@@ -2,6 +2,8 @@
 
 - This document is the source of truth. Refer back to it whenever scope is unclear.
 - Edit this file as your understanding of the project evolves.
+- Commit and push to the GitHub repository after every code update.
+
 
 
 # Goal of the application
