@@ -1017,10 +1017,29 @@
                 return;
             }
 
-            // Sort competitorAnalysesData by domain name (full domain name including TLD)
+            // Count appearances of each domain in organic competitors
+            const domainCounts = {};
+            if (typeof competitorsData !== 'undefined' && Array.isArray(competitorsData)) {
+                competitorsData.forEach(comp => {
+                    if (comp.type === 'organic') {
+                        const dom = getFullDomainFromUrl(comp.url);
+                        if (dom) {
+                            domainCounts[dom] = (domainCounts[dom] || 0) + 1;
+                        }
+                    }
+                });
+            }
+
+            // Sort competitorAnalysesData by frequency count DESC, then alphabetically by domain name (full domain name including TLD)
             competitorAnalysesData.sort((a, b) => {
-                const domainA = getDomainFromUrl(a.url).toLowerCase();
-                const domainB = getDomainFromUrl(b.url).toLowerCase();
+                const domainA = getFullDomainFromUrl(a.url);
+                const domainB = getFullDomainFromUrl(b.url);
+                const countA = domainCounts[domainA] || 0;
+                const countB = domainCounts[domainB] || 0;
+
+                if (countB !== countA) {
+                    return countB - countA;
+                }
                 return domainA.localeCompare(domainB);
             });
 
@@ -1319,7 +1338,7 @@
                                             <div style="display: flex; gap: 6px; align-items: center;">
                                                 <input type="text" class="form-input" style="opacity:0.8; flex: 1;" value="${c.country_ranking !== null ? c.country_ranking.toLocaleString() : '-'}" readonly>
                                                 <span style="font-size: 0.85rem; color: var(--text-secondary);">in</span>
-                                                <input type="text" class="form-input" style="opacity:0.8; flex: 1.5;" value="${escapeHtml(activeAuditCountry)}" readonly disabled>
+                                                <input type="text" class="form-input" style="opacity:0.8; flex: 1.5;" value="${escapeHtml(c.target_country || activeAuditCountry)}" readonly disabled>
                                             </div>
                                         </div>
                                     </div>
@@ -1729,6 +1748,17 @@
             
             showFullText(null, url, fieldLabel, value);
         });
+
+        function getFullDomainFromUrl(url) {
+            if (!url) return '';
+            try {
+                const parsed = new URL(url);
+                return parsed.hostname.toLowerCase().replace(/^www\./i, '');
+            } catch (e) {
+                const clean = url.trim().replace(/^(?:https?:\/\/)?(?:www\.)?/i, '');
+                return clean.split('/')[0].toLowerCase();
+            }
+        }
 
         function truncateCellText(text) {
             if (!text) return 'N/A';

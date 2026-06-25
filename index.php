@@ -1297,6 +1297,8 @@ if (!isset($_SESSION['user_id'])) {
 
         // Auto-save visual indicator helpers
         window.justSavedCell = null;
+        window.recentlyAddedPageIds = new Set();
+        window.recentlyAddedCompetitorIds = new Set();
 
         function getSavedIndicatorHTML(id, field, type) {
             if (window.justSavedCell && window.justSavedCell.id == id && window.justSavedCell.field === field && window.justSavedCell.type === type) {
@@ -2563,6 +2565,10 @@ if (!isset($_SESSION['user_id'])) {
             pagesData.forEach(p => {
                 // Render SEO list
                 const seoRow = document.createElement('tr');
+                seoRow.id = `seo-page-row-${p.id}`;
+                if (window.recentlyAddedPageIds && window.recentlyAddedPageIds.has(p.id)) {
+                    seoRow.classList.add('row-flash');
+                }
                 const titleLen = p.meta_title ? p.meta_title.length : 0;
                 const descLen = p.meta_description ? p.meta_description.length : 0;
                 const h1Len = p.h1 ? p.h1.length : 0;
@@ -2650,6 +2656,10 @@ if (!isset($_SESSION['user_id'])) {
                 }
 
                 const techRow = document.createElement('tr');
+                techRow.id = `tech-page-row-${p.id}`;
+                if (window.recentlyAddedPageIds && window.recentlyAddedPageIds.has(p.id)) {
+                    techRow.classList.add('row-flash');
+                }
                 techRow.innerHTML = `
                     <td style="white-space: nowrap; vertical-align: middle;">
                         <div style="display: flex; align-items: center; gap: 8px;">
@@ -2679,6 +2689,56 @@ if (!isset($_SESSION['user_id'])) {
                 techTable.appendChild(techRow);
             });
             lucide.createIcons();
+            scrollToNewPage();
+        }
+
+        function scrollToNewPage() {
+            if (!window.recentlyAddedPageIds || window.recentlyAddedPageIds.size === 0) return;
+            
+            const ids = Array.from(window.recentlyAddedPageIds);
+            const lastId = ids[ids.length - 1];
+            
+            const isSeoVisible = document.getElementById('subtab-seo') && document.getElementById('subtab-seo').style.display !== 'none';
+            const isTechVisible = document.getElementById('subtab-tech') && document.getElementById('subtab-tech').style.display !== 'none';
+            
+            let targetEl = null;
+            if (isSeoVisible) {
+                targetEl = document.getElementById(`seo-page-row-${lastId}`);
+            } else if (isTechVisible) {
+                targetEl = document.getElementById(`tech-page-row-${lastId}`);
+            }
+            
+            if (targetEl) {
+                setTimeout(() => {
+                    targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 100);
+            }
+        }
+
+        function scrollToNewCompetitor() {
+            if (!window.recentlyAddedCompetitorIds || window.recentlyAddedCompetitorIds.size === 0) return;
+            
+            const ids = Array.from(window.recentlyAddedCompetitorIds);
+            const lastId = ids[ids.length - 1];
+            
+            const isSeoVisible = document.getElementById('comp-subtab-seo') && document.getElementById('comp-subtab-seo').style.display !== 'none';
+            const isTechVisible = document.getElementById('comp-subtab-tech') && document.getElementById('comp-subtab-tech').style.display !== 'none';
+            const isPerfVisible = document.getElementById('comp-subtab-perf') && document.getElementById('comp-subtab-perf').style.display !== 'none';
+            
+            let targetEl = null;
+            if (isSeoVisible) {
+                targetEl = document.getElementById(`comp-seo-row-${lastId}`);
+            } else if (isTechVisible) {
+                targetEl = document.getElementById(`comp-tech-card-${lastId}`);
+            } else if (isPerfVisible) {
+                targetEl = document.getElementById(`comp-perf-card-${lastId}`);
+            }
+            
+            if (targetEl) {
+                setTimeout(() => {
+                    targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 100);
+            }
         }
 
         let activeScrapeMode = 'single';
@@ -2745,6 +2805,12 @@ if (!isset($_SESSION['user_id'])) {
                 hideFullscreenLoader();
                 if (data.success) {
                     if (data.pages && Array.isArray(data.pages)) {
+                        data.pages.forEach(p => {
+                            window.recentlyAddedPageIds.add(p.id);
+                            setTimeout(() => {
+                                window.recentlyAddedPageIds.delete(p.id);
+                            }, 3000);
+                        });
                         pagesData.push(...data.pages);
                     }
                     renderPages();
@@ -2793,6 +2859,12 @@ if (!isset($_SESSION['user_id'])) {
                 btn.innerHTML = originalBtnHTML;
                 if (data.success) {
                     if (data.pages && Array.isArray(data.pages)) {
+                        data.pages.forEach(p => {
+                            window.recentlyAddedPageIds.add(p.id);
+                            setTimeout(() => {
+                                window.recentlyAddedPageIds.delete(p.id);
+                            }, 3000);
+                        });
                         pagesData.push(...data.pages);
                     }
                     renderPages();
@@ -2890,6 +2962,10 @@ if (!isset($_SESSION['user_id'])) {
                 formData.append('crawl_errors', document.getElementById('edit-page-errors').value);
             } else {
                 actionUrl = 'api.php?action=competitor_analysis_update';
+                const comp = competitorAnalysesData.find(c => c.id === id);
+                if (comp) {
+                    formData.append('target_country', comp.target_country || '');
+                }
             }
 
             window.activeSavePromise = fetch(actionUrl, {
@@ -4053,9 +4129,17 @@ if (!isset($_SESSION['user_id'])) {
                     openModal('import-results-modal');
                     
                     // Refresh competitor list
+                    const oldIds = new Set(competitorAnalysesData.map(c => c.id));
                     fetch(`api.php?action=audit_get&id=${activeAuditId}`)
                         .then(r => r.json())
                         .then(d => {
+                            const newCompetitors = d.competitor_analyses.filter(c => !oldIds.has(c.id));
+                            newCompetitors.forEach(c => {
+                                window.recentlyAddedCompetitorIds.add(c.id);
+                                setTimeout(() => {
+                                    window.recentlyAddedCompetitorIds.delete(c.id);
+                                }, 3000);
+                            });
                             competitorAnalysesData = d.competitor_analyses;
                             renderCompetitorAnalyses();
                             // Switch to competitor analysis tab
@@ -4081,10 +4165,29 @@ if (!isset($_SESSION['user_id'])) {
         function renderCompetitorAnalyses() {
             closeActiveDropdown();
 
-            // Sort competitorAnalysesData by domain name (full domain name including TLD)
+            // Count appearances of each domain in organic competitors
+            const domainCounts = {};
+            if (typeof competitorsData !== 'undefined' && Array.isArray(competitorsData)) {
+                competitorsData.forEach(comp => {
+                    if (comp.type === 'organic') {
+                        const dom = getFullDomainFromUrl(comp.url);
+                        if (dom) {
+                            domainCounts[dom] = (domainCounts[dom] || 0) + 1;
+                        }
+                    }
+                });
+            }
+
+            // Sort competitorAnalysesData by frequency count DESC, then alphabetically by domain name (full domain name including TLD)
             competitorAnalysesData.sort((a, b) => {
-                const domainA = getDomainFromUrl(a.url).toLowerCase();
-                const domainB = getDomainFromUrl(b.url).toLowerCase();
+                const domainA = getFullDomainFromUrl(a.url);
+                const domainB = getFullDomainFromUrl(b.url);
+                const countA = domainCounts[domainA] || 0;
+                const countB = domainCounts[domainB] || 0;
+
+                if (countB !== countA) {
+                    return countB - countA;
+                }
                 return domainA.localeCompare(domainB);
             });
 
@@ -4097,6 +4200,10 @@ if (!isset($_SESSION['user_id'])) {
             } else {
                 competitorAnalysesData.forEach(c => {
                     const row = document.createElement('tr');
+                    row.id = `comp-seo-row-${c.id}`;
+                    if (window.recentlyAddedCompetitorIds && window.recentlyAddedCompetitorIds.has(c.id)) {
+                        row.classList.add('row-flash');
+                    }
                     const titleLen = c.meta_title ? c.meta_title.length : 0;
                     const descLen = c.meta_description ? c.meta_description.length : 0;
                     const h1Len = c.h1 ? c.h1.length : 0;
@@ -4180,7 +4287,11 @@ if (!isset($_SESSION['user_id'])) {
             } else {
                 competitorAnalysesData.forEach(c => {
                     const card = document.createElement('div');
+                    card.id = `comp-tech-card-${c.id}`;
                     card.className = 'glass-panel';
+                    if (window.recentlyAddedCompetitorIds && window.recentlyAddedCompetitorIds.has(c.id)) {
+                        card.classList.add('card-flash');
+                    }
                     card.style.padding = '30px';
                     card.style.marginBottom = '24px';
 
@@ -4454,7 +4565,11 @@ if (!isset($_SESSION['user_id'])) {
                 competitorAnalysesData.forEach(c => {
                     const isCollapsed = collapsedCompetitorPerf.has(c.id);
                     const card = document.createElement('div');
+                    card.id = `comp-perf-card-${c.id}`;
                     card.className = 'glass-panel';
+                    if (window.recentlyAddedCompetitorIds && window.recentlyAddedCompetitorIds.has(c.id)) {
+                        card.classList.add('card-flash');
+                    }
                     card.style.padding = '24px';
                     card.innerHTML = `
                         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: ${isCollapsed ? 'none' : '1px solid var(--border-glass)'}; padding-bottom: 12px; margin-bottom: ${isCollapsed ? '0' : '20px'};">
@@ -4518,7 +4633,7 @@ if (!isset($_SESSION['user_id'])) {
                                             <div style="display: flex; gap: 8px; align-items: center;">
                                                 <input type="number" min="0" id="comp-country-rank-${c.id}" class="form-input" placeholder="e.g. 45000" value="${c.country_ranking !== null ? c.country_ranking : ''}" onchange="window.lastChangedElement = this; saveCompetitorTraffic(${c.id})" style="flex: 1;">
                                                 <span style="font-size: 0.85rem; color: var(--text-secondary);">in</span>
-                                                <input type="text" class="form-input" value="${escapeHtml(activeAuditCountry)}" style="flex: 1.5; opacity: 0.7;" disabled title="Competitors use the same target country as defined in the website audit Traffic & Performance tab.">
+                                                <input type="text" id="comp-target-country-${c.id}" class="form-input" placeholder="e.g. United States" value="${escapeHtml(c.target_country || activeAuditCountry)}" onchange="window.lastChangedElement = this; saveCompetitorTraffic(${c.id})" style="flex: 1.5;">
                                             </div>
                                         </div>
                                     </div>
@@ -4567,6 +4682,7 @@ if (!isset($_SESSION['user_id'])) {
             }
 
             lucide.createIcons();
+            scrollToNewCompetitor();
         }
 
         function addCompetitorManual(e) {
@@ -4592,6 +4708,10 @@ if (!isset($_SESSION['user_id'])) {
             .then(data => {
                 hideFullscreenLoader();
                 if (data.success) {
+                    window.recentlyAddedCompetitorIds.add(data.competitor.id);
+                    setTimeout(() => {
+                        window.recentlyAddedCompetitorIds.delete(data.competitor.id);
+                    }, 3000);
                     competitorAnalysesData.push(data.competitor);
                     renderCompetitorAnalyses();
                     urlInput.value = '';
@@ -4634,6 +4754,10 @@ if (!isset($_SESSION['user_id'])) {
                 btn.disabled = false;
                 btn.innerHTML = originalBtnHTML;
                 if (data.success) {
+                    window.recentlyAddedCompetitorIds.add(data.competitor.id);
+                    setTimeout(() => {
+                        window.recentlyAddedCompetitorIds.delete(data.competitor.id);
+                    }, 3000);
                     competitorAnalysesData.push(data.competitor);
                     renderCompetitorAnalyses();
                     urlInput.value = '';
@@ -4676,6 +4800,10 @@ if (!isset($_SESSION['user_id'])) {
                 btn.disabled = false;
                 btn.innerHTML = originalBtnHTML;
                 if (data.success) {
+                    window.recentlyAddedCompetitorIds.add(data.competitor.id);
+                    setTimeout(() => {
+                        window.recentlyAddedCompetitorIds.delete(data.competitor.id);
+                    }, 3000);
                     competitorAnalysesData.push(data.competitor);
                     renderCompetitorAnalyses();
                     urlInput.value = '';
@@ -4805,6 +4933,7 @@ if (!isset($_SESSION['user_id'])) {
 
             const globalRank = document.getElementById(`comp-global-rank-${competitorId}`).value;
             const countryRank = document.getElementById(`comp-country-rank-${competitorId}`).value;
+            const targetCountry = document.getElementById(`comp-target-country-${competitorId}`).value;
 
             const breakdown = document.getElementById(`comp-breakdown-${competitorId}`).value;
 
@@ -4826,6 +4955,7 @@ if (!isset($_SESSION['user_id'])) {
             formData.append('avg_visit_duration', duration > 0 ? duration : '');
             formData.append('global_ranking', globalRank !== '' ? globalRank : '');
             formData.append('country_ranking', countryRank !== '' ? countryRank : '');
+            formData.append('target_country', targetCountry);
             formData.append('breakdown_by_country', breakdown);
 
             window.activeSavePromise = fetch('api.php?action=competitor_analysis_update', {
@@ -5797,6 +5927,17 @@ if (!isset($_SESSION['user_id'])) {
             .finally(() => {
                 window.activeSavePromise = null;
             });
+        }
+
+        function getFullDomainFromUrl(url) {
+            if (!url) return '';
+            try {
+                const parsed = new URL(url);
+                return parsed.hostname.toLowerCase().replace(/^www\./i, '');
+            } catch (e) {
+                const clean = url.trim().replace(/^(?:https?:\/\/)?(?:www\.)?/i, '');
+                return clean.split('/')[0].toLowerCase();
+            }
         }
 
         function truncateCellText(text) {

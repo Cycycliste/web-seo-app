@@ -1345,6 +1345,35 @@ body.is-resizing-table * {
     margin-left: 0 !important;
 }
 
+/* Row & Card Flash Highlight Animations */
+@keyframes rowFlash {
+    0% {
+        background-color: rgba(139, 92, 246, 0.35);
+    }
+    100% {
+        background-color: transparent;
+    }
+}
+
+.row-flash {
+    animation: rowFlash 2.5s ease-out forwards;
+}
+
+@keyframes cardFlash {
+    0% {
+        border-color: var(--primary);
+        box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
+    }
+    100% {
+        border-color: var(--border-glass);
+        box-shadow: var(--shadow-glass);
+    }
+}
+
+.card-flash {
+    animation: cardFlash 2.5s ease-out forwards;
+}
+
 
 
 

@@ -751,7 +751,7 @@ switch ($action) {
         // Validate fields to prevent sql injection
         $allowedFields = [
             'page' => ['meta_title', 'meta_description', 'h1', 'monthly_visits', 'avg_time_per_visit', 'audience_country_proportion', 'global_ranking', 'country_ranking', 'search_terms', 'notes', 'indexing_gsc', 'crawl_errors', 'internal_links', 'external_links', 'missing_alt_images'],
-            'competitor_analysis' => ['meta_title', 'meta_description', 'h1', 'monthly_visits', 'avg_time_per_visit', 'audience_country_proportion', 'global_ranking', 'country_ranking', 'search_terms', 'notes', 'bounce_rate', 'pages_per_visit', 'avg_monthly_visits', 'avg_visit_duration', 'breakdown_by_country', 'internal_links', 'external_links', 'missing_alt_images'],
+            'competitor_analysis' => ['meta_title', 'meta_description', 'h1', 'monthly_visits', 'avg_time_per_visit', 'audience_country_proportion', 'global_ranking', 'country_ranking', 'target_country', 'search_terms', 'notes', 'bounce_rate', 'pages_per_visit', 'avg_monthly_visits', 'avg_visit_duration', 'breakdown_by_country', 'internal_links', 'external_links', 'missing_alt_images'],
             'competitor_card' => ['url', 'bounce_rate', 'pages_per_visit', 'avg_monthly_visits', 'avg_visit_duration'],
             'audit' => ['target_country']
         ];
@@ -1413,9 +1413,13 @@ switch ($action) {
         $avg_monthly_visits = isset($_POST['avg_monthly_visits']) && $_POST['avg_monthly_visits'] !== '' ? (int)$_POST['avg_monthly_visits'] : null;
         $avg_visit_duration = isset($_POST['avg_visit_duration']) && $_POST['avg_visit_duration'] !== '' ? (int)$_POST['avg_visit_duration'] : null;
 
-        $stmt = $pdo->prepare("SELECT breakdown_by_country FROM competitor_analyses WHERE id = ?");
+        $stmt = $pdo->prepare("SELECT breakdown_by_country, target_country FROM competitor_analyses WHERE id = ?");
         $stmt->execute([$id]);
-        $oldBreakdown = $stmt->fetchColumn() ?? '';
+        $row = $stmt->fetch();
+        $oldBreakdown = $row['breakdown_by_country'] ?? '';
+        $oldTargetCountry = $row['target_country'] ?? null;
+
+        $target_country = isset($_POST['target_country']) ? ($_POST['target_country'] === '' ? null : $_POST['target_country']) : $oldTargetCountry;
 
         $breakdown_by_country = $_POST['breakdown_by_country'] ?? null;
 
@@ -1436,13 +1440,13 @@ switch ($action) {
             $stmt = $pdo->prepare("UPDATE competitor_analyses SET 
                 meta_title = ?, meta_description = ?, h1 = ?, 
                 monthly_visits = ?, avg_time_per_visit = ?, audience_country_proportion = ?, 
-                global_ranking = ?, country_ranking = ?, search_terms = ?, notes = ?,
+                global_ranking = ?, country_ranking = ?, target_country = ?, search_terms = ?, notes = ?,
                 bounce_rate = ?, pages_per_visit = ?, avg_monthly_visits = ?, avg_visit_duration = ?, breakdown_by_country = ?
                 WHERE id = ?");
             $stmt->execute([
                 $meta_title, $meta_description, $h1,
                 $monthly_visits, $avg_time_per_visit, $audience_country_proportion,
-                $global_ranking, $country_ranking, $search_terms, $notes,
+                $global_ranking, $country_ranking, $target_country, $search_terms, $notes,
                 $bounce_rate, $pages_per_visit, $avg_monthly_visits, $avg_visit_duration, $breakdown_by_country,
                 $id
             ]);

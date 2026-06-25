@@ -124,6 +124,7 @@ CREATE TABLE IF NOT EXISTS `competitor_analyses` (
   `audience_country_proportion` VARCHAR(255) DEFAULT NULL,
   `global_ranking` INT DEFAULT NULL,
   `country_ranking` INT DEFAULT NULL,
+  `target_country` VARCHAR(255) DEFAULT NULL,
   `search_terms` VARCHAR(1000) DEFAULT NULL,
   `notes` TEXT DEFAULT NULL,
   `desktop_score` INT DEFAULT NULL,
