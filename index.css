@@ -508,11 +508,13 @@ body {
 .scraper-form {
     display: flex;
     gap: 12px;
+    align-items: flex-end;
 }
 
 /* Data Tables */
 .table-wrapper {
-    overflow-x: auto;
+    overflow: auto;
+    max-height: 550px;
     border-radius: var(--radius-md);
     border: 1px solid var(--border-glass);
     margin-bottom: 30px;
@@ -524,11 +526,14 @@ body {
     font-size: 0.9rem;
 }
 .table-custom th {
-    background: rgba(0, 0, 0, 0.2);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: #131927; /* Opaque background to prevent overlapping text while scrolling */
     color: var(--text-secondary);
     font-weight: 600;
     padding: 16px 20px;
-    border-bottom: 1px solid var(--border-glass);
+    box-shadow: inset 0 -1px 0 var(--border-glass); /* Ensures bottom border is always visible when sticky */
     text-transform: uppercase;
     font-size: 0.75rem;
     letter-spacing: 0.05em;
@@ -943,6 +948,7 @@ body {
     }
     .scraper-form {
         flex-direction: column;
+        align-items: stretch;
     }
 }
 
@@ -1256,7 +1262,6 @@ textarea.inline-editor {
 
 /* Table Column Resizing */
 .table-custom th {
-    position: relative;
     border-right: 1px solid rgba(255, 255, 255, 0.08);
 }
 

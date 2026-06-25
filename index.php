@@ -298,42 +298,37 @@ if (!isset($_SESSION['user_id'])) {
                         <!-- Subtab: SEO State -->
                         <div id="subtab-seo">
                             <div class="glass-panel scraper-box">
-                                <h4 style="margin-bottom: 12px; font-weight: 600;">Audit Page URL(s)</h4>
-                                <form id="scraper-form" onsubmit="addPage(event)" style="display: flex; flex-direction: column; gap: 16px;">
-                                    <div style="display: flex; flex-direction: column; gap: 6px;">
-                                        <label style="font-size: 0.85rem; font-weight: 500; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em;">Scraping Method</label>
-                                        <div class="scrape-mode-selector">
-                                            <button type="button" class="mode-toggle-btn active" id="btn-mode-single" onclick="setScrapeMode('single')">Pasted URL(s)</button>
-                                            <button type="button" class="mode-toggle-btn" id="btn-mode-website" onclick="setScrapeMode('website')">Full Website from 1 Link</button>
-                                        </div>
+                                <div style="display: flex; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 16px;">
+                                    <h4 style="font-weight: 600; margin: 0;">Audit Page URL(s)</h4>
+                                    <div class="scrape-mode-selector">
+                                        <button type="button" class="mode-toggle-btn active" id="btn-mode-single" onclick="setScrapeMode('single')">Pasted URL(s) only</button>
+                                        <button type="button" class="mode-toggle-btn" id="btn-mode-website" onclick="setScrapeMode('website')">Full Website</button>
                                     </div>
-
+                                </div>
+                                <form id="scraper-form" class="scraper-form" onsubmit="addPage(event)">
                                     <!-- Panel for Pasted URL(s) -->
-                                    <div id="panel-mode-single" class="mode-panel">
-                                        <label for="scrape-urls" style="display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 8px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em;">Webpage URL(s)</label>
-                                        <textarea id="scrape-urls" class="form-input" placeholder="Paste webpage URL(s) to crawl (one URL per line, e.g. https://example.com/about)..." rows="3" style="resize: vertical;" required></textarea>
+                                    <div id="panel-mode-single" class="mode-panel" style="flex-grow: 1; height: 80px;">
+                                        <textarea id="scrape-urls" class="form-input" placeholder="Paste webpage URL(s) to crawl (one URL per line, e.g. https://example.com/about)..." style="width: 100%; height: 80px; min-height: 80px; resize: vertical; display: block;" required></textarea>
                                     </div>
 
                                     <!-- Panel for Full Website -->
-                                    <div id="panel-mode-website" class="mode-panel" style="display: none;">
-                                        <div style="display: flex; gap: 16px; flex-wrap: wrap;">
-                                            <div style="flex: 1; min-width: 250px;">
+                                    <div id="panel-mode-website" class="mode-panel" style="display: none; flex-grow: 1; height: 80px;">
+                                        <div style="display: flex; gap: 16px; flex-wrap: wrap; width: 100%; height: 100%; align-items: flex-end;">
+                                            <div style="flex: 1; min-width: 200px;">
                                                 <label for="scrape-website-url" style="display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 8px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em;">Starting Page URL</label>
-                                                <input type="url" id="scrape-website-url" class="form-input" placeholder="Enter homepage or seed URL (e.g. https://example.com)...">
+                                                <input type="url" id="scrape-website-url" class="form-input" placeholder="Enter homepage or seed URL (e.g. https://example.com)..." style="width: 100%; height: 38px;">
                                             </div>
-                                            <div style="width: 150px;">
-                                                <label for="scrape-max-pages" style="display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 8px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em;">Max Pages to Crawl</label>
-                                                <input type="number" id="scrape-max-pages" class="form-input" value="10" min="1" max="50">
+                                            <div style="width: 120px; flex-shrink: 0;">
+                                                <label for="scrape-max-pages" style="display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 8px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em;">Max Pages</label>
+                                                <input type="number" id="scrape-max-pages" class="form-input" value="10" min="1" max="50" style="width: 100%; height: 38px;">
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div>
-                                        <button type="submit" class="btn btn-primary" style="white-space: nowrap; margin-top: 4px;">
-                                            <i data-lucide="scan" style="width: 16px; height: 16px;"></i>
-                                            <span id="submit-btn-text">Crawl & Add URL(s)</span>
-                                        </button>
-                                    </div>
+                                    <button type="submit" class="btn btn-primary" style="white-space: nowrap; height: 38px; display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+                                        <i data-lucide="scan" style="width: 16px; height: 16px;"></i>
+                                        <span id="submit-btn-text">Crawl & Add</span>
+                                    </button>
                                 </form>
                             </div>
 
@@ -2708,7 +2703,7 @@ if (!isset($_SESSION['user_id'])) {
                 txtSingle.setAttribute('required', '');
                 inpWebsite.removeAttribute('required');
                 
-                btnText.textContent = 'Crawl & Add URL(s)';
+                btnText.textContent = 'Crawl & Add';
             } else {
                 btnSingle.classList.remove('active');
                 btnWebsite.classList.add('active');
@@ -2718,7 +2713,7 @@ if (!isset($_SESSION['user_id'])) {
                 txtSingle.removeAttribute('required');
                 inpWebsite.setAttribute('required', '');
                 
-                btnText.textContent = 'Crawl & Analyze Website';
+                btnText.textContent = 'Crawl & Add';
             }
         }
 
