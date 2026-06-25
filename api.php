@@ -670,6 +670,73 @@ switch ($action) {
         }
         break;
 
+    case 'upload_breakdown_screenshot':
+        $id = (int)($_POST['id'] ?? 0);
+        $type = $_POST['type'] ?? 'audit'; // 'audit' or 'competitor'
+
+        if ($id <= 0) {
+            echo json_encode(['error' => 'Invalid ID.']);
+            exit;
+        }
+
+        if (!isset($_FILES['screenshot']) || $_FILES['screenshot']['error'] !== UPLOAD_ERR_OK) {
+            echo json_encode(['error' => 'No file uploaded or upload error occurred.']);
+            exit;
+        }
+
+        $file = $_FILES['screenshot'];
+        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        $allowed = ['png', 'jpg', 'jpeg', 'webp', 'gif'];
+        if (!in_array($ext, $allowed)) {
+            echo json_encode(['error' => 'Invalid file extension. Only PNG, JPG, JPEG, WEBP, and GIF are allowed.']);
+            exit;
+        }
+
+        if (!file_exists('uploads')) {
+            mkdir('uploads', 0777, true);
+        }
+
+        $filename = 'uploads/breakdown_screenshot_' . $type . '_' . $id . '_' . time() . '.' . $ext;
+        if (move_uploaded_file($file['tmp_name'], $filename)) {
+            try {
+                if ($type === 'audit') {
+                    // Fetch old screenshot to delete
+                    $stmt = $pdo->prepare("SELECT breakdown_by_country FROM audits WHERE id = ?");
+                    $stmt->execute([$id]);
+                    $old = $stmt->fetchColumn();
+                    if ($old && file_exists($old) && is_file($old)) {
+                        @unlink($old);
+                    }
+                    
+                    $stmt = $pdo->prepare("UPDATE audits SET breakdown_by_country = ? WHERE id = ?");
+                    $stmt->execute([$filename, $id]);
+                    
+                    echo json_encode(['success' => true, 'filepath' => $filename]);
+                } else {
+                    // Fetch old screenshot to delete
+                    $stmt = $pdo->prepare("SELECT breakdown_by_country FROM competitor_analyses WHERE id = ?");
+                    $stmt->execute([$id]);
+                    $old = $stmt->fetchColumn();
+                    if ($old && file_exists($old) && is_file($old)) {
+                        @unlink($old);
+                    }
+                    
+                    $stmt = $pdo->prepare("UPDATE competitor_analyses SET breakdown_by_country = ? WHERE id = ?");
+                    $stmt->execute([$filename, $id]);
+                    
+                    // Re-fetch competitor
+                    $stmt = $pdo->prepare("SELECT * FROM competitor_analyses WHERE id = ?");
+                    $stmt->execute([$id]);
+                    echo json_encode(['success' => true, 'filepath' => $filename, 'competitor' => $stmt->fetch()]);
+                }
+            } catch (PDOException $e) {
+                echo json_encode(['error' => 'Database update failed: ' . $e->getMessage()]);
+            }
+        } else {
+            echo json_encode(['error' => 'Failed to move uploaded file.']);
+        }
+        break;
+
     case 'update_field':
         $id = (int)($_POST['id'] ?? 0);
         $type = $_POST['type'] ?? ''; // 'page', 'competitor_analysis', 'competitor_card', or 'audit'
@@ -1341,12 +1408,29 @@ switch ($action) {
         $search_terms = $_POST['search_terms'] ?? '';
         $notes = $_POST['notes'] ?? null;
 
-        // New traffic fields
         $bounce_rate = isset($_POST['bounce_rate']) && $_POST['bounce_rate'] !== '' ? (float)$_POST['bounce_rate'] : null;
         $pages_per_visit = isset($_POST['pages_per_visit']) && $_POST['pages_per_visit'] !== '' ? (float)$_POST['pages_per_visit'] : null;
         $avg_monthly_visits = isset($_POST['avg_monthly_visits']) && $_POST['avg_monthly_visits'] !== '' ? (int)$_POST['avg_monthly_visits'] : null;
         $avg_visit_duration = isset($_POST['avg_visit_duration']) && $_POST['avg_visit_duration'] !== '' ? (int)$_POST['avg_visit_duration'] : null;
+
+        $stmt = $pdo->prepare("SELECT breakdown_by_country FROM competitor_analyses WHERE id = ?");
+        $stmt->execute([$id]);
+        $oldBreakdown = $stmt->fetchColumn() ?? '';
+
         $breakdown_by_country = $_POST['breakdown_by_country'] ?? null;
+
+        if (isset($_FILES['breakdown_by_country_file']) && $_FILES['breakdown_by_country_file']['error'] === UPLOAD_ERR_OK) {
+            $ext = pathinfo($_FILES['breakdown_by_country_file']['name'], PATHINFO_EXTENSION);
+            $filename = 'uploads/comp_breakdown_' . $id . '_' . time() . '.' . $ext;
+            if (move_uploaded_file($_FILES['breakdown_by_country_file']['tmp_name'], $filename)) {
+                $breakdown_by_country = $filename;
+                if (!empty($oldBreakdown) && file_exists($oldBreakdown) && is_file($oldBreakdown) && $oldBreakdown !== $filename) {
+                    @unlink($oldBreakdown);
+                }
+            }
+        } else if (($breakdown_by_country === '' || $breakdown_by_country === null) && !empty($oldBreakdown) && file_exists($oldBreakdown) && is_file($oldBreakdown)) {
+            @unlink($oldBreakdown);
+        }
 
         try {
             $stmt = $pdo->prepare("UPDATE competitor_analyses SET 

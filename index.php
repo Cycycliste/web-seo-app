@@ -677,20 +677,48 @@ if (!isset($_SESSION['user_id'])) {
                                     <!-- Right Column: Breakdown By Country -->
                                     <div style="display: flex; flex-direction: column;">
                                         <div class="form-group" style="height: 100%; display: flex; flex-direction: column; margin-bottom: 0;">
-                                            <label for="perf-breakdown-country" style="margin-bottom: 8px;">Breakdown By Country</label>
-                                            <textarea id="perf-breakdown-country" class="form-input" style="flex-grow: 1; min-height: 180px; resize: vertical;" placeholder="e.g. USA: 40%, France: 20%, Germany: 15%..." onchange="saveAuditMetrics(true)"></textarea>
+                                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                                <label style="margin-bottom: 0;">Breakdown By Country</label>
+                                                <div class="mode-tabs" style="display: flex; gap: 4px;">
+                                                    <button type="button" class="btn btn-secondary btn-sm" id="btn-breakdown-mode-text" onclick="setBreakdownMode('text')" style="font-size: 0.75rem; padding: 2px 8px; background: rgba(139, 92, 246, 0.15); border-color: rgba(139, 92, 246, 0.3); color: var(--primary);">Text</button>
+                                                    <button type="button" class="btn btn-secondary btn-sm" id="btn-breakdown-mode-screenshot" onclick="setBreakdownMode('screenshot')" style="font-size: 0.75rem; padding: 2px 8px;">Screenshot</button>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Mode Text: Textarea -->
+                                            <div id="breakdown-text-container" style="flex-grow: 1; display: flex; flex-direction: column;">
+                                                <textarea id="perf-breakdown-country" class="form-input" style="flex-grow: 1; min-height: 180px; resize: vertical;" placeholder="e.g. USA: 40%, France: 20%, Germany: 15%..." onchange="saveAuditMetrics(true)"></textarea>
+                                            </div>
+                                            
+                                            <!-- Mode Screenshot: Upload Zone & Preview -->
+                                            <div id="breakdown-screenshot-container" style="display: none; flex-grow: 1; flex-direction: column;">
+                                                <div class="screenshot-upload-zone" id="zone-breakdown-country" onclick="triggerFileInput('perf-breakdown-country-file')" style="min-height: 180px; flex-grow: 1;">
+                                                    <input type="file" id="perf-breakdown-country-file" accept="image/*" style="display: none;" onchange="handleFileChange(event, 'breakdown-country')">
+                                                    <div class="upload-placeholder" id="placeholder-breakdown-country">
+                                                        <i data-lucide="image" style="width: 28px; height: 28px; color: var(--text-muted); margin-bottom: 8px;"></i>
+                                                        <p style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 500;">Click, drag & drop, or paste (Ctrl+V) breakdown screenshot</p>
+                                                    </div>
+                                                    <div class="upload-preview" id="preview-breakdown-country" style="display: none; position: relative; width: 100%;">
+                                                        <img src="" id="img-breakdown-country" style="width: 100%; max-height: 350px; object-fit: contain; border-radius: var(--radius-sm);">
+                                                        <button type="button" class="btn-delete-screenshot" onclick="removeScreenshot(event, 'breakdown-country')">
+                                                            <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                                                            <span>Remove</span>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="form-group">
                                         <label>Main Channels</label>
-                                        <div class="screenshot-upload-zone" id="zone-main-channels" onclick="triggerFileInput('perf-main-channels-file')">
+                                        <div class="screenshot-upload-zone" id="zone-main-channels" onclick="triggerFileInput('perf-main-channels-file')" style="min-height: 220px;">
                                             <input type="file" id="perf-main-channels-file" accept="image/*" style="display: none;" onchange="handleFileChange(event, 'main-channels')">
                                             <div class="upload-placeholder" id="placeholder-main-channels">
                                                 <i data-lucide="image" style="width: 28px; height: 28px; color: var(--text-muted); margin-bottom: 8px;"></i>
                                                 <p style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 500;">Click or drag & drop to upload Main Channels screenshot</p>
                                             </div>
                                             <div class="upload-preview" id="preview-main-channels" style="display: none; position: relative;">
-                                                <img src="" id="img-main-channels" style="width: 100%; max-height: 250px; object-fit: contain; border-radius: var(--radius-sm);">
+                                                <img src="" id="img-main-channels" style="width: 100%; max-height: 350px; object-fit: contain; border-radius: var(--radius-sm);">
                                                 <button type="button" class="btn-delete-screenshot" onclick="removeScreenshot(event, 'main-channels')">
                                                     <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
                                                     <span>Remove</span>
@@ -700,14 +728,14 @@ if (!isset($_SESSION['user_id'])) {
                                     </div>
                                     <div class="form-group">
                                         <label>Traffic Trends (Last 3-6 Months)</label>
-                                        <div class="screenshot-upload-zone" id="zone-traffic-trends" onclick="triggerFileInput('perf-traffic-trends-file')">
+                                        <div class="screenshot-upload-zone" id="zone-traffic-trends" onclick="triggerFileInput('perf-traffic-trends-file')" style="min-height: 220px;">
                                             <input type="file" id="perf-traffic-trends-file" accept="image/*" style="display: none;" onchange="handleFileChange(event, 'traffic-trends')">
                                             <div class="upload-placeholder" id="placeholder-traffic-trends">
                                                 <i data-lucide="image" style="width: 28px; height: 28px; color: var(--text-muted); margin-bottom: 8px;"></i>
                                                 <p style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 500;">Click or drag & drop to upload Traffic Trends screenshot</p>
                                             </div>
                                             <div class="upload-preview" id="preview-traffic-trends" style="display: none; position: relative;">
-                                                <img src="" id="img-traffic-trends" style="width: 100%; max-height: 250px; object-fit: contain; border-radius: var(--radius-sm);">
+                                                <img src="" id="img-traffic-trends" style="width: 100%; max-height: 350px; object-fit: contain; border-radius: var(--radius-sm);">
                                                 <button type="button" class="btn-delete-screenshot" onclick="removeScreenshot(event, 'traffic-trends')">
                                                     <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
                                                     <span>Remove</span>
@@ -1767,7 +1795,21 @@ if (!isset($_SESSION['user_id'])) {
                     document.getElementById('perf-avg-visit-duration-min').value = duration ? Math.floor(duration / 60) : '';
                     document.getElementById('perf-avg-visit-duration-sec').value = duration ? (duration % 60) : '';
 
-                    document.getElementById('perf-breakdown-country').value = data.audit.breakdown_by_country || '';
+                    const breakdownVal = data.audit.breakdown_by_country || '';
+                    currentBreakdownPath = isScreenshotPath(breakdownVal) ? breakdownVal : '';
+                    if (isScreenshotPath(breakdownVal)) {
+                        setBreakdownMode('screenshot');
+                        document.getElementById('img-breakdown-country').src = breakdownVal + '?v=' + new Date().getTime();
+                        document.getElementById('preview-breakdown-country').style.display = 'block';
+                        document.getElementById('placeholder-breakdown-country').style.display = 'none';
+                        document.getElementById('perf-breakdown-country').value = '';
+                    } else {
+                        setBreakdownMode('text');
+                        document.getElementById('perf-breakdown-country').value = breakdownVal;
+                        document.getElementById('img-breakdown-country').src = '';
+                        document.getElementById('preview-breakdown-country').style.display = 'none';
+                        document.getElementById('placeholder-breakdown-country').style.display = 'block';
+                    }
                     
                     currentMainChannelsPath = data.audit.main_channels || '';
                     currentTrafficTrendsPath = data.audit.traffic_trends || '';
@@ -1896,7 +1938,11 @@ if (!isset($_SESSION['user_id'])) {
             formData.append('pages_per_visit', document.getElementById('perf-pages-per-visit').value);
             formData.append('avg_monthly_visits', document.getElementById('perf-avg-monthly-visits').value);
             formData.append('avg_visit_duration', avg_visit_duration || '');
-            formData.append('breakdown_by_country', document.getElementById('perf-breakdown-country').value);
+            if (currentBreakdownMode === 'screenshot') {
+                formData.append('breakdown_by_country', currentBreakdownPath || '');
+            } else {
+                formData.append('breakdown_by_country', document.getElementById('perf-breakdown-country').value);
+            }
             formData.append('sitemap_details', document.getElementById('sitemap-details').value);
             formData.append('additional_notes', document.getElementById('additional-notes').value);
             formData.append('global_analysis', document.getElementById('global-report-analysis').value);
@@ -1956,6 +2002,171 @@ if (!isset($_SESSION['user_id'])) {
 
         let currentMainChannelsPath = '';
         let currentTrafficTrendsPath = '';
+        let currentBreakdownPath = '';
+        let currentBreakdownMode = 'text';
+
+        function setBreakdownMode(mode) {
+            currentBreakdownMode = mode;
+            const btnText = document.getElementById('btn-breakdown-mode-text');
+            const btnImg = document.getElementById('btn-breakdown-mode-screenshot');
+            const containerText = document.getElementById('breakdown-text-container');
+            const containerImg = document.getElementById('breakdown-screenshot-container');
+            
+            if (mode === 'text') {
+                btnText.style.background = 'rgba(139, 92, 246, 0.15)';
+                btnText.style.borderColor = 'rgba(139, 92, 246, 0.3)';
+                btnText.style.color = 'var(--primary)';
+                
+                btnImg.style.background = 'none';
+                btnImg.style.borderColor = 'var(--border-glass)';
+                btnImg.style.color = 'var(--text-primary)';
+                
+                containerText.style.display = 'block';
+                containerImg.style.display = 'none';
+            } else {
+                btnImg.style.background = 'rgba(139, 92, 246, 0.15)';
+                btnImg.style.borderColor = 'rgba(139, 92, 246, 0.3)';
+                btnImg.style.color = 'var(--primary)';
+                
+                btnText.style.background = 'none';
+                btnText.style.borderColor = 'var(--border-glass)';
+                btnText.style.color = 'var(--text-primary)';
+                
+                containerText.style.display = 'none';
+                containerImg.style.display = 'block';
+            }
+        }
+
+        function setCompBreakdownMode(compId, mode) {
+            const btnText = document.getElementById(`btn-comp-breakdown-mode-text-${compId}`);
+            const btnImg = document.getElementById(`btn-comp-breakdown-mode-screenshot-${compId}`);
+            const containerText = document.getElementById(`comp-breakdown-text-container-${compId}`);
+            const containerImg = document.getElementById(`comp-breakdown-screenshot-container-${compId}`);
+            
+            if (mode === 'text') {
+                btnText.style.background = 'rgba(139, 92, 246, 0.15)';
+                btnText.style.borderColor = 'rgba(139, 92, 246, 0.3)';
+                btnText.style.color = 'var(--primary)';
+                
+                btnImg.style.background = 'none';
+                btnImg.style.borderColor = 'var(--border-glass)';
+                btnImg.style.color = 'var(--text-primary)';
+                
+                containerText.style.display = 'block';
+                containerImg.style.display = 'none';
+            } else {
+                btnImg.style.background = 'rgba(139, 92, 246, 0.15)';
+                btnImg.style.borderColor = 'rgba(139, 92, 246, 0.3)';
+                btnImg.style.color = 'var(--primary)';
+                
+                btnText.style.background = 'none';
+                btnText.style.borderColor = 'var(--border-glass)';
+                btnText.style.color = 'var(--text-primary)';
+                
+                containerText.style.display = 'none';
+                containerImg.style.display = 'block';
+            }
+        }
+
+        function uploadBreakdownScreenshot(file, type, id) {
+            const formData = new FormData();
+            formData.append('id', id);
+            formData.append('type', type);
+            formData.append('screenshot', file);
+            
+            showFullscreenLoader("Uploading breakdown screenshot...");
+            
+            fetch('api.php?action=upload_breakdown_screenshot', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                hideFullscreenLoader();
+                if (data.success) {
+                    if (type === 'audit') {
+                        currentBreakdownPath = data.filepath;
+                        document.getElementById('img-breakdown-country').src = data.filepath + '?v=' + new Date().getTime();
+                        document.getElementById('preview-breakdown-country').style.display = 'block';
+                        document.getElementById('placeholder-breakdown-country').style.display = 'none';
+                        saveAuditMetrics(true);
+                    } else {
+                        const compId = id;
+                        const img = document.getElementById(`img-comp-breakdown-${compId}`);
+                        const preview = document.getElementById(`preview-comp-breakdown-${compId}`);
+                        const placeholder = document.getElementById(`placeholder-comp-breakdown-${compId}`);
+                        if (img) img.src = data.filepath + '?v=' + new Date().getTime();
+                        if (preview) preview.style.display = 'block';
+                        if (placeholder) placeholder.style.display = 'none';
+                        
+                        // Update in memory
+                        competitorAnalysesData = competitorAnalysesData.map(c => c.id == compId ? data.competitor : c);
+                        saveAuditMetrics(true);
+                    }
+                } else {
+                    alert(data.error);
+                }
+            })
+            .catch(err => {
+                hideFullscreenLoader();
+                console.error(err);
+                alert("Upload failed.");
+            });
+        }
+
+        function handleCompBreakdownFileChange(event, compId) {
+            const file = event.target.files[0];
+            if (file) {
+                uploadBreakdownScreenshot(file, 'competitor', compId);
+            }
+        }
+
+        function removeCompBreakdownScreenshot(event, compId) {
+            if (event) event.stopPropagation();
+            
+            const preview = document.getElementById(`preview-comp-breakdown-${compId}`);
+            const placeholder = document.getElementById(`placeholder-comp-breakdown-${compId}`);
+            const img = document.getElementById(`img-comp-breakdown-${compId}`);
+            
+            if (preview) preview.style.display = 'none';
+            if (placeholder) placeholder.style.display = 'block';
+            if (img) img.src = '';
+            
+            // Save empty breakdown
+            const comp = competitorAnalysesData.find(c => c.id === compId);
+            if (comp) {
+                const formData = new FormData();
+                formData.append('id', compId);
+                formData.append('url', comp.url);
+                formData.append('breakdown_by_country', '');
+                
+                // Fetch other fields
+                formData.append('meta_title', comp.meta_title || '');
+                formData.append('meta_description', comp.meta_description || '');
+                formData.append('h1', comp.h1 || '');
+                formData.append('search_terms', comp.search_terms || '');
+                formData.append('monthly_visits', comp.monthly_visits || '');
+                formData.append('avg_time_per_visit', comp.avg_time_per_visit || '');
+                formData.append('bounce_rate', comp.bounce_rate !== null ? comp.bounce_rate : '');
+                formData.append('pages_per_visit', comp.pages_per_visit !== null ? comp.pages_per_visit : '');
+                formData.append('avg_monthly_visits', comp.avg_monthly_visits !== null ? comp.avg_monthly_visits : '');
+                formData.append('avg_visit_duration', comp.avg_visit_duration !== null ? comp.avg_visit_duration : '');
+                formData.append('global_ranking', comp.global_ranking !== null ? comp.global_ranking : '');
+                formData.append('country_ranking', comp.country_ranking !== null ? comp.country_ranking : '');
+
+                fetch('api.php?action=competitor_analysis_update', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        competitorAnalysesData = competitorAnalysesData.map(c => c.id === compId ? data.competitor : c);
+                        saveAuditMetrics(true);
+                    }
+                });
+            }
+        }
 
         function triggerFileInput(id) {
             document.getElementById(id).click();
@@ -1964,6 +2175,11 @@ if (!isset($_SESSION['user_id'])) {
         function handleFileChange(event, type) {
             const file = event.target.files[0];
             if (!file) return;
+
+            if (type === 'breakdown-country') {
+                uploadBreakdownScreenshot(file, 'audit', activeAuditId);
+                return;
+            }
 
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -1988,6 +2204,8 @@ if (!isset($_SESSION['user_id'])) {
                 currentMainChannelsPath = '';
             } else if (type === 'traffic-trends') {
                 currentTrafficTrendsPath = '';
+            } else if (type === 'breakdown-country') {
+                currentBreakdownPath = '';
             }
             saveAuditMetrics(true); // Auto-save after screenshot removal
         }
@@ -2768,16 +2986,38 @@ if (!isset($_SESSION['user_id'])) {
             // Paste handler for screenshot
             window.addEventListener('paste', e => {
                 const modal = document.getElementById('headers-modal');
-                if (modal && modal.style.display !== 'none') {
-                    const items = (e.clipboardData || e.originalEvent.clipboardData).items;
-                    for (let i = 0; i < items.length; i++) {
-                        if (items[i].type.indexOf('image') === 0) {
-                            const file = items[i].getAsFile();
-                            setHeaderMode('screenshot');
-                            uploadHeadersScreenshot(file);
-                            break;
-                        }
+                const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+                let imageFile = null;
+                for (let i = 0; i < items.length; i++) {
+                    if (items[i].type.indexOf('image') === 0) {
+                        imageFile = items[i].getAsFile();
+                        break;
                     }
+                }
+                if (!imageFile) return;
+
+                // 1. Headers modal paste
+                if (modal && modal.style.display !== 'none') {
+                    setHeaderMode('screenshot');
+                    uploadHeadersScreenshot(imageFile);
+                    return;
+                }
+
+                // 2. Audit Breakdown by Country paste
+                const subtabPerf = document.getElementById('subtab-perf');
+                const breakdownImgContainer = document.getElementById('breakdown-screenshot-container');
+                if (subtabPerf && subtabPerf.style.display !== 'none' && breakdownImgContainer && breakdownImgContainer.style.display !== 'none') {
+                    uploadBreakdownScreenshot(imageFile, 'audit', activeAuditId);
+                    return;
+                }
+
+                // 3. Competitor Breakdown by Country paste
+                const visibleCompContainer = Array.from(document.querySelectorAll('.comp-breakdown-screenshot-container'))
+                    .find(el => el.style.display !== 'none' && el.getBoundingClientRect().height > 0);
+                if (visibleCompContainer) {
+                    const compId = visibleCompContainer.getAttribute('data-comp-id');
+                    uploadBreakdownScreenshot(imageFile, 'competitor', compId);
+                    return;
                 }
             });
         }
@@ -3964,8 +4204,33 @@ if (!isset($_SESSION['user_id'])) {
                             </div>
                             
                             <div class="form-group" style="margin-bottom: 0;">
-                                <label style="font-size: 0.8rem; margin-bottom: 6px; color: var(--text-secondary);">Breakdown by Country</label>
-                                <textarea id="comp-breakdown-${c.id}" class="form-input" style="height: 80px; resize: vertical;" placeholder="e.g. United States: 40%, United Kingdom: 20%, France: 10%" onchange="saveCompetitorTraffic(${c.id})">${escapeHtml(c.breakdown_by_country || '')}</textarea>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <label style="font-size: 0.8rem; margin-bottom: 0; color: var(--text-secondary);">Breakdown by Country</label>
+                                    <div class="mode-tabs" style="display: flex; gap: 4px;">
+                                        <button type="button" class="btn btn-secondary btn-sm" id="btn-comp-breakdown-mode-text-${c.id}" onclick="setCompBreakdownMode(${c.id}, 'text')" style="font-size: 0.7rem; padding: 1px 6px; ${!isScreenshotPath(c.breakdown_by_country) ? 'background: rgba(139, 92, 246, 0.15); border-color: rgba(139, 92, 246, 0.3); color: var(--primary);' : ''}">Text</button>
+                                        <button type="button" class="btn btn-secondary btn-sm" id="btn-comp-breakdown-mode-screenshot-${c.id}" onclick="setCompBreakdownMode(${c.id}, 'screenshot')" style="font-size: 0.7rem; padding: 1px 6px; ${isScreenshotPath(c.breakdown_by_country) ? 'background: rgba(139, 92, 246, 0.15); border-color: rgba(139, 92, 246, 0.3); color: var(--primary);' : ''}">Screenshot</button>
+                                    </div>
+                                </div>
+                                
+                                <div id="comp-breakdown-text-container-${c.id}" style="${isScreenshotPath(c.breakdown_by_country) ? 'display: none;' : ''}">
+                                    <textarea id="comp-breakdown-${c.id}" class="form-input" style="height: 80px; resize: vertical;" placeholder="e.g. United States: 40%, United Kingdom: 20%, France: 10%" onchange="saveCompetitorTraffic(${c.id})">${escapeHtml(!isScreenshotPath(c.breakdown_by_country) ? c.breakdown_by_country || '' : '')}</textarea>
+                                </div>
+                                
+                                <div id="comp-breakdown-screenshot-container-${c.id}" class="comp-breakdown-screenshot-container" data-comp-id="${c.id}" style="${!isScreenshotPath(c.breakdown_by_country) ? 'display: none;' : ''}">
+                                    <div class="screenshot-upload-zone" id="zone-comp-breakdown-${c.id}" onclick="triggerFileInput('comp-breakdown-file-${c.id}')" style="min-height: 120px; padding: 16px;">
+                                        <input type="file" id="comp-breakdown-file-${c.id}" accept="image/*" style="display: none;" onchange="handleCompBreakdownFileChange(event, ${c.id})">
+                                        <div class="upload-placeholder" id="placeholder-comp-breakdown-${c.id}" style="${isScreenshotPath(c.breakdown_by_country) ? 'display: none;' : ''}">
+                                            <i data-lucide="image" style="width: 20px; height: 20px; color: var(--text-muted); margin-bottom: 6px;"></i>
+                                            <p style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 500; margin: 0;">Click, drag & drop, or paste (Ctrl+V)</p>
+                                        </div>
+                                        <div class="upload-preview" id="preview-comp-breakdown-${c.id}" style="${isScreenshotPath(c.breakdown_by_country) ? 'display: block;' : 'display: none;'} position: relative; width: 100%;">
+                                            <img src="${isScreenshotPath(c.breakdown_by_country) ? escapeHtml(c.breakdown_by_country) : ''}" id="img-comp-breakdown-${c.id}" style="width: 100%; max-height: 180px; object-fit: contain; border-radius: var(--radius-sm);">
+                                            <button type="button" class="btn-delete-screenshot" onclick="removeCompBreakdownScreenshot(event, ${c.id})" style="padding: 4px 8px; top: 6px; right: 6px;">
+                                                <i data-lucide="trash-2" style="width: 12px; height: 12px;"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     `;

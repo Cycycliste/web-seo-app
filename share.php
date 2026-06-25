@@ -390,7 +390,9 @@
                         <div style="display: flex; flex-direction: column;">
                             <div class="form-group" style="height: 100%; display: flex; flex-direction: column; margin-bottom: 0;">
                                 <label style="margin-bottom: 8px;">Country Breakdown</label>
-                                <textarea id="perf-breakdown-country" class="form-input" style="opacity:0.8; flex-grow: 1; min-height: 180px; resize: none;" readonly></textarea>
+                                <div id="share-breakdown-country-container" style="flex-grow: 1; display: flex; flex-direction: column;">
+                                    <textarea id="perf-breakdown-country" class="form-input" style="opacity:0.8; flex-grow: 1; min-height: 180px; resize: none;" readonly></textarea>
+                                </div>
                             </div>
                         </div>
                         <div class="form-group">
@@ -640,14 +642,21 @@
                     const duration = data.audit.avg_visit_duration;
                     document.getElementById('perf-avg-visit-duration').value = duration !== null ? Math.floor(duration / 60) + 'm ' + (duration % 60) + 's' : '-';
                     
-                    document.getElementById('perf-breakdown-country').value = data.audit.breakdown_by_country || 'No country breakdown registered.';
+                    const breakdownVal = data.audit.breakdown_by_country || '';
+                    const breakdownContainer = document.getElementById('share-breakdown-country-container');
+                    if (isScreenshotPath(breakdownVal)) {
+                        breakdownContainer.innerHTML = `<img src="${breakdownVal}" style="width: 100%; max-height: 250px; object-fit: contain; border-radius: var(--radius-sm); border: 1px solid var(--border-glass);">`;
+                    } else {
+                        breakdownContainer.innerHTML = `<textarea id="perf-breakdown-country" class="form-input" style="opacity:0.8; flex-grow: 1; min-height: 180px; resize: none;" readonly></textarea>`;
+                        document.getElementById('perf-breakdown-country').value = breakdownVal || 'No country breakdown registered.';
+                    }
                     
                     // Render Main Channels screenshot
                     const mainChannelsBox = document.getElementById('share-main-channels-box');
                     if (data.audit.main_channels) {
                         mainChannelsBox.innerHTML = `<img src="${data.audit.main_channels}" style="width: 100%; max-height: 400px; object-fit: contain; border-radius: var(--radius-md); border: 1px solid var(--border-glass);">`;
                     } else {
-                        mainChannelsBox.innerHTML = `<div style="padding: 20px; text-align: center; color: var(--text-muted); background: rgba(0,0,0,0.15); border-radius: var(--radius-sm); border: 1px dashed var(--border-glass); font-size: 0.85rem;">No Main Channels screenshot uploaded.</div>`;
+                        mainChannelsBox.innerHTML = `<div style="min-height: 220px; display: flex; align-items: center; justify-content: center; text-align: center; color: var(--text-muted); background: rgba(0,0,0,0.15); border-radius: var(--radius-sm); border: 1px dashed var(--border-glass); font-size: 0.85rem; padding: 24px;">No Main Channels screenshot uploaded.</div>`;
                     }
 
                     // Render Traffic Trends screenshot
@@ -655,7 +664,7 @@
                     if (data.audit.traffic_trends) {
                         trafficTrendsBox.innerHTML = `<img src="${data.audit.traffic_trends}" style="width: 100%; max-height: 400px; object-fit: contain; border-radius: var(--radius-md); border: 1px solid var(--border-glass);">`;
                     } else {
-                        trafficTrendsBox.innerHTML = `<div style="padding: 20px; text-align: center; color: var(--text-muted); background: rgba(0,0,0,0.15); border-radius: var(--radius-sm); border: 1px dashed var(--border-glass); font-size: 0.85rem;">No Traffic Trends screenshot uploaded.</div>`;
+                        trafficTrendsBox.innerHTML = `<div style="min-height: 220px; display: flex; align-items: center; justify-content: center; text-align: center; color: var(--text-muted); background: rgba(0,0,0,0.15); border-radius: var(--radius-sm); border: 1px dashed var(--border-glass); font-size: 0.85rem; padding: 24px;">No Traffic Trends screenshot uploaded.</div>`;
                     }
 
                     document.getElementById('perf-global-ranking').value = data.audit.global_ranking !== null ? data.audit.global_ranking.toLocaleString() : '-';
@@ -1296,8 +1305,14 @@
                             </div>
 
                             <div style="display:flex; flex-direction:column; gap:4px; margin-top:6px; flex-grow:1;">
-                                <div style="font-size:0.75rem; color:var(--text-muted); font-weight:600; text-transform:uppercase;">Country Breakdown</div>
-                                <div style="font-size:0.8rem; color:var(--text-secondary); background:rgba(255,255,255,0.02); padding:10px; border-radius:6px; border:1px solid var(--border-glass); flex-grow:1; min-height:60px; white-space:pre-wrap;">${escapeHtml(c.breakdown_by_country || 'No country breakdown provided.')}</div>
+                                <div style="font-size:0.75rem; color:var(--text-muted); font-weight:600; text-transform:uppercase; margin-bottom: 4px;">Country Breakdown</div>
+                                ${isScreenshotPath(c.breakdown_by_country) ? `
+                                    <div style="background:rgba(255,255,255,0.02); padding:8px; border-radius:6px; border:1px solid var(--border-glass);">
+                                        <img src="${escapeHtml(c.breakdown_by_country)}" style="width:100%; max-height:180px; object-fit:contain; border-radius:4px;">
+                                    </div>
+                                ` : `
+                                    <div style="font-size:0.8rem; color:var(--text-secondary); background:rgba(255,255,255,0.02); padding:10px; border-radius:6px; border:1px solid var(--border-glass); flex-grow:1; min-height:60px; white-space:pre-wrap;">${escapeHtml(c.breakdown_by_country || 'No country breakdown provided.')}</div>
+                                `}
                             </div>
                         </div>
 
