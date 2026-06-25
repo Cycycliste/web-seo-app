@@ -601,7 +601,7 @@ if (!isset($_SESSION['user_id'])) {
                                 <div class="glass-panel" style="grid-column: 2; grid-row: 2; padding: 24px; margin-bottom: 30px; display: flex; flex-direction: column;">
                                     <h4 id="header-sitemap" style="margin-bottom: 16px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px;">Sitemap Status & Setup Details</h4>
                                     <div class="form-group" style="margin-bottom: 0; flex-grow: 1; display: flex; flex-direction: column;">
-                                        <textarea id="sitemap-details" class="form-input" style="flex-grow: 1; min-height: 120px; resize: vertical;" placeholder="Add sitemap submission status, URL, last read dates, and crawl coverage..." onchange="saveAuditMetrics(true)"></textarea>
+                                        <textarea id="sitemap-details" class="form-input" style="flex-grow: 1; min-height: 120px; resize: vertical;" placeholder="Add sitemap submission status, URL, last read dates, and crawl coverage..." onchange="window.lastChangedElement = this; saveAuditMetrics(true)"></textarea>
                                     </div>
                                 </div>
 
@@ -609,7 +609,7 @@ if (!isset($_SESSION['user_id'])) {
                                 <div class="glass-panel" style="grid-column: 3; grid-row: 2; padding: 24px; margin-bottom: 30px; display: flex; flex-direction: column;">
                                     <h4 id="header-additional-notes" style="margin-bottom: 16px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px;">Additional Notes</h4>
                                     <div class="form-group" style="margin-bottom: 0; flex-grow: 1; display: flex; flex-direction: column;">
-                                        <textarea id="additional-notes" class="form-input" style="flex-grow: 1; min-height: 120px; resize: vertical;" placeholder="Add other observations, technical guidelines, or custom audit notes..." onchange="saveAuditMetrics(true)"></textarea>
+                                        <textarea id="additional-notes" class="form-input" style="flex-grow: 1; min-height: 120px; resize: vertical;" placeholder="Add other observations, technical guidelines, or custom audit notes..." onchange="window.lastChangedElement = this; saveAuditMetrics(true)"></textarea>
                                     </div>
                                 </div>
 
@@ -628,11 +628,11 @@ if (!isset($_SESSION['user_id'])) {
                                         <div style="display: flex; gap: 15px;">
                                             <div class="form-group" style="flex: 1; margin-bottom: 0;">
                                                 <label for="perf-bounce-rate">Bounce Rate (%)</label>
-                                                <input type="number" step="0.01" min="0" max="100" id="perf-bounce-rate" class="form-input" placeholder="e.g. 45.5" onchange="saveAuditMetrics(true)">
+                                                <input type="number" step="0.01" min="0" max="100" id="perf-bounce-rate" class="form-input" placeholder="e.g. 45.5" onchange="window.lastChangedElement = this; saveAuditMetrics(true)">
                                             </div>
                                             <div class="form-group" style="flex: 1; margin-bottom: 0;">
                                                 <label for="perf-pages-per-visit">Pages Per Visit</label>
-                                                <input type="number" step="0.01" min="0" id="perf-pages-per-visit" class="form-input" placeholder="e.g. 3.2" onchange="saveAuditMetrics(true)">
+                                                <input type="number" step="0.01" min="0" id="perf-pages-per-visit" class="form-input" placeholder="e.g. 3.2" onchange="window.lastChangedElement = this; saveAuditMetrics(true)">
                                             </div>
                                         </div>
 
@@ -640,17 +640,17 @@ if (!isset($_SESSION['user_id'])) {
                                         <div style="display: flex; gap: 15px;">
                                             <div class="form-group" style="flex: 1; margin-bottom: 0;">
                                                 <label for="perf-avg-monthly-visits">Average Monthly Visits</label>
-                                                <input type="number" min="0" id="perf-avg-monthly-visits" class="form-input" placeholder="e.g. 50000" onchange="saveAuditMetrics(true)">
+                                                <input type="number" min="0" id="perf-avg-monthly-visits" class="form-input" placeholder="e.g. 50000" onchange="window.lastChangedElement = this; saveAuditMetrics(true)">
                                             </div>
                                             <div class="form-group" style="flex: 1; margin-bottom: 0;">
                                                 <label style="margin-bottom: 6px; display: block;">Average Visit Duration</label>
                                                 <div style="display: flex; gap: 8px;">
                                                     <div style="flex: 1; display: flex; align-items: center; gap: 4px;">
-                                                        <input type="number" min="0" id="perf-avg-visit-duration-min" class="form-input" placeholder="Min" style="width: 100%;" onchange="saveAuditMetrics(true)">
+                                                        <input type="number" min="0" id="perf-avg-visit-duration-min" class="form-input" placeholder="Min" style="width: 100%;" onchange="window.lastChangedElement = this; saveAuditMetrics(true)">
                                                         <span style="font-size: 0.85rem; color: var(--text-secondary);">m</span>
                                                     </div>
                                                     <div style="flex: 1; display: flex; align-items: center; gap: 4px;">
-                                                        <input type="number" min="0" max="59" id="perf-avg-visit-duration-sec" class="form-input" placeholder="Sec" style="width: 100%;" onchange="saveAuditMetrics(true)">
+                                                        <input type="number" min="0" max="59" id="perf-avg-visit-duration-sec" class="form-input" placeholder="Sec" style="width: 100%;" onchange="window.lastChangedElement = this; saveAuditMetrics(true)">
                                                         <span style="font-size: 0.85rem; color: var(--text-secondary);">s</span>
                                                     </div>
                                                 </div>
@@ -661,14 +661,14 @@ if (!isset($_SESSION['user_id'])) {
                                         <div style="display: flex; gap: 15px;">
                                             <div class="form-group" style="flex: 1; margin-bottom: 0;">
                                                 <label for="perf-global-ranking">Global Rank</label>
-                                                <input type="number" min="0" id="perf-global-ranking" class="form-input" placeholder="e.g. 150000" onchange="saveAuditMetrics(true)">
+                                                <input type="number" min="0" id="perf-global-ranking" class="form-input" placeholder="e.g. 150000" onchange="window.lastChangedElement = this; saveAuditMetrics(true)">
                                             </div>
                                             <div class="form-group" style="flex: 1; margin-bottom: 0;">
                                                 <label for="perf-country-ranking">Country Rank</label>
                                                 <div style="display: flex; gap: 8px; align-items: center;">
-                                                    <input type="number" min="0" id="perf-country-ranking" class="form-input" placeholder="e.g. 500" style="flex: 1;" onchange="saveAuditMetrics(true)">
+                                                    <input type="number" min="0" id="perf-country-ranking" class="form-input" placeholder="e.g. 500" style="flex: 1;" onchange="window.lastChangedElement = this; saveAuditMetrics(true)">
                                                     <span style="font-size: 0.85rem; color: var(--text-secondary);">in</span>
-                                                    <input type="text" id="perf-target-country" class="form-input" placeholder="e.g. France" style="flex: 1.5;" onchange="saveAuditMetrics(true)">
+                                                    <input type="text" id="perf-target-country" class="form-input" placeholder="e.g. France" style="flex: 1.5;" onchange="window.lastChangedElement = this; saveAuditMetrics(true)">
                                                 </div>
                                             </div>
                                         </div>
@@ -687,7 +687,7 @@ if (!isset($_SESSION['user_id'])) {
                                             
                                             <!-- Mode Text: Textarea -->
                                             <div id="breakdown-text-container" style="flex-grow: 1; display: flex; flex-direction: column; height: 100%;">
-                                                <textarea id="perf-breakdown-country" class="form-input" style="flex-grow: 1; min-height: 180px; resize: vertical; height: 100%;" placeholder="e.g. USA: 40%, France: 20%, Germany: 15%..." onchange="saveAuditMetrics(true)"></textarea>
+                                                <textarea id="perf-breakdown-country" class="form-input" style="flex-grow: 1; min-height: 180px; resize: vertical; height: 100%;" placeholder="e.g. USA: 40%, France: 20%, Germany: 15%..." onchange="window.lastChangedElement = this; saveAuditMetrics(true)"></textarea>
                                             </div>
                                             
                                             <!-- Mode Screenshot: Upload Zone & Preview -->
@@ -875,7 +875,7 @@ if (!isset($_SESSION['user_id'])) {
                                     <i data-lucide="compass" style="width: 16px; height: 16px; color: var(--primary);"></i>
                                     <span>Global Analysis & Audit Meaning</span>
                                 </label>
-                                <textarea id="global-report-analysis" class="form-input" style="min-height: 250px; resize: vertical; width: 100%; font-family: inherit; line-height: 1.5; padding: 14px;" placeholder="Explain the global findings of this audit. What do these metrics mean for the client's website? (e.g. Traffic Trends, Keyword Gaps, Core Web Vitals summary...)" onchange="saveAuditMetrics(true)"></textarea>
+                                <textarea id="global-report-analysis" class="form-input" style="min-height: 250px; resize: vertical; width: 100%; font-family: inherit; line-height: 1.5; padding: 14px;" placeholder="Explain the global findings of this audit. What do these metrics mean for the client's website? (e.g. Traffic Trends, Keyword Gaps, Core Web Vitals summary...)" onchange="window.lastChangedElement = this; saveAuditMetrics(true)"></textarea>
                             </div>
                             
                             <div class="form-group" style="display: flex; flex-direction: column; gap: 8px;">
@@ -883,7 +883,7 @@ if (!isset($_SESSION['user_id'])) {
                                     <i data-lucide="trending-up" style="width: 16px; height: 16px; color: var(--secondary);"></i>
                                     <span>Recommendations & Strategy to Adopt</span>
                                 </label>
-                                <textarea id="global-report-strategy" class="form-input" style="min-height: 250px; resize: vertical; width: 100%; font-family: inherit; line-height: 1.5; padding: 14px;" placeholder="Outline the concrete recommendations and next steps. What strategy should they execute next?" onchange="saveAuditMetrics(true)"></textarea>
+                                <textarea id="global-report-strategy" class="form-input" style="min-height: 250px; resize: vertical; width: 100%; font-family: inherit; line-height: 1.5; padding: 14px;" placeholder="Outline the concrete recommendations and next steps. What strategy should they execute next?" onchange="window.lastChangedElement = this; saveAuditMetrics(true)"></textarea>
                             </div>
                         </div>
                     </div>
@@ -1297,21 +1297,40 @@ if (!isset($_SESSION['user_id'])) {
         window.lastChangedElement = null;
 
         // Auto-save visual indicator helpers
-        function triggerIndicator(header, status) {
-            if (!header) return;
+        window.justSavedCell = null;
+
+        function getSavedIndicatorHTML(id, field, type) {
+            if (window.justSavedCell && window.justSavedCell.id == id && window.justSavedCell.field === field && window.justSavedCell.type === type) {
+                // Clear it, but keep a local reference to find it in the DOM after rendering
+                window.justSavedCell = null;
+                setTimeout(() => {
+                    // Try to find the cell or parent in GSC/crawl errors case
+                    const cell = document.querySelector(`td[data-id="${id}"][data-field="${field}"][data-type="${type}"]`) || 
+                                 (field === 'indexing_gsc' ? document.querySelector(`span[onclick*="showGscSelector"][onclick*="${id}"]`)?.parentNode : null) ||
+                                 (field === 'crawl_errors' ? document.querySelector(`span[onclick*="showCrawlErrorsSelector"][onclick*="${id}"]`)?.parentNode : null);
+                    const ind = cell ? cell.querySelector('.save-indicator') : null;
+                    if (ind) {
+                        ind.classList.remove('visible');
+                        setTimeout(() => {
+                            if (!ind.classList.contains('visible') && ind.parentNode) {
+                                ind.remove();
+                            }
+                        }, 200);
+                    }
+                }, 1200);
+                return ` <span class="save-indicator visible saved">saved</span>`;
+            }
+            return '';
+        }
+
+        function triggerIndicator(target, status) {
+            if (!target) return;
             
-            let indicator = header.querySelector('.save-indicator');
+            let indicator = target.querySelector('.save-indicator');
             if (!indicator) {
                 indicator = document.createElement('span');
                 indicator.className = 'save-indicator';
-                
-                // Insert before first span or anchor, or as first child
-                const insertTarget = header.querySelector('span, a');
-                if (insertTarget) {
-                    header.insertBefore(indicator, insertTarget);
-                } else {
-                    header.insertBefore(indicator, header.firstChild);
-                }
+                target.appendChild(indicator);
             }
             
             if (status === 'saving') {
@@ -1339,33 +1358,37 @@ if (!isset($_SESSION['user_id'])) {
             }
         }
 
-        function showSavingIndicatorForElement(element) {
-            if (!element) return;
-            let header = null;
-            if (element.id && element.id.startsWith('comp-')) {
-                const compId = element.id.split('-').pop();
-                header = document.getElementById(`comp-header-${compId}`);
-            } else {
-                const panel = element.closest('.glass-panel');
-                header = panel ? panel.querySelector('h3, h4') : null;
+        function getLabelOrHeaderForElement(element) {
+            if (!element) return null;
+            
+            // For competitor card inputs and performance metrics, find closest .form-group's label
+            const formGroup = element.closest('.form-group');
+            if (formGroup) {
+                const label = formGroup.querySelector('label');
+                if (label) return label;
             }
-            if (header) {
-                triggerIndicator(header, 'saving');
+            
+            // Fallback to sitemap / additional notes headers
+            const panel = element.closest('.glass-panel');
+            if (panel) {
+                const heading = panel.querySelector('h3, h4');
+                if (heading) return heading;
+            }
+            
+            return null;
+        }
+
+        function showSavingIndicatorForElement(element) {
+            const target = getLabelOrHeaderForElement(element);
+            if (target) {
+                triggerIndicator(target, 'saving');
             }
         }
 
         function showSavedIndicatorForElement(element) {
-            if (!element) return;
-            let header = null;
-            if (element.id && element.id.startsWith('comp-')) {
-                const compId = element.id.split('-').pop();
-                header = document.getElementById(`comp-header-${compId}`);
-            } else {
-                const panel = element.closest('.glass-panel');
-                header = panel ? panel.querySelector('h3, h4') : null;
-            }
-            if (header) {
-                triggerIndicator(header, 'saved');
+            const target = getLabelOrHeaderForElement(element);
+            if (target) {
+                triggerIndicator(target, 'saved');
             }
         }
 
@@ -2190,14 +2213,12 @@ if (!isset($_SESSION['user_id'])) {
             
             showFullscreenLoader("Uploading breakdown screenshot...");
             
-            let header = null;
-            if (type === 'audit') {
-                header = document.getElementById('header-perf');
-            } else {
-                header = document.getElementById(`comp-header-${id}`);
-            }
-            if (header) {
-                triggerIndicator(header, 'saving');
+            const fileInput = type === 'audit' 
+                ? document.getElementById('perf-breakdown-country-file')
+                : document.getElementById(`comp-breakdown-file-${id}`);
+            const target = getLabelOrHeaderForElement(fileInput);
+            if (target) {
+                triggerIndicator(target, 'saving');
             }
             
             fetch('api.php?action=upload_breakdown_screenshot', {
@@ -2230,8 +2251,8 @@ if (!isset($_SESSION['user_id'])) {
                         saveAuditMetrics(true);
                     }
                 } else {
-                    if (header) {
-                        const indicator = header.querySelector('.save-indicator');
+                    if (target) {
+                        const indicator = target.querySelector('.save-indicator');
                         if (indicator) indicator.classList.remove('visible');
                     }
                     alert(data.error);
@@ -2239,8 +2260,8 @@ if (!isset($_SESSION['user_id'])) {
             })
             .catch(err => {
                 hideFullscreenLoader();
-                if (header) {
-                    const indicator = header.querySelector('.save-indicator');
+                if (target) {
+                    const indicator = target.querySelector('.save-indicator');
                     if (indicator) indicator.classList.remove('visible');
                 }
                 console.error(err);
@@ -2269,8 +2290,9 @@ if (!isset($_SESSION['user_id'])) {
             // Save empty breakdown
             const comp = competitorAnalysesData.find(c => c.id === compId);
             if (comp) {
-                const header = document.getElementById(`comp-header-${compId}`);
-                if (header) triggerIndicator(header, 'saving');
+                const fileInput = document.getElementById(`comp-breakdown-file-${compId}`);
+                const target = getLabelOrHeaderForElement(fileInput);
+                if (target) triggerIndicator(target, 'saving');
 
                 const formData = new FormData();
                 formData.append('id', compId);
@@ -2298,19 +2320,19 @@ if (!isset($_SESSION['user_id'])) {
                 .then(res => res.json())
                 .then(data => {
                     if (data.success) {
-                        if (header) triggerIndicator(header, 'saved');
+                        if (target) triggerIndicator(target, 'saved');
                         competitorAnalysesData = competitorAnalysesData.map(c => c.id === compId ? data.competitor : c);
                         saveAuditMetrics(true);
                     } else {
-                        if (header) {
-                            const indicator = header.querySelector('.save-indicator');
+                        if (target) {
+                            const indicator = target.querySelector('.save-indicator');
                             if (indicator) indicator.classList.remove('visible');
                         }
                     }
                 })
                 .catch(err => {
-                    if (header) {
-                        const indicator = header.querySelector('.save-indicator');
+                    if (target) {
+                        const indicator = target.querySelector('.save-indicator');
                         if (indicator) indicator.classList.remove('visible');
                     }
                     console.error(err);
@@ -2530,18 +2552,21 @@ if (!isset($_SESSION['user_id'])) {
                         <div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">
                             <span>${titleLen} chars</span>
                         </div>
+                        ${getSavedIndicatorHTML(p.id, 'meta_title', 'page')}
                     </td>
                     <td data-editable="true" data-id="${p.id}" data-type="page" data-field="meta_description" data-input-type="textarea" data-value="${escapeHtml(p.meta_description || '')}">
                         <div class="text-truncate-cell" style="font-size:0.85rem;" title="${escapeHtml(p.meta_description || '')}">${escapeHtml(truncateCellText(p.meta_description))}</div>
                         <div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">
                             <span>${descLen} chars</span>
                         </div>
+                        ${getSavedIndicatorHTML(p.id, 'meta_description', 'page')}
                     </td>
                     <td data-editable="true" data-id="${p.id}" data-type="page" data-field="h1" data-value="${escapeHtml(p.h1 || '')}">
                         <div class="text-truncate-cell" style="font-weight: 500;" title="${escapeHtml(p.h1 || '')}">${escapeHtml(truncateCellText(p.h1))}</div>
                         <div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">
                             <span>${h1Len} chars</span>
                         </div>
+                        ${getSavedIndicatorHTML(p.id, 'h1', 'page')}
                     </td>
                     <td>
                         <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.8rem;" onclick="viewHeadersStructure(${p.id}, 'page')">
@@ -2551,20 +2576,25 @@ if (!isset($_SESSION['user_id'])) {
                     </td>
                     <td data-editable="true" data-id="${p.id}" data-type="page" data-field="internal_links" data-input-type="number" data-value="${p.internal_links}">
                         <span style="font-weight:600; color:var(--secondary);">${p.internal_links}</span>
+                        ${getSavedIndicatorHTML(p.id, 'internal_links', 'page')}
                     </td>
                     <td data-editable="true" data-id="${p.id}" data-type="page" data-field="external_links" data-input-type="number" data-value="${p.external_links}">
                         <span style="font-weight:600; color:var(--accent);">${p.external_links}</span>
+                        ${getSavedIndicatorHTML(p.id, 'external_links', 'page')}
                     </td>
                     <td data-editable="true" data-id="${p.id}" data-type="page" data-field="missing_alt_images" data-input-type="number" data-value="${p.missing_alt_images}">
                         <span class="badge ${p.missing_alt_images > 0 ? 'badge-warning' : 'badge-success'}">
                             ${p.missing_alt_images}
                         </span>
+                        ${getSavedIndicatorHTML(p.id, 'missing_alt_images', 'page')}
                     </td>
                     <td data-editable="true" data-id="${p.id}" data-type="page" data-field="search_terms" data-value="${escapeHtml(p.search_terms || '')}">
                         <div class="text-truncate-cell" title="${escapeHtml(p.search_terms || '')}">${formatSearchTermsAsBullets(p.search_terms)}</div>
+                        ${getSavedIndicatorHTML(p.id, 'search_terms', 'page')}
                     </td>
                     <td data-editable="true" data-id="${p.id}" data-type="page" data-field="notes" data-value="${escapeHtml(p.notes || '')}">
                         <div class="text-truncate-cell" title="${escapeHtml(p.notes || '')}">${escapeHtml(p.notes || '')}</div>
+                        ${getSavedIndicatorHTML(p.id, 'notes', 'page')}
                     </td>
                 `;
                 seoTable.appendChild(seoRow);
@@ -2600,15 +2630,17 @@ if (!isset($_SESSION['user_id'])) {
                             <a href="${escapeHtml(p.url)}" target="_blank" class="url-link" title="${escapeHtml(p.url)}">${escapeHtml(getUrlDisplayName(p.url))}</a>
                         </div>
                     </td>
-                    <td style="text-align: center;">
+                    <td style="text-align: center; position: relative;">
                         <span class="badge badge-clickable ${gscBadgeClass}" onclick="showGscSelector(event, this, ${p.id}, '${p.indexing_gsc || ''}')">
                             ${gscText}
                         </span>
+                        ${getSavedIndicatorHTML(p.id, 'indexing_gsc', 'page')}
                     </td>
-                    <td style="text-align: center;">
+                    <td style="text-align: center; position: relative;">
                         <span class="badge badge-clickable ${errorsBadgeClass}" onclick="showCrawlErrorsSelector(event, this, ${p.id}, '${p.crawl_errors || ''}')">
                             ${errorsText}
                         </span>
+                        ${getSavedIndicatorHTML(p.id, 'crawl_errors', 'page')}
                     </td>
                 `;
                 techTable.appendChild(techRow);
@@ -4057,18 +4089,21 @@ if (!isset($_SESSION['user_id'])) {
                             <div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">
                                 <span>${titleLen} chars</span>
                             </div>
+                            ${getSavedIndicatorHTML(c.id, 'meta_title', 'competitor_analysis')}
                         </td>
                         <td data-editable="true" data-id="${c.id}" data-type="competitor_analysis" data-field="meta_description" data-input-type="textarea" data-value="${escapeHtml(c.meta_description || '')}">
                             <div class="text-truncate-cell" style="font-size:0.85rem;" title="${escapeHtml(c.meta_description || '')}">${escapeHtml(truncateCellText(c.meta_description))}</div>
                             <div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">
                                 <span>${descLen} chars</span>
                             </div>
+                            ${getSavedIndicatorHTML(c.id, 'meta_description', 'competitor_analysis')}
                         </td>
                         <td data-editable="true" data-id="${c.id}" data-type="competitor_analysis" data-field="h1" data-value="${escapeHtml(c.h1 || '')}">
                             <div class="text-truncate-cell" style="font-weight: 500;" title="${escapeHtml(c.h1 || '')}">${escapeHtml(truncateCellText(c.h1))}</div>
                             <div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">
                                 <span>${h1Len} chars</span>
                             </div>
+                            ${getSavedIndicatorHTML(c.id, 'h1', 'competitor_analysis')}
                         </td>
                         <td>
                             <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.8rem;" onclick="viewHeadersStructure(${c.id}, 'competitor')">
@@ -4078,20 +4113,25 @@ if (!isset($_SESSION['user_id'])) {
                         </td>
                         <td data-editable="true" data-id="${c.id}" data-type="competitor_analysis" data-field="internal_links" data-input-type="number" data-value="${c.internal_links || 0}">
                             <span style="font-weight:600; color:var(--secondary);">${c.internal_links || 0}</span>
+                            ${getSavedIndicatorHTML(c.id, 'internal_links', 'competitor_analysis')}
                         </td>
                         <td data-editable="true" data-id="${c.id}" data-type="competitor_analysis" data-field="external_links" data-input-type="number" data-value="${c.external_links || 0}">
                             <span style="font-weight:600; color:var(--accent);">${c.external_links || 0}</span>
+                            ${getSavedIndicatorHTML(c.id, 'external_links', 'competitor_analysis')}
                         </td>
                         <td data-editable="true" data-id="${c.id}" data-type="competitor_analysis" data-field="missing_alt_images" data-input-type="number" data-value="${c.missing_alt_images || 0}">
                             <span class="badge ${(parseInt(c.missing_alt_images) || 0) > 0 ? 'badge-warning' : 'badge-success'}">
                                 ${c.missing_alt_images || 0}
                             </span>
+                            ${getSavedIndicatorHTML(c.id, 'missing_alt_images', 'competitor_analysis')}
                         </td>
                         <td data-editable="true" data-id="${c.id}" data-type="competitor_analysis" data-field="search_terms" data-value="${escapeHtml(c.search_terms || '')}">
                             <div class="text-truncate-cell" title="${escapeHtml(c.search_terms || '')}">${formatSearchTermsAsBullets(c.search_terms)}</div>
+                            ${getSavedIndicatorHTML(c.id, 'search_terms', 'competitor_analysis')}
                         </td>
                         <td data-editable="true" data-id="${c.id}" data-type="competitor_analysis" data-field="notes" data-value="${escapeHtml(c.notes || '')}">
                             <div class="text-truncate-cell" title="${escapeHtml(c.notes || '')}">${escapeHtml(c.notes || '')}</div>
+                            ${getSavedIndicatorHTML(c.id, 'notes', 'competitor_analysis')}
                         </td>
                     `;
                     list.appendChild(row);
@@ -4409,11 +4449,11 @@ if (!isset($_SESSION['user_id'])) {
                                     <div style="display: flex; gap: 15px;">
                                         <div class="form-group" style="flex: 1; margin-bottom: 0;">
                                             <label style="font-size: 0.8rem; margin-bottom: 6px; color: var(--text-secondary);">Bounce Rate (%)</label>
-                                            <input type="number" step="0.01" min="0" max="100" id="comp-bounce-${c.id}" class="form-input" placeholder="e.g. 45.5" value="${c.bounce_rate !== null ? c.bounce_rate : ''}" onchange="saveCompetitorTraffic(${c.id})">
+                                            <input type="number" step="0.01" min="0" max="100" id="comp-bounce-${c.id}" class="form-input" placeholder="e.g. 45.5" value="${c.bounce_rate !== null ? c.bounce_rate : ''}" onchange="window.lastChangedElement = this; saveCompetitorTraffic(${c.id})">
                                         </div>
                                         <div class="form-group" style="flex: 1; margin-bottom: 0;">
                                             <label style="font-size: 0.8rem; margin-bottom: 6px; color: var(--text-secondary);">Pages per Visit</label>
-                                            <input type="number" step="0.01" min="0" id="comp-pages-${c.id}" class="form-input" placeholder="e.g. 2.5" value="${c.pages_per_visit !== null ? c.pages_per_visit : ''}" onchange="saveCompetitorTraffic(${c.id})">
+                                            <input type="number" step="0.01" min="0" id="comp-pages-${c.id}" class="form-input" placeholder="e.g. 2.5" value="${c.pages_per_visit !== null ? c.pages_per_visit : ''}" onchange="window.lastChangedElement = this; saveCompetitorTraffic(${c.id})">
                                         </div>
                                     </div>
 
@@ -4421,14 +4461,14 @@ if (!isset($_SESSION['user_id'])) {
                                     <div style="display: flex; gap: 15px;">
                                         <div class="form-group" style="flex: 1; margin-bottom: 0;">
                                             <label style="font-size: 0.8rem; margin-bottom: 6px; color: var(--text-secondary);">Average Monthly Visits</label>
-                                            <input type="number" min="0" id="comp-monthly-visits-${c.id}" class="form-input" placeholder="e.g. 50000" value="${c.avg_monthly_visits !== null ? c.avg_monthly_visits : ''}" onchange="saveCompetitorTraffic(${c.id})">
+                                            <input type="number" min="0" id="comp-monthly-visits-${c.id}" class="form-input" placeholder="e.g. 50000" value="${c.avg_monthly_visits !== null ? c.avg_monthly_visits : ''}" onchange="window.lastChangedElement = this; saveCompetitorTraffic(${c.id})">
                                         </div>
                                         <div class="form-group" style="flex: 1; margin-bottom: 0;">
                                             <label style="font-size: 0.8rem; margin-bottom: 6px; color: var(--text-secondary);">Average Visit Duration</label>
                                             <div style="display: flex; gap: 8px; align-items: center;">
-                                                <input type="number" min="0" id="comp-duration-min-${c.id}" class="form-input" placeholder="Min" value="${c.avg_visit_duration ? Math.floor(c.avg_visit_duration / 60) : ''}" style="flex: 1; text-align: center;" onchange="saveCompetitorTraffic(${c.id})">
+                                                <input type="number" min="0" id="comp-duration-min-${c.id}" class="form-input" placeholder="Min" value="${c.avg_visit_duration ? Math.floor(c.avg_visit_duration / 60) : ''}" style="flex: 1; text-align: center;" onchange="window.lastChangedElement = this; saveCompetitorTraffic(${c.id})">
                                                 <span style="font-size: 0.85rem; color: var(--text-muted);">m</span>
-                                                <input type="number" min="0" max="59" id="comp-duration-sec-${c.id}" class="form-input" placeholder="Sec" value="${c.avg_visit_duration ? (c.avg_visit_duration % 60) : ''}" style="flex: 1; text-align: center;" onchange="saveCompetitorTraffic(${c.id})">
+                                                <input type="number" min="0" max="59" id="comp-duration-sec-${c.id}" class="form-input" placeholder="Sec" value="${c.avg_visit_duration ? (c.avg_visit_duration % 60) : ''}" style="flex: 1; text-align: center;" onchange="window.lastChangedElement = this; saveCompetitorTraffic(${c.id})">
                                                 <span style="font-size: 0.85rem; color: var(--text-muted);">s</span>
                                             </div>
                                         </div>
@@ -4438,12 +4478,12 @@ if (!isset($_SESSION['user_id'])) {
                                     <div style="display: flex; gap: 15px;">
                                         <div class="form-group" style="flex: 1; margin-bottom: 0;">
                                             <label style="font-size: 0.8rem; margin-bottom: 6px; color: var(--text-secondary);">Global Rank</label>
-                                            <input type="number" min="0" id="comp-global-rank-${c.id}" class="form-input" placeholder="e.g. 250000" value="${c.global_ranking !== null ? c.global_ranking : ''}" onchange="saveCompetitorTraffic(${c.id})">
+                                            <input type="number" min="0" id="comp-global-rank-${c.id}" class="form-input" placeholder="e.g. 250000" value="${c.global_ranking !== null ? c.global_ranking : ''}" onchange="window.lastChangedElement = this; saveCompetitorTraffic(${c.id})">
                                         </div>
                                         <div class="form-group" style="flex: 1; margin-bottom: 0;">
                                             <label style="font-size: 0.8rem; margin-bottom: 6px; color: var(--text-secondary);">Country Rank</label>
                                             <div style="display: flex; gap: 8px; align-items: center;">
-                                                <input type="number" min="0" id="comp-country-rank-${c.id}" class="form-input" placeholder="e.g. 45000" value="${c.country_ranking !== null ? c.country_ranking : ''}" onchange="saveCompetitorTraffic(${c.id})" style="flex: 1;">
+                                                <input type="number" min="0" id="comp-country-rank-${c.id}" class="form-input" placeholder="e.g. 45000" value="${c.country_ranking !== null ? c.country_ranking : ''}" onchange="window.lastChangedElement = this; saveCompetitorTraffic(${c.id})" style="flex: 1;">
                                                 <span style="font-size: 0.85rem; color: var(--text-secondary);">in</span>
                                                 <input type="text" class="form-input" value="${escapeHtml(activeAuditCountry)}" style="flex: 1.5; opacity: 0.7;" disabled title="Competitors use the same target country as defined in the website audit Traffic & Performance tab.">
                                             </div>
@@ -4464,7 +4504,7 @@ if (!isset($_SESSION['user_id'])) {
                                         
                                         <!-- Mode Text: Textarea -->
                                         <div id="comp-breakdown-text-container-${c.id}" style="${isScreenshotPath(c.breakdown_by_country) ? 'display: none;' : ''} flex-grow: 1; display: flex; flex-direction: column; height: 100%;">
-                                            <textarea id="comp-breakdown-${c.id}" class="form-input" style="flex-grow: 1; min-height: 180px; resize: vertical; height: 100%;" placeholder="e.g. United States: 40%, United Kingdom: 20%, France: 10%" onchange="saveCompetitorTraffic(${c.id})">${escapeHtml(!isScreenshotPath(c.breakdown_by_country) ? c.breakdown_by_country || '' : '')}</textarea>
+                                            <textarea id="comp-breakdown-${c.id}" class="form-input" style="flex-grow: 1; min-height: 180px; resize: vertical; height: 100%;" placeholder="e.g. United States: 40%, United Kingdom: 20%, France: 10%" onchange="window.lastChangedElement = this; saveCompetitorTraffic(${c.id})">${escapeHtml(!isScreenshotPath(c.breakdown_by_country) ? c.breakdown_by_country || '' : '')}</textarea>
                                         </div>
                                         
                                         <!-- Mode Screenshot: Upload Zone & Preview -->
@@ -4715,9 +4755,11 @@ if (!isset($_SESSION['user_id'])) {
             const comp = competitorAnalysesData.find(c => c.id === competitorId);
             if (!comp) return;
 
-            const header = document.getElementById(`comp-header-${competitorId}`);
-            if (header) {
-                triggerIndicator(header, 'saving');
+            const triggeringElement = window.lastChangedElement;
+            window.lastChangedElement = null; // Clear immediately
+
+            if (triggeringElement) {
+                showSavingIndicatorForElement(triggeringElement);
             }
 
             const bounce = document.getElementById(`comp-bounce-${competitorId}`).value;
@@ -4760,22 +4802,24 @@ if (!isset($_SESSION['user_id'])) {
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    if (header) {
-                        triggerIndicator(header, 'saved');
+                    if (triggeringElement) {
+                        showSavedIndicatorForElement(triggeringElement);
                     }
                     competitorAnalysesData = competitorAnalysesData.map(c => c.id === competitorId ? data.competitor : c);
                     saveAuditMetrics(true); // Save audit silently
                 } else {
-                    if (header) {
-                        const indicator = header.querySelector('.save-indicator');
+                    if (triggeringElement) {
+                        const target = getLabelOrHeaderForElement(triggeringElement);
+                        const indicator = target?.querySelector('.save-indicator');
                         if (indicator) indicator.classList.remove('visible');
                     }
                     showToast('Failed to auto-save competitor data: ' + (data.error || ''), 'error');
                 }
             })
             .catch(err => {
-                if (header) {
-                    const indicator = header.querySelector('.save-indicator');
+                if (triggeringElement) {
+                    const target = getLabelOrHeaderForElement(triggeringElement);
+                    const indicator = target?.querySelector('.save-indicator');
                     if (indicator) indicator.classList.remove('visible');
                 }
                 console.error(err);
@@ -5030,7 +5074,23 @@ if (!isset($_SESSION['user_id'])) {
                     return;
                 }
                 
+                // Show the new value immediately at 0.5 opacity
+                if (field === 'internal_links') {
+                    cell.innerHTML = `<span style="font-weight:600; color:var(--secondary);">${escapeHtml(newValue)}</span>`;
+                } else if (field === 'external_links') {
+                    cell.innerHTML = `<span style="font-weight:600; color:var(--accent);">${escapeHtml(newValue)}</span>`;
+                } else if (field === 'missing_alt_images') {
+                    const count = parseInt(newValue) || 0;
+                    const badgeClass = count > 0 ? 'badge-warning' : 'badge-success';
+                    cell.innerHTML = `<span class="badge ${badgeClass}">${count}</span>`;
+                } else if (field === 'search_terms') {
+                    cell.innerHTML = `<div class="text-truncate-cell" title="${escapeHtml(newValue)}">${formatSearchTermsAsBullets(newValue)}</div>`;
+                } else {
+                    cell.innerHTML = `<div class="text-truncate-cell" title="${escapeHtml(newValue)}">${escapeHtml(newValue)}</div>`;
+                }
+                
                 cell.style.opacity = '0.5';
+                triggerIndicator(cell, 'saving');
                 
                 const formData = new FormData();
                 formData.append('id', id);
@@ -5046,6 +5106,7 @@ if (!isset($_SESSION['user_id'])) {
                 .then(data => {
                     cell.style.opacity = '1';
                     if (data.success) {
+                        window.justSavedCell = { id, field, type };
                         const record = data.record;
                         if (type === 'page') {
                             pagesData = pagesData.map(p => p.id == id ? record : p);
@@ -5064,12 +5125,16 @@ if (!isset($_SESSION['user_id'])) {
                         }
                         saveAuditMetrics(true); // Save audit silently
                     } else {
+                        const ind = cell.querySelector('.save-indicator');
+                        if (ind) ind.classList.remove('visible');
                         alert(data.error || 'Failed to update field.');
                         cell.innerHTML = originalHtml;
                     }
                 })
                 .catch(err => {
                     cell.style.opacity = '1';
+                    const ind = cell.querySelector('.save-indicator');
+                    if (ind) ind.classList.remove('visible');
                     console.error(err);
                     alert('Error updating field.');
                     cell.innerHTML = originalHtml;
@@ -5144,7 +5209,8 @@ if (!isset($_SESSION['user_id'])) {
                 item.onclick = function(e) {
                     console.log('Option clicked:', opt.value);
                     e.stopPropagation();
-                    updateGscStatus(id, opt.value);
+                    updateGscStatus(id, opt.value, badge);
+                    closeActiveDropdown();
                 };
                 menu.appendChild(item);
             });
@@ -5153,9 +5219,14 @@ if (!isset($_SESSION['user_id'])) {
             activeDropdown = menu;
             console.log('Dropdown appended to body');
         }
-
-        function updateGscStatus(id, newVal) {
+ 
+        function updateGscStatus(id, newVal, badgeElement) {
             console.log('updateGscStatus called', { id, newVal });
+            
+            const badge = badgeElement;
+            const cell = badge ? badge.parentNode : null;
+            if (cell) triggerIndicator(cell, 'saving');
+ 
             const formData = new FormData();
             formData.append('id', id);
             formData.append('type', 'page');
@@ -5170,18 +5241,27 @@ if (!isset($_SESSION['user_id'])) {
             .then(data => {
                 console.log('updateGscStatus API response:', data);
                 if (data.success) {
+                    window.justSavedCell = { id, field: 'indexing_gsc', type: 'page' };
                     pagesData = pagesData.map(p => p.id == id ? data.record : p);
                     renderPages();
                 } else {
+                    if (cell) {
+                        const ind = cell.querySelector('.save-indicator');
+                        if (ind) ind.classList.remove('visible');
+                    }
                     alert(data.error || 'Failed to update GSC status.');
                 }
             })
             .catch(err => {
+                if (cell) {
+                    const ind = cell.querySelector('.save-indicator');
+                    if (ind) ind.classList.remove('visible');
+                }
                 console.error(err);
                 alert('Error updating GSC status.');
             });
         }
-
+ 
         // Crawl Errors Selector dropdown
         function showCrawlErrorsSelector(event, badge, id, currentVal) {
             console.log('showCrawlErrorsSelector called', { id, currentVal });
@@ -5215,7 +5295,8 @@ if (!isset($_SESSION['user_id'])) {
                 item.onclick = function(e) {
                     console.log('Option clicked:', opt.value);
                     e.stopPropagation();
-                    updateCrawlErrorsStatus(id, opt.value);
+                    updateCrawlErrorsStatus(id, opt.value, badge);
+                    closeActiveDropdown();
                 };
                 menu.appendChild(item);
             });
@@ -5224,9 +5305,14 @@ if (!isset($_SESSION['user_id'])) {
             activeDropdown = menu;
             console.log('Dropdown appended to body');
         }
-
-        function updateCrawlErrorsStatus(id, newVal) {
+ 
+        function updateCrawlErrorsStatus(id, newVal, badgeElement) {
             console.log('updateCrawlErrorsStatus called', { id, newVal });
+            
+            const badge = badgeElement;
+            const cell = badge ? badge.parentNode : null;
+            if (cell) triggerIndicator(cell, 'saving');
+ 
             const formData = new FormData();
             formData.append('id', id);
             formData.append('type', 'page');
@@ -5241,13 +5327,22 @@ if (!isset($_SESSION['user_id'])) {
             .then(data => {
                 console.log('updateCrawlErrorsStatus API response:', data);
                 if (data.success) {
+                    window.justSavedCell = { id, field: 'crawl_errors', type: 'page' };
                     pagesData = pagesData.map(p => p.id == id ? data.record : p);
                     renderPages();
                 } else {
+                    if (cell) {
+                        const ind = cell.querySelector('.save-indicator');
+                        if (ind) ind.classList.remove('visible');
+                    }
                     alert(data.error || 'Failed to update crawl errors.');
                 }
             })
             .catch(err => {
+                if (cell) {
+                    const ind = cell.querySelector('.save-indicator');
+                    if (ind) ind.classList.remove('visible');
+                }
                 console.error(err);
                 alert('Error updating crawl errors.');
             });
@@ -5613,6 +5708,12 @@ if (!isset($_SESSION['user_id'])) {
         function saveTextViewerContent() {
             if (!textViewerEditingId || !textViewerEditingType || !textViewerEditingField) return;
 
+            const cell = document.querySelector(`td[data-id="${textViewerEditingId}"][data-type="${textViewerEditingType === 'page' ? 'page' : 'competitor_analysis'}"][data-field="${textViewerEditingField}"]`);
+            if (cell) {
+                cell.style.opacity = '0.5';
+                triggerIndicator(cell, 'saving');
+            }
+
             const newValue = document.getElementById('text-viewer-content').value;
 
             const formData = new FormData();
@@ -5628,6 +5729,11 @@ if (!isset($_SESSION['user_id'])) {
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
+                    window.justSavedCell = { 
+                        id: textViewerEditingId, 
+                        field: textViewerEditingField, 
+                        type: textViewerEditingType === 'page' ? 'page' : 'competitor_analysis' 
+                    };
                     closeModal('text-viewer-modal');
                     const record = data.record;
                     if (textViewerEditingType === 'page') {
@@ -5639,8 +5745,21 @@ if (!isset($_SESSION['user_id'])) {
                     }
                     saveAuditMetrics(true); // Save audit silently
                 } else {
+                    if (cell) {
+                        cell.style.opacity = '1';
+                        const ind = cell.querySelector('.save-indicator');
+                        if (ind) ind.classList.remove('visible');
+                    }
                     alert(data.error || 'Failed to update content.');
                 }
+            })
+            .catch(err => {
+                if (cell) {
+                    cell.style.opacity = '1';
+                    const ind = cell.querySelector('.save-indicator');
+                    if (ind) ind.classList.remove('visible');
+                }
+                console.error(err);
             })
             .finally(() => {
                 window.activeSavePromise = null;
