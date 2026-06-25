@@ -3673,13 +3673,20 @@ if (!isset($_SESSION['user_id'])) {
                     card.innerHTML = `
                         <!-- Competitor Domain Header -->
                         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: ${isCollapsed ? 'none' : '1px solid var(--border-glass)'}; padding-bottom: 12px; margin-bottom: ${isCollapsed ? '0' : '20px'};">
-                            <div style="display: flex; align-items: center; gap: 12px;">
-                                <h4 style="font-weight: 700; margin: 0; font-size: 1.15rem; color: var(--primary);">
-                                    <a href="${escapeHtml(c.url)}" target="_blank" class="url-link">${escapeHtml(getDomainFromUrl(c.url))}</a>
-                                </h4>
-                                <button class="btn btn-secondary btn-icon" style="padding: 4px; border-radius: 4px; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center;" onclick="toggleCompetitorTechCollapse(${c.id})" title="${isCollapsed ? 'Expand' : 'Collapse'}">
-                                    <i data-lucide="${isCollapsed ? 'chevron-down' : 'chevron-up'}" style="width: 14px; height: 14px;"></i>
-                                </button>
+                            <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <h4 style="font-weight: 700; margin: 0; font-size: 1.15rem; color: var(--primary);">
+                                        <a href="${escapeHtml(c.url)}" target="_blank" class="url-link">${escapeHtml(getDomainFromUrl(c.url))}</a>
+                                    </h4>
+                                    <button class="btn btn-secondary btn-icon" style="padding: 4px; border-radius: 4px; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center;" onclick="toggleCompetitorTechCollapse(${c.id})" title="${isCollapsed ? 'Expand' : 'Collapse'}">
+                                        <i data-lucide="${isCollapsed ? 'chevron-down' : 'chevron-up'}" style="width: 14px; height: 14px;"></i>
+                                    </button>
+                                </div>
+                                <div style="width: 1px; height: 24px; background: var(--border-glass);"></div>
+                                <div style="text-align: left;">
+                                    <span style="font-weight: 700; font-size: 1.05rem; color: var(--text-primary); display: block;">Core Web Vitals & Speed Scores</span>
+                                    <span style="font-size: 0.75rem; color: var(--text-secondary); display: block; margin-top: 2px;">Checked using competitor URL as representative page</span>
+                                </div>
                             </div>
                             <div style="display: flex; align-items: center; gap: 12px;">
                                 ${cwvAllBtnHTML}
@@ -3690,13 +3697,6 @@ if (!isset($_SESSION['user_id'])) {
                         </div>
 
                         <div style="display: ${isCollapsed ? 'none' : 'block'};">
-                            <!-- Core Web Vitals Header Row (mirroring Website Audit) -->
-                            <div class="flex-space" style="margin-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 16px;">
-                                <div>
-                                    <h3 style="font-weight: 700; font-size: 1.1rem; margin: 0;">Core Web Vitals & Speed Scores</h3>
-                                    <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px;">Checked using competitor URL as representative page</p>
-                                </div>
-                            </div>
 
                             <!-- Two strategies results side-by-side -->
                             <div id="comp-cwv-results-${c.id}" class="cwv-grid" style="display: ${showResults ? 'grid' : 'none'}; grid-template-columns: 1fr 1fr; gap: 24px;">

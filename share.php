@@ -124,7 +124,179 @@
 
             <!-- Subtab: Technical State -->
             <div id="subtab-tech" style="display: none;">
-                 
+                <!-- Web Vitals homepage -->
+                <div class="glass-panel" style="padding: 30px; margin-bottom: 30px; width: 100%;">
+                    <div class="flex-space" style="margin-bottom: 24px; border-bottom: 1px solid var(--border-glass); padding-bottom: 16px;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <h3 style="font-weight: 700; margin: 0; display: flex; align-items: center; gap: 8px;">
+                                <span>Core Web Vitals & Speed Scores</span>
+                                <button class="btn btn-secondary btn-icon" id="audit-cwv-toggle-btn" style="padding: 4px; border-radius: 4px; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center;" onclick="toggleAuditTechCollapse()" title="Collapse">
+                                    <i id="audit-cwv-toggle-icon" data-lucide="chevron-up" style="width: 14px; height: 14px;"></i>
+                                </button>
+                            </h3>
+                            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px; margin-left: 12px; margin-bottom: 0;">Checked using homepage as representative page</p>
+                        </div>
+                    </div>
+
+                    <div id="audit-cwv-body">
+                        <div id="cwv-results" class="cwv-container">
+                            <!-- Desktop -->
+                            <div class="glass-card cwv-strategy-card">
+                                <div class="cwv-header">
+                                    <div class="flex-align" style="gap: 8px;">
+                                        <i data-lucide="monitor" style="width: 20px; height: 20px; color: var(--secondary);"></i>
+                                        <span style="font-weight: 600;">Desktop Strategy</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Row of 5 circular scores -->
+                                <div class="cwv-scores-row">
+                                    <div class="cwv-score-card">
+                                        <div id="cwv-desktop-score" class="cwv-score-circle poor">-</div>
+                                        <div class="cwv-score-label">Perf</div>
+                                        <div class="cwv-tooltip">
+                                            <div class="cwv-tooltip-title">Performance</div>
+                                            <div class="cwv-tooltip-text">Measures page load speed, responsiveness, and visual stability.</div>
+                                        </div>
+                                    </div>
+                                    <div class="cwv-score-card">
+                                        <div id="cwv-desktop-accessibility" class="cwv-score-circle poor">-</div>
+                                        <div class="cwv-score-label">A11y</div>
+                                        <div class="cwv-tooltip">
+                                            <div class="cwv-tooltip-title">Accessibility</div>
+                                            <div class="cwv-tooltip-text">Measures how easy the website is to use for people with disabilities.</div>
+                                        </div>
+                                    </div>
+                                    <div class="cwv-score-card">
+                                        <div id="cwv-desktop-best-practices" class="cwv-score-circle poor">-</div>
+                                        <div class="cwv-score-label">Best</div>
+                                        <div class="cwv-tooltip">
+                                            <div class="cwv-tooltip-title">Best Practices</div>
+                                            <div class="cwv-tooltip-text">Checks if the website follows web standards and security best practices.</div>
+                                        </div>
+                                    </div>
+                                    <div class="cwv-score-card">
+                                        <div id="cwv-desktop-seo" class="cwv-score-circle poor">-</div>
+                                        <div class="cwv-score-label">SEO</div>
+                                        <div class="cwv-tooltip">
+                                            <div class="cwv-tooltip-title">Search Engine Optimization</div>
+                                            <div class="cwv-tooltip-text">Checks how well search engines can crawl, index, and understand the page.</div>
+                                        </div>
+                                    </div>
+                                    <div class="cwv-score-card">
+                                        <div id="cwv-desktop-agentic-browsing" class="cwv-score-circle poor">-</div>
+                                        <div class="cwv-score-label">Agentic</div>
+                                        <div class="cwv-tooltip">
+                                            <div class="cwv-tooltip-title">Agentic Browsing</div>
+                                            <div class="cwv-tooltip-text">Measures suitability for AI agents: checks visual stability (CLS &le; 0.1), Accessibility (&ge; 80), and SEO (&ge; 90).</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="cwv-metrics-list">
+                                    <div class="cwv-metric-item">
+                                        <div class="cwv-metric-lbl">First Contentful Paint</div>
+                                        <div id="cwv-desktop-fcp" class="cwv-metric-val">-</div>
+                                    </div>
+                                    <div class="cwv-metric-item">
+                                        <div class="cwv-metric-lbl">Largest Contentful Paint</div>
+                                        <div id="cwv-desktop-lcp" class="cwv-metric-val">-</div>
+                                    </div>
+                                    <div class="cwv-metric-item">
+                                        <div class="cwv-metric-lbl">Total Blocking Time</div>
+                                        <div id="cwv-desktop-tbt" class="cwv-metric-val">-</div>
+                                    </div>
+                                    <div class="cwv-metric-item">
+                                        <div class="cwv-metric-lbl">Cumulative Layout Shift</div>
+                                        <div id="cwv-desktop-cls" class="cwv-metric-val">-</div>
+                                    </div>
+                                    <div class="cwv-metric-item" style="grid-column: span 2;">
+                                        <div class="cwv-metric-lbl">Speed Index</div>
+                                        <div id="cwv-desktop-si" class="cwv-metric-val">-</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Mobile -->
+                            <div class="glass-card cwv-strategy-card">
+                                <div class="cwv-header">
+                                    <div class="flex-align" style="gap: 8px;">
+                                        <i data-lucide="smartphone" style="width: 20px; height: 20px; color: var(--accent);"></i>
+                                        <span style="font-weight: 600;">Mobile Strategy</span>
+                                    </div>
+                                </div>
+
+                                <!-- Row of 5 circular scores -->
+                                <div class="cwv-scores-row">
+                                    <div class="cwv-score-card">
+                                        <div id="cwv-mobile-score" class="cwv-score-circle poor">-</div>
+                                        <div class="cwv-score-label">Perf</div>
+                                        <div class="cwv-tooltip">
+                                            <div class="cwv-tooltip-title">Performance</div>
+                                            <div class="cwv-tooltip-text">Measures page load speed, responsiveness, and visual stability.</div>
+                                        </div>
+                                    </div>
+                                    <div class="cwv-score-card">
+                                        <div id="cwv-mobile-accessibility" class="cwv-score-circle poor">-</div>
+                                        <div class="cwv-score-label">A11y</div>
+                                        <div class="cwv-tooltip">
+                                            <div class="cwv-tooltip-title">Accessibility</div>
+                                            <div class="cwv-tooltip-text">Measures how easy the website is to use for people with disabilities.</div>
+                                        </div>
+                                    </div>
+                                    <div class="cwv-score-card">
+                                        <div id="cwv-mobile-best-practices" class="cwv-score-circle poor">-</div>
+                                        <div class="cwv-score-label">Best</div>
+                                        <div class="cwv-tooltip">
+                                            <div class="cwv-tooltip-title">Best Practices</div>
+                                            <div class="cwv-tooltip-text">Checks if the website follows web standards and security best practices.</div>
+                                        </div>
+                                    </div>
+                                    <div class="cwv-score-card">
+                                        <div id="cwv-mobile-seo" class="cwv-score-circle poor">-</div>
+                                        <div class="cwv-score-label">SEO</div>
+                                        <div class="cwv-tooltip">
+                                            <div class="cwv-tooltip-title">Search Engine Optimization</div>
+                                            <div class="cwv-tooltip-text">Checks how well search engines can crawl, index, and understand the page.</div>
+                                        </div>
+                                    </div>
+                                    <div class="cwv-score-card">
+                                        <div id="cwv-mobile-agentic-browsing" class="cwv-score-circle poor">-</div>
+                                        <div class="cwv-score-label">Agentic</div>
+                                        <div class="cwv-tooltip">
+                                            <div class="cwv-tooltip-title">Agentic Browsing</div>
+                                            <div class="cwv-tooltip-text">Measures suitability for AI agents: checks visual stability (CLS &le; 0.1), Accessibility (&ge; 80), and SEO (&ge; 90).</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="cwv-metrics-list">
+                                    <div class="cwv-metric-item">
+                                        <div class="cwv-metric-lbl">First Contentful Paint</div>
+                                        <div id="cwv-mobile-fcp" class="cwv-metric-val">-</div>
+                                    </div>
+                                    <div class="cwv-metric-item">
+                                        <div class="cwv-metric-lbl">Largest Contentful Paint</div>
+                                        <div id="cwv-mobile-lcp" class="cwv-metric-val">-</div>
+                                    </div>
+                                    <div class="cwv-metric-item">
+                                        <div class="cwv-metric-lbl">Total Blocking Time</div>
+                                        <div id="cwv-mobile-tbt" class="cwv-metric-val">-</div>
+                                    </div>
+                                    <div class="cwv-metric-item">
+                                        <div class="cwv-metric-lbl">Cumulative Layout Shift</div>
+                                        <div id="cwv-mobile-cls" class="cwv-metric-val">-</div>
+                                    </div>
+                                    <div class="cwv-metric-item" style="grid-column: span 2;">
+                                        <div class="cwv-metric-lbl">Speed Index</div>
+                                        <div id="cwv-mobile-si" class="cwv-metric-val">-</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                  <div style="display: grid; grid-template-columns: minmax(auto, 676px) 350px 350px; gap: 0 24px; width: 100%;">
                      
                      <!-- Row 1, Column 1: Header -->
@@ -163,168 +335,6 @@
                      </div>
  
                  </div>
-
-                <!-- Web Vitals homepage -->
-                <div class="glass-panel" style="padding: 30px; width: 100%;">
-                    <h3 style="font-weight: 700; margin-bottom: 8px;">Homepage Performance & Core Web Vitals</h3>
-                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 24px; border-bottom: 1px solid var(--border-glass); padding-bottom: 16px;">Verified using public Google Lighthouse API analysis</p>
-
-                    <div id="cwv-results" class="cwv-container">
-                        <!-- Desktop -->
-                        <div class="glass-card cwv-strategy-card">
-                            <div class="cwv-header">
-                                <div class="flex-align" style="gap: 8px;">
-                                    <i data-lucide="monitor" style="width: 20px; height: 20px; color: var(--secondary);"></i>
-                                    <span style="font-weight: 600;">Desktop Strategy</span>
-                                </div>
-                            </div>
-                            
-                            <!-- Row of 5 circular scores -->
-                            <div class="cwv-scores-row">
-                                <div class="cwv-score-card">
-                                    <div id="cwv-desktop-score" class="cwv-score-circle poor">-</div>
-                                    <div class="cwv-score-label">Perf</div>
-                                    <div class="cwv-tooltip">
-                                        <div class="cwv-tooltip-title">Performance</div>
-                                        <div class="cwv-tooltip-text">Measures page load speed, responsiveness, and visual stability.</div>
-                                    </div>
-                                </div>
-                                <div class="cwv-score-card">
-                                    <div id="cwv-desktop-accessibility" class="cwv-score-circle poor">-</div>
-                                    <div class="cwv-score-label">A11y</div>
-                                    <div class="cwv-tooltip">
-                                        <div class="cwv-tooltip-title">Accessibility</div>
-                                        <div class="cwv-tooltip-text">Measures how easy the website is to use for people with disabilities.</div>
-                                    </div>
-                                </div>
-                                <div class="cwv-score-card">
-                                    <div id="cwv-desktop-best-practices" class="cwv-score-circle poor">-</div>
-                                    <div class="cwv-score-label">Best</div>
-                                    <div class="cwv-tooltip">
-                                        <div class="cwv-tooltip-title">Best Practices</div>
-                                        <div class="cwv-tooltip-text">Checks if the website follows web standards and security best practices.</div>
-                                    </div>
-                                </div>
-                                <div class="cwv-score-card">
-                                    <div id="cwv-desktop-seo" class="cwv-score-circle poor">-</div>
-                                    <div class="cwv-score-label">SEO</div>
-                                    <div class="cwv-tooltip">
-                                        <div class="cwv-tooltip-title">Search Engine Optimization</div>
-                                        <div class="cwv-tooltip-text">Checks how well search engines can crawl, index, and understand the page.</div>
-                                    </div>
-                                </div>
-                                <div class="cwv-score-card">
-                                    <div id="cwv-desktop-agentic-browsing" class="cwv-score-circle poor">-</div>
-                                    <div class="cwv-score-label">Agentic</div>
-                                    <div class="cwv-tooltip">
-                                        <div class="cwv-tooltip-title">Agentic Browsing</div>
-                                        <div class="cwv-tooltip-text">Measures suitability for AI agents: checks visual stability (CLS &le; 0.1), Accessibility (&ge; 80), and SEO (&ge; 90).</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="cwv-metrics-list">
-                                <div class="cwv-metric-item">
-                                    <div class="cwv-metric-lbl">First Contentful Paint</div>
-                                    <div id="cwv-desktop-fcp" class="cwv-metric-val">-</div>
-                                </div>
-                                <div class="cwv-metric-item">
-                                    <div class="cwv-metric-lbl">Largest Contentful Paint</div>
-                                    <div id="cwv-desktop-lcp" class="cwv-metric-val">-</div>
-                                </div>
-                                <div class="cwv-metric-item">
-                                    <div class="cwv-metric-lbl">Total Blocking Time</div>
-                                    <div id="cwv-desktop-tbt" class="cwv-metric-val">-</div>
-                                </div>
-                                <div class="cwv-metric-item">
-                                    <div class="cwv-metric-lbl">Cumulative Layout Shift</div>
-                                    <div id="cwv-desktop-cls" class="cwv-metric-val">-</div>
-                                </div>
-                                <div class="cwv-metric-item" style="grid-column: span 2;">
-                                    <div class="cwv-metric-lbl">Speed Index</div>
-                                    <div id="cwv-desktop-si" class="cwv-metric-val">-</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Mobile -->
-                        <div class="glass-card cwv-strategy-card">
-                            <div class="cwv-header">
-                                <div class="flex-align" style="gap: 8px;">
-                                    <i data-lucide="smartphone" style="width: 20px; height: 20px; color: var(--accent);"></i>
-                                    <span style="font-weight: 600;">Mobile Strategy</span>
-                                </div>
-                            </div>
-
-                            <!-- Row of 5 circular scores -->
-                            <div class="cwv-scores-row">
-                                <div class="cwv-score-card">
-                                    <div id="cwv-mobile-score" class="cwv-score-circle poor">-</div>
-                                    <div class="cwv-score-label">Perf</div>
-                                    <div class="cwv-tooltip">
-                                        <div class="cwv-tooltip-title">Performance</div>
-                                        <div class="cwv-tooltip-text">Measures page load speed, responsiveness, and visual stability.</div>
-                                    </div>
-                                </div>
-                                <div class="cwv-score-card">
-                                    <div id="cwv-mobile-accessibility" class="cwv-score-circle poor">-</div>
-                                    <div class="cwv-score-label">A11y</div>
-                                    <div class="cwv-tooltip">
-                                        <div class="cwv-tooltip-title">Accessibility</div>
-                                        <div class="cwv-tooltip-text">Measures how easy the website is to use for people with disabilities.</div>
-                                    </div>
-                                </div>
-                                <div class="cwv-score-card">
-                                    <div id="cwv-mobile-best-practices" class="cwv-score-circle poor">-</div>
-                                    <div class="cwv-score-label">Best</div>
-                                    <div class="cwv-tooltip">
-                                        <div class="cwv-tooltip-title">Best Practices</div>
-                                        <div class="cwv-tooltip-text">Checks if the website follows web standards and security best practices.</div>
-                                    </div>
-                                </div>
-                                <div class="cwv-score-card">
-                                    <div id="cwv-mobile-seo" class="cwv-score-circle poor">-</div>
-                                    <div class="cwv-score-label">SEO</div>
-                                    <div class="cwv-tooltip">
-                                        <div class="cwv-tooltip-title">Search Engine Optimization</div>
-                                        <div class="cwv-tooltip-text">Checks how well search engines can crawl, index, and understand the page.</div>
-                                    </div>
-                                </div>
-                                <div class="cwv-score-card">
-                                    <div id="cwv-mobile-agentic-browsing" class="cwv-score-circle poor">-</div>
-                                    <div class="cwv-score-label">Agentic</div>
-                                    <div class="cwv-tooltip">
-                                        <div class="cwv-tooltip-title">Agentic Browsing</div>
-                                        <div class="cwv-tooltip-text">Measures suitability for AI agents: checks visual stability (CLS &le; 0.1), Accessibility (&ge; 80), and SEO (&ge; 90).</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="cwv-metrics-list">
-                                <div class="cwv-metric-item">
-                                    <div class="cwv-metric-lbl">First Contentful Paint</div>
-                                    <div id="cwv-mobile-fcp" class="cwv-metric-val">-</div>
-                                </div>
-                                <div class="cwv-metric-item">
-                                    <div class="cwv-metric-lbl">Largest Contentful Paint</div>
-                                    <div id="cwv-mobile-lcp" class="cwv-metric-val">-</div>
-                                </div>
-                                <div class="cwv-metric-item">
-                                    <div class="cwv-metric-lbl">Total Blocking Time</div>
-                                    <div id="cwv-mobile-tbt" class="cwv-metric-val">-</div>
-                                </div>
-                                <div class="cwv-metric-item">
-                                    <div class="cwv-metric-lbl">Cumulative Layout Shift</div>
-                                    <div id="cwv-mobile-cls" class="cwv-metric-val">-</div>
-                                </div>
-                                <div class="cwv-metric-item" style="grid-column: span 2;">
-                                    <div class="cwv-metric-lbl">Speed Index</div>
-                                    <div id="cwv-mobile-si" class="cwv-metric-val">-</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
 
             <!-- Subtab: Traffic Analytics -->
@@ -520,6 +530,7 @@
         let searchTermsData = [];
         let competitorsData = [];
         let competitorAnalysesData = [];
+        let collapsedAuditTech = false;
 
         let isRouting = false;
 
@@ -673,6 +684,9 @@
                     renderCompetitorAnalyses();
 
                     // Render Speed Metrics
+                    collapsedAuditTech = (!data.core_web_vitals || (data.core_web_vitals.desktop_score === null && data.core_web_vitals.mobile_score === null));
+                    updateAuditTechCollapseUI();
+
                     if (data.core_web_vitals) {
                         const cwt = data.core_web_vitals;
                         
@@ -725,6 +739,30 @@
 
                     lucide.createIcons();
                 });
+        }
+
+        function toggleAuditTechCollapse() {
+            collapsedAuditTech = !collapsedAuditTech;
+            updateAuditTechCollapseUI();
+        }
+
+        function updateAuditTechCollapseUI() {
+            const body = document.getElementById('audit-cwv-body');
+            const icon = document.getElementById('audit-cwv-toggle-icon');
+            const btn = document.getElementById('audit-cwv-toggle-btn');
+            if (!body) return;
+            if (collapsedAuditTech) {
+                body.style.display = 'none';
+                if (icon) icon.setAttribute('data-lucide', 'chevron-down');
+                if (btn) btn.title = 'Expand';
+            } else {
+                body.style.display = 'block';
+                if (icon) icon.setAttribute('data-lucide', 'chevron-up');
+                if (btn) btn.title = 'Collapse';
+            }
+            if (typeof lucide !== 'undefined' && lucide.createIcons) {
+                lucide.createIcons();
+            }
         }
 
         function getCwvScoreClass(score) {
