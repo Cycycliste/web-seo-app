@@ -1253,6 +1253,37 @@ textarea.inline-editor {
     line-height: 1.4;
 }
 
+/* Table Column Resizing */
+.table-custom th {
+    position: relative;
+}
+
+.table-resizer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 6px;
+    height: 100%;
+    cursor: col-resize;
+    user-select: none;
+    z-index: 10;
+    border-right: 2px solid transparent;
+    transition: border-color 0.2s ease;
+}
+
+.table-resizer:hover,
+.table-resizer.is-resizing {
+    border-right: 2px solid var(--primary);
+}
+
+/* Global resizing feedback style */
+body.is-resizing-table,
+body.is-resizing-table * {
+    cursor: col-resize !important;
+    user-select: none !important;
+}
+
+
 
 
 

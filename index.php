@@ -583,7 +583,7 @@ if (!isset($_SESSION['user_id'])) {
                                 
                                 <!-- Row 2, Column 1: Table Wrapper -->
                                 <div class="table-wrapper" style="grid-column: 1; grid-row: 2; margin-bottom: 30px;">
-                                    <table class="table-custom">
+                                    <table class="table-custom" id="tech-pages-table">
                                         <thead>
                                             <tr>
                                                 <th style="width: 50%;">URL</th>
@@ -1336,6 +1336,11 @@ if (!isset($_SESSION['user_id'])) {
             initDragAndDrop();
             initHeadersModalHandlers();
             lucide.createIcons();
+
+            // Initialize column resizing on tables
+            initTableResizing('seo-pages-table');
+            initTableResizing('tech-pages-table');
+            initTableResizing('competitor-analysis-table');
 
             // Listen for Ctrl+S or F5 keyboard shortcuts to save the audit and refresh
             window.addEventListener('keydown', (e) => {
@@ -2257,8 +2262,64 @@ if (!isset($_SESSION['user_id'])) {
                         // Trigger preview
                         const eventObj = { target: { files: files } };
                         handleFileChange(eventObj, type);
-                    }
                 }, false);
+            });
+        }
+
+        function initTableResizing(tableId) {
+            const table = document.getElementById(tableId);
+            if (!table) return;
+
+            const headers = table.querySelectorAll('thead th');
+            headers.forEach((th) => {
+                th.style.position = 'relative';
+
+                const resizer = document.createElement('div');
+                resizer.className = 'table-resizer';
+                th.appendChild(resizer);
+
+                let startX, startWidth;
+                let totalTableWidth = 0;
+
+                resizer.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    startX = e.clientX;
+                    startWidth = th.getBoundingClientRect().width;
+
+                    resizer.classList.add('is-resizing');
+
+                    const allHeaders = table.querySelectorAll('thead th');
+                    totalTableWidth = 0;
+                    allHeaders.forEach((h) => {
+                        const w = h.getBoundingClientRect().width;
+                        h.style.width = w + 'px';
+                        totalTableWidth += w;
+                    });
+
+                    table.style.width = totalTableWidth + 'px';
+                    table.style.tableLayout = 'fixed';
+
+                    document.body.classList.add('is-resizing-table');
+
+                    const onMouseMove = (moveEvent) => {
+                        const deltaX = moveEvent.clientX - startX;
+                        const newWidth = Math.max(50, startWidth + deltaX);
+                        const widthDiff = newWidth - startWidth;
+                        
+                        th.style.width = newWidth + 'px';
+                        table.style.width = (totalTableWidth + widthDiff) + 'px';
+                    };
+
+                    const onMouseUp = () => {
+                        document.removeEventListener('mousemove', onMouseMove);
+                        document.removeEventListener('mouseup', onMouseUp);
+                        resizer.classList.remove('is-resizing');
+                        document.body.classList.remove('is-resizing-table');
+                    };
+
+                    document.addEventListener('mousemove', onMouseMove);
+                    document.addEventListener('mouseup', onMouseUp);
+                });
             });
         }
 
