@@ -387,11 +387,11 @@
                         </div>
 
                         <!-- Right Column: Country Breakdown -->
-                        <div style="display: flex; flex-direction: column;">
+                        <div style="display: flex; flex-direction: column; height: 100%;">
                             <div class="form-group" style="height: 100%; display: flex; flex-direction: column; margin-bottom: 0;">
                                 <label style="margin-bottom: 8px;">Country Breakdown</label>
-                                <div id="share-breakdown-country-container" style="flex-grow: 1; display: flex; flex-direction: column;">
-                                    <textarea id="perf-breakdown-country" class="form-input" style="opacity:0.8; flex-grow: 1; min-height: 180px; resize: none;" readonly></textarea>
+                                <div id="share-breakdown-country-container" style="flex-grow: 1; display: flex; flex-direction: column; height: 100%;">
+                                    <textarea id="perf-breakdown-country" class="form-input" style="opacity:0.8; flex-grow: 1; min-height: 180px; resize: none; height: 100%;" readonly></textarea>
                                 </div>
                             </div>
                         </div>
@@ -645,9 +645,9 @@
                     const breakdownVal = data.audit.breakdown_by_country || '';
                     const breakdownContainer = document.getElementById('share-breakdown-country-container');
                     if (isScreenshotPath(breakdownVal)) {
-                        breakdownContainer.innerHTML = `<img src="${breakdownVal}" style="width: 100%; max-height: 250px; object-fit: contain; border-radius: var(--radius-sm); border: 1px solid var(--border-glass);">`;
+                        breakdownContainer.innerHTML = `<img src="${breakdownVal}" style="width: 100%; max-height: 400px; object-fit: contain; border-radius: var(--radius-sm); border: 1px solid var(--border-glass);">`;
                     } else {
-                        breakdownContainer.innerHTML = `<textarea id="perf-breakdown-country" class="form-input" style="opacity:0.8; flex-grow: 1; min-height: 180px; resize: none;" readonly></textarea>`;
+                        breakdownContainer.innerHTML = `<textarea id="perf-breakdown-country" class="form-input" style="opacity:0.8; flex-grow: 1; min-height: 180px; resize: none; height: 100%;" readonly></textarea>`;
                         document.getElementById('perf-breakdown-country').value = breakdownVal || 'No country breakdown registered.';
                     }
                     
@@ -656,7 +656,7 @@
                     if (data.audit.main_channels) {
                         mainChannelsBox.innerHTML = `<img src="${data.audit.main_channels}" style="width: 100%; max-height: 400px; object-fit: contain; border-radius: var(--radius-md); border: 1px solid var(--border-glass);">`;
                     } else {
-                        mainChannelsBox.innerHTML = `<div style="min-height: 220px; display: flex; align-items: center; justify-content: center; text-align: center; color: var(--text-muted); background: rgba(0,0,0,0.15); border-radius: var(--radius-sm); border: 1px dashed var(--border-glass); font-size: 0.85rem; padding: 24px;">No Main Channels screenshot uploaded.</div>`;
+                        mainChannelsBox.innerHTML = `<div style="min-height: 280px; display: flex; align-items: center; justify-content: center; text-align: center; color: var(--text-muted); background: rgba(0,0,0,0.15); border-radius: var(--radius-sm); border: 1px dashed var(--border-glass); font-size: 0.85rem; padding: 24px;">No Main Channels screenshot uploaded.</div>`;
                     }
 
                     // Render Traffic Trends screenshot
@@ -664,7 +664,7 @@
                     if (data.audit.traffic_trends) {
                         trafficTrendsBox.innerHTML = `<img src="${data.audit.traffic_trends}" style="width: 100%; max-height: 400px; object-fit: contain; border-radius: var(--radius-md); border: 1px solid var(--border-glass);">`;
                     } else {
-                        trafficTrendsBox.innerHTML = `<div style="min-height: 220px; display: flex; align-items: center; justify-content: center; text-align: center; color: var(--text-muted); background: rgba(0,0,0,0.15); border-radius: var(--radius-sm); border: 1px dashed var(--border-glass); font-size: 0.85rem; padding: 24px;">No Traffic Trends screenshot uploaded.</div>`;
+                        trafficTrendsBox.innerHTML = `<div style="min-height: 280px; display: flex; align-items: center; justify-content: center; text-align: center; color: var(--text-muted); background: rgba(0,0,0,0.15); border-radius: var(--radius-sm); border: 1px dashed var(--border-glass); font-size: 0.85rem; padding: 24px;">No Traffic Trends screenshot uploaded.</div>`;
                     }
 
                     document.getElementById('perf-global-ranking').value = data.audit.global_ranking !== null ? data.audit.global_ranking.toLocaleString() : '-';

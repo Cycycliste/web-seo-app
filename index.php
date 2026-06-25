@@ -675,9 +675,9 @@ if (!isset($_SESSION['user_id'])) {
                                     </div>
 
                                     <!-- Right Column: Breakdown By Country -->
-                                    <div style="display: flex; flex-direction: column;">
+                                    <div style="display: flex; flex-direction: column; height: 100%;">
                                         <div class="form-group" style="height: 100%; display: flex; flex-direction: column; margin-bottom: 0;">
-                                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                            <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 8px;">
                                                 <label style="margin-bottom: 0;">Breakdown By Country</label>
                                                 <div class="mode-tabs" style="display: flex; gap: 4px;">
                                                     <button type="button" class="btn btn-secondary btn-sm" id="btn-breakdown-mode-text" onclick="setBreakdownMode('text')" style="font-size: 0.75rem; padding: 2px 8px; background: rgba(139, 92, 246, 0.15); border-color: rgba(139, 92, 246, 0.3); color: var(--primary);">Text</button>
@@ -686,20 +686,20 @@ if (!isset($_SESSION['user_id'])) {
                                             </div>
                                             
                                             <!-- Mode Text: Textarea -->
-                                            <div id="breakdown-text-container" style="flex-grow: 1; display: flex; flex-direction: column;">
-                                                <textarea id="perf-breakdown-country" class="form-input" style="flex-grow: 1; min-height: 180px; resize: vertical;" placeholder="e.g. USA: 40%, France: 20%, Germany: 15%..." onchange="saveAuditMetrics(true)"></textarea>
+                                            <div id="breakdown-text-container" style="flex-grow: 1; display: flex; flex-direction: column; height: 100%;">
+                                                <textarea id="perf-breakdown-country" class="form-input" style="flex-grow: 1; min-height: 180px; resize: vertical; height: 100%;" placeholder="e.g. USA: 40%, France: 20%, Germany: 15%..." onchange="saveAuditMetrics(true)"></textarea>
                                             </div>
                                             
                                             <!-- Mode Screenshot: Upload Zone & Preview -->
-                                            <div id="breakdown-screenshot-container" style="display: none; flex-grow: 1; flex-direction: column;">
-                                                <div class="screenshot-upload-zone" id="zone-breakdown-country" onclick="triggerFileInput('perf-breakdown-country-file')" style="min-height: 180px; flex-grow: 1;">
+                                            <div id="breakdown-screenshot-container" style="display: none; flex-grow: 1; flex-direction: column; height: 100%;">
+                                                <div class="screenshot-upload-zone" id="zone-breakdown-country" onclick="triggerFileInput('perf-breakdown-country-file')" style="min-height: 180px; flex-grow: 1; height: 100%;">
                                                     <input type="file" id="perf-breakdown-country-file" accept="image/*" style="display: none;" onchange="handleFileChange(event, 'breakdown-country')">
                                                     <div class="upload-placeholder" id="placeholder-breakdown-country">
                                                         <i data-lucide="image" style="width: 28px; height: 28px; color: var(--text-muted); margin-bottom: 8px;"></i>
                                                         <p style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 500;">Click, drag & drop, or paste (Ctrl+V) breakdown screenshot</p>
                                                     </div>
                                                     <div class="upload-preview" id="preview-breakdown-country" style="display: none; position: relative; width: 100%;">
-                                                        <img src="" id="img-breakdown-country" style="width: 100%; max-height: 350px; object-fit: contain; border-radius: var(--radius-sm);">
+                                                        <img src="" id="img-breakdown-country" style="width: 100%; max-height: 400px; object-fit: contain; border-radius: var(--radius-sm);">
                                                         <button type="button" class="btn-delete-screenshot" onclick="removeScreenshot(event, 'breakdown-country')">
                                                             <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
                                                             <span>Remove</span>
@@ -711,14 +711,14 @@ if (!isset($_SESSION['user_id'])) {
                                     </div>
                                     <div class="form-group">
                                         <label>Main Channels</label>
-                                        <div class="screenshot-upload-zone" id="zone-main-channels" onclick="triggerFileInput('perf-main-channels-file')" style="min-height: 220px;">
+                                        <div class="screenshot-upload-zone" id="zone-main-channels" onclick="triggerFileInput('perf-main-channels-file')" style="min-height: 280px;">
                                             <input type="file" id="perf-main-channels-file" accept="image/*" style="display: none;" onchange="handleFileChange(event, 'main-channels')">
                                             <div class="upload-placeholder" id="placeholder-main-channels">
                                                 <i data-lucide="image" style="width: 28px; height: 28px; color: var(--text-muted); margin-bottom: 8px;"></i>
                                                 <p style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 500;">Click or drag & drop to upload Main Channels screenshot</p>
                                             </div>
                                             <div class="upload-preview" id="preview-main-channels" style="display: none; position: relative;">
-                                                <img src="" id="img-main-channels" style="width: 100%; max-height: 350px; object-fit: contain; border-radius: var(--radius-sm);">
+                                                <img src="" id="img-main-channels" style="width: 100%; max-height: 400px; object-fit: contain; border-radius: var(--radius-sm);">
                                                 <button type="button" class="btn-delete-screenshot" onclick="removeScreenshot(event, 'main-channels')">
                                                     <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
                                                     <span>Remove</span>
@@ -728,14 +728,14 @@ if (!isset($_SESSION['user_id'])) {
                                     </div>
                                     <div class="form-group">
                                         <label>Traffic Trends (Last 3-6 Months)</label>
-                                        <div class="screenshot-upload-zone" id="zone-traffic-trends" onclick="triggerFileInput('perf-traffic-trends-file')" style="min-height: 220px;">
+                                        <div class="screenshot-upload-zone" id="zone-traffic-trends" onclick="triggerFileInput('perf-traffic-trends-file')" style="min-height: 280px;">
                                             <input type="file" id="perf-traffic-trends-file" accept="image/*" style="display: none;" onchange="handleFileChange(event, 'traffic-trends')">
                                             <div class="upload-placeholder" id="placeholder-traffic-trends">
                                                 <i data-lucide="image" style="width: 28px; height: 28px; color: var(--text-muted); margin-bottom: 8px;"></i>
                                                 <p style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 500;">Click or drag & drop to upload Traffic Trends screenshot</p>
                                             </div>
                                             <div class="upload-preview" id="preview-traffic-trends" style="display: none; position: relative;">
-                                                <img src="" id="img-traffic-trends" style="width: 100%; max-height: 350px; object-fit: contain; border-radius: var(--radius-sm);">
+                                                <img src="" id="img-traffic-trends" style="width: 100%; max-height: 400px; object-fit: contain; border-radius: var(--radius-sm);">
                                                 <button type="button" class="btn-delete-screenshot" onclick="removeScreenshot(event, 'traffic-trends')">
                                                     <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
                                                     <span>Remove</span>
@@ -4204,7 +4204,7 @@ if (!isset($_SESSION['user_id'])) {
                             </div>
                             
                             <div class="form-group" style="margin-bottom: 0;">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 8px;">
                                     <label style="font-size: 0.8rem; margin-bottom: 0; color: var(--text-secondary);">Breakdown by Country</label>
                                     <div class="mode-tabs" style="display: flex; gap: 4px;">
                                         <button type="button" class="btn btn-secondary btn-sm" id="btn-comp-breakdown-mode-text-${c.id}" onclick="setCompBreakdownMode(${c.id}, 'text')" style="font-size: 0.7rem; padding: 1px 6px; ${!isScreenshotPath(c.breakdown_by_country) ? 'background: rgba(139, 92, 246, 0.15); border-color: rgba(139, 92, 246, 0.3); color: var(--primary);' : ''}">Text</button>
