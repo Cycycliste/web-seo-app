@@ -622,46 +622,64 @@ if (!isset($_SESSION['user_id'])) {
                                 <h3 style="font-weight: 700; margin-bottom: 24px; border-bottom: 1px solid var(--border-glass); padding-bottom: 12px;">Website Traffic & Performance Metrics</h3>
                                 
                                 <div class="grid-form">
-                                    <div class="form-group">
-                                        <label for="perf-bounce-rate">Bounce Rate (%)</label>
-                                        <input type="number" step="0.01" min="0" max="100" id="perf-bounce-rate" class="form-input" placeholder="e.g. 45.5" onchange="saveAuditMetrics(true)">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="perf-pages-per-visit">Pages Per Visit</label>
-                                        <input type="number" step="0.01" min="0" id="perf-pages-per-visit" class="form-input" placeholder="e.g. 3.2" onchange="saveAuditMetrics(true)">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="perf-avg-monthly-visits">Average Monthly Visits</label>
-                                        <input type="number" min="0" id="perf-avg-monthly-visits" class="form-input" placeholder="e.g. 50000" onchange="saveAuditMetrics(true)">
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Average Visit Duration</label>
-                                        <div style="display: flex; gap: 8px;">
-                                            <div style="flex: 1; display: flex; align-items: center; gap: 4px;">
-                                                <input type="number" min="0" id="perf-avg-visit-duration-min" class="form-input" placeholder="Min" style="width: 100%;" onchange="saveAuditMetrics(true)">
-                                                <span style="font-size: 0.85rem; color: var(--text-secondary);">m</span>
+                                    <!-- Left Column: Metrics -->
+                                    <div style="display: flex; flex-direction: column; gap: 20px;">
+                                        <!-- Row 1: Bounce Rate & Pages Per Visit -->
+                                        <div style="display: flex; gap: 15px;">
+                                            <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                                                <label for="perf-bounce-rate">Bounce Rate (%)</label>
+                                                <input type="number" step="0.01" min="0" max="100" id="perf-bounce-rate" class="form-input" placeholder="e.g. 45.5" onchange="saveAuditMetrics(true)">
                                             </div>
-                                            <div style="flex: 1; display: flex; align-items: center; gap: 4px;">
-                                                <input type="number" min="0" max="59" id="perf-avg-visit-duration-sec" class="form-input" placeholder="Sec" style="width: 100%;" onchange="saveAuditMetrics(true)">
-                                                <span style="font-size: 0.85rem; color: var(--text-secondary);">s</span>
+                                            <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                                                <label for="perf-pages-per-visit">Pages Per Visit</label>
+                                                <input type="number" step="0.01" min="0" id="perf-pages-per-visit" class="form-input" placeholder="e.g. 3.2" onchange="saveAuditMetrics(true)">
+                                            </div>
+                                        </div>
+
+                                        <!-- Row 2: Average Monthly Visits & Average Visit Duration -->
+                                        <div style="display: flex; gap: 15px;">
+                                            <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                                                <label for="perf-avg-monthly-visits">Average Monthly Visits</label>
+                                                <input type="number" min="0" id="perf-avg-monthly-visits" class="form-input" placeholder="e.g. 50000" onchange="saveAuditMetrics(true)">
+                                            </div>
+                                            <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                                                <label style="margin-bottom: 6px; display: block;">Average Visit Duration</label>
+                                                <div style="display: flex; gap: 8px;">
+                                                    <div style="flex: 1; display: flex; align-items: center; gap: 4px;">
+                                                        <input type="number" min="0" id="perf-avg-visit-duration-min" class="form-input" placeholder="Min" style="width: 100%;" onchange="saveAuditMetrics(true)">
+                                                        <span style="font-size: 0.85rem; color: var(--text-secondary);">m</span>
+                                                    </div>
+                                                    <div style="flex: 1; display: flex; align-items: center; gap: 4px;">
+                                                        <input type="number" min="0" max="59" id="perf-avg-visit-duration-sec" class="form-input" placeholder="Sec" style="width: 100%;" onchange="saveAuditMetrics(true)">
+                                                        <span style="font-size: 0.85rem; color: var(--text-secondary);">s</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Row 3: Global Rank & Country Rank -->
+                                        <div style="display: flex; gap: 15px;">
+                                            <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                                                <label for="perf-global-ranking">Global Rank</label>
+                                                <input type="number" min="0" id="perf-global-ranking" class="form-input" placeholder="e.g. 150000" onchange="saveAuditMetrics(true)">
+                                            </div>
+                                            <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                                                <label for="perf-country-ranking">Country Rank</label>
+                                                <div style="display: flex; gap: 8px; align-items: center;">
+                                                    <input type="number" min="0" id="perf-country-ranking" class="form-input" placeholder="e.g. 500" style="flex: 1;" onchange="saveAuditMetrics(true)">
+                                                    <span style="font-size: 0.85rem; color: var(--text-secondary);">in</span>
+                                                    <input type="text" id="perf-target-country" class="form-input" placeholder="e.g. France" style="flex: 1.5;" onchange="saveAuditMetrics(true)">
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="form-group">
-                                        <label for="perf-global-ranking">Global Rank</label>
-                                        <input type="number" min="0" id="perf-global-ranking" class="form-input" placeholder="e.g. 150000" onchange="saveAuditMetrics(true)">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="perf-country-ranking">Country Rank</label>
-                                        <input type="number" min="0" id="perf-country-ranking" class="form-input" placeholder="e.g. 500" onchange="saveAuditMetrics(true)">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="perf-target-country">Target Country Name</label>
-                                        <input type="text" id="perf-target-country" class="form-input" placeholder="e.g. France" onchange="saveAuditMetrics(true)">
-                                    </div>
-                                    <div class="form-group full-width">
-                                        <label for="perf-breakdown-country">Breakdown By Country</label>
-                                        <textarea id="perf-breakdown-country" class="form-input" style="height: 80px; resize: vertical;" placeholder="e.g. USA: 40%, France: 20%, Germany: 15%..." onchange="saveAuditMetrics(true)"></textarea>
+
+                                    <!-- Right Column: Breakdown By Country -->
+                                    <div style="display: flex; flex-direction: column;">
+                                        <div class="form-group" style="height: 100%; display: flex; flex-direction: column; margin-bottom: 0;">
+                                            <label for="perf-breakdown-country" style="margin-bottom: 8px;">Breakdown By Country</label>
+                                            <textarea id="perf-breakdown-country" class="form-input" style="flex-grow: 1; min-height: 180px; resize: vertical;" placeholder="e.g. USA: 40%, France: 20%, Germany: 15%..." onchange="saveAuditMetrics(true)"></textarea>
+                                        </div>
                                     </div>
                                     <div class="form-group full-width">
                                         <label>Main Channels (Screenshot)</label>

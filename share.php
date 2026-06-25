@@ -343,37 +343,55 @@
                     <h3 style="font-weight: 700; margin-bottom: 24px; border-bottom: 1px solid var(--border-glass); padding-bottom: 12px;">Detailed Web Traffic Insights</h3>
                     
                     <div class="grid-form">
-                        <div class="form-group">
-                            <label>Bounce Rate (%)</label>
-                            <input type="text" id="perf-bounce-rate" class="form-input" style="opacity:0.8;" readonly>
+                        <!-- Left Column: Metrics -->
+                        <div style="display: flex; flex-direction: column; gap: 20px;">
+                            <!-- Row 1: Bounce Rate & Pages Per Visit -->
+                            <div style="display: flex; gap: 15px;">
+                                <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                                    <label>Bounce Rate (%)</label>
+                                    <input type="text" id="perf-bounce-rate" class="form-input" style="opacity:0.8;" readonly>
+                                </div>
+                                <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                                    <label>Pages Per Visit</label>
+                                    <input type="text" id="perf-pages-per-visit" class="form-input" style="opacity:0.8;" readonly>
+                                </div>
+                            </div>
+
+                            <!-- Row 2: Average Monthly Visits & Average Visit Duration -->
+                            <div style="display: flex; gap: 15px;">
+                                <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                                    <label>Average Monthly Visits</label>
+                                    <input type="text" id="perf-avg-monthly-visits" class="form-input" style="opacity:0.8;" readonly>
+                                </div>
+                                <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                                    <label>Average Visit Duration</label>
+                                    <input type="text" id="perf-avg-visit-duration" class="form-input" style="opacity:0.8;" readonly>
+                                </div>
+                            </div>
+
+                            <!-- Row 3: Global Rank & Country Rank -->
+                            <div style="display: flex; gap: 15px;">
+                                <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                                    <label>Global Rank</label>
+                                    <input type="text" id="perf-global-ranking" class="form-input" style="opacity:0.8;" readonly>
+                                </div>
+                                <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                                    <label>Country Rank</label>
+                                    <div style="display: flex; gap: 8px; align-items: center;">
+                                        <input type="text" id="perf-country-ranking" class="form-input" style="opacity:0.8; flex: 1;" readonly>
+                                        <span style="font-size: 0.85rem; color: var(--text-secondary);">in</span>
+                                        <input type="text" id="perf-target-country" class="form-input" style="opacity:0.8; flex: 1.5;" readonly>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label>Pages Per Visit</label>
-                            <input type="text" id="perf-pages-per-visit" class="form-input" style="opacity:0.8;" readonly>
-                        </div>
-                        <div class="form-group">
-                            <label>Average Monthly Visits</label>
-                            <input type="text" id="perf-avg-monthly-visits" class="form-input" style="opacity:0.8;" readonly>
-                        </div>
-                        <div class="form-group">
-                            <label>Average Visit Duration</label>
-                            <input type="text" id="perf-avg-visit-duration" class="form-input" style="opacity:0.8;" readonly>
-                        </div>
-                        <div class="form-group">
-                            <label>Global Rank</label>
-                            <input type="text" id="perf-global-ranking" class="form-input" style="opacity:0.8;" readonly>
-                        </div>
-                        <div class="form-group">
-                            <label>Country Rank</label>
-                            <input type="text" id="perf-country-ranking" class="form-input" style="opacity:0.8;" readonly>
-                        </div>
-                        <div class="form-group">
-                            <label>Target Country Name</label>
-                            <input type="text" id="perf-target-country" class="form-input" style="opacity:0.8;" readonly>
-                        </div>
-                        <div class="form-group full-width">
-                            <label>Country Breakdown</label>
-                            <textarea id="perf-breakdown-country" class="form-input" style="opacity:0.8; height: 80px; resize: none;" readonly></textarea>
+
+                        <!-- Right Column: Country Breakdown -->
+                        <div style="display: flex; flex-direction: column;">
+                            <div class="form-group" style="height: 100%; display: flex; flex-direction: column; margin-bottom: 0;">
+                                <label style="margin-bottom: 8px;">Country Breakdown</label>
+                                <textarea id="perf-breakdown-country" class="form-input" style="opacity:0.8; flex-grow: 1; min-height: 180px; resize: none;" readonly></textarea>
+                            </div>
                         </div>
                         <div class="form-group full-width">
                             <label>Main Channels (Screenshot)</label>
