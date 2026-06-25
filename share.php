@@ -1871,6 +1871,7 @@
                     });
 
                     table.style.width = totalTableWidth + 'px';
+                    table.style.minWidth = '0';
                     table.style.tableLayout = 'fixed';
 
                     document.body.classList.add('is-resizing-table');

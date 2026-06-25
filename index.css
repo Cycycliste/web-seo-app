@@ -1013,30 +1013,30 @@ textarea.inline-editor {
     min-width: 1810px;
     table-layout: fixed;
 }
-#seo-pages-table th:nth-child(1), #seo-pages-table td:nth-child(1) { width: 320px; } /* URL */
-#seo-pages-table th:nth-child(2), #seo-pages-table td:nth-child(2) { width: 220px; } /* Meta Title */
-#seo-pages-table th:nth-child(3), #seo-pages-table td:nth-child(3) { width: 320px; } /* Meta Description */
-#seo-pages-table th:nth-child(4), #seo-pages-table td:nth-child(4) { width: 220px; } /* H1 */
-#seo-pages-table th:nth-child(5), #seo-pages-table td:nth-child(5) { width: 140px; } /* Semantic Headers */
-#seo-pages-table th:nth-child(6), #seo-pages-table td:nth-child(6) { width: 110px; } /* Internal Links */
-#seo-pages-table th:nth-child(7), #seo-pages-table td:nth-child(7) { width: 110px; } /* External Links */
-#seo-pages-table th:nth-child(8), #seo-pages-table td:nth-child(8) { width: 100px; } /* Missing Alt */
-#seo-pages-table th:nth-child(9), #seo-pages-table td:nth-child(9) { width: 180px; } /* Search Terms */
-#seo-pages-table th:nth-child(10), #seo-pages-table td:nth-child(10) { width: 90px; }  /* Actions */
+#seo-pages-table th:nth-child(1) { width: 320px; } /* URL */
+#seo-pages-table th:nth-child(2) { width: 220px; } /* Meta Title */
+#seo-pages-table th:nth-child(3) { width: 320px; } /* Meta Description */
+#seo-pages-table th:nth-child(4) { width: 220px; } /* H1 */
+#seo-pages-table th:nth-child(5) { width: 140px; } /* Semantic Headers */
+#seo-pages-table th:nth-child(6) { width: 110px; } /* Internal Links */
+#seo-pages-table th:nth-child(7) { width: 110px; } /* External Links */
+#seo-pages-table th:nth-child(8) { width: 100px; } /* Missing Alt */
+#seo-pages-table th:nth-child(9) { width: 180px; } /* Search Terms */
+#seo-pages-table th:nth-child(10) { width: 90px; }  /* Actions */
 
 #competitor-analysis-table {
     min-width: 1810px;
     table-layout: fixed;
 }
-#competitor-analysis-table th:nth-child(1), #competitor-analysis-table td:nth-child(1) { width: 320px; } /* Domain name */
-#competitor-analysis-table th:nth-child(2), #competitor-analysis-table td:nth-child(2) { width: 220px; } /* Meta Title */
-#competitor-analysis-table th:nth-child(3), #competitor-analysis-table td:nth-child(3) { width: 320px; } /* Meta Description */
-#competitor-analysis-table th:nth-child(4), #competitor-analysis-table td:nth-child(4) { width: 220px; } /* H1 Tag */
-#competitor-analysis-table th:nth-child(5), #competitor-analysis-table td:nth-child(5) { width: 140px; } /* Semantic Headers */
-#competitor-analysis-table th:nth-child(6), #competitor-analysis-table td:nth-child(6) { width: 110px; } /* Internal Links */
-#competitor-analysis-table th:nth-child(7), #competitor-analysis-table td:nth-child(7) { width: 110px; } /* External Links */
-#competitor-analysis-table th:nth-child(8), #competitor-analysis-table td:nth-child(8) { width: 100px; } /* Missing Alt */
-#competitor-analysis-table th:nth-child(9), #competitor-analysis-table td:nth-child(9) { width: 180px; } /* Search Terms */
+#competitor-analysis-table th:nth-child(1) { width: 320px; } /* Domain name */
+#competitor-analysis-table th:nth-child(2) { width: 220px; } /* Meta Title */
+#competitor-analysis-table th:nth-child(3) { width: 320px; } /* Meta Description */
+#competitor-analysis-table th:nth-child(4) { width: 220px; } /* H1 Tag */
+#competitor-analysis-table th:nth-child(5) { width: 140px; } /* Semantic Headers */
+#competitor-analysis-table th:nth-child(6) { width: 110px; } /* Internal Links */
+#competitor-analysis-table th:nth-child(7) { width: 110px; } /* External Links */
+#competitor-analysis-table th:nth-child(8) { width: 100px; } /* Missing Alt */
+#competitor-analysis-table th:nth-child(9) { width: 180px; } /* Search Terms */
 
 /* Floating Status Selector Menu */
 .floating-selector-menu {
