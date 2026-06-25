@@ -1256,6 +1256,11 @@ textarea.inline-editor {
 /* Table Column Resizing */
 .table-custom th {
     position: relative;
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.table-custom th:last-child {
+    border-right: none;
 }
 
 .table-resizer {

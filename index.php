@@ -2271,6 +2271,23 @@ if (!isset($_SESSION['user_id'])) {
             const table = document.getElementById(tableId);
             if (!table) return;
 
+            const getMinWidthForHeader = (th) => {
+                const text = th.textContent.trim().toUpperCase();
+                if (text.includes('URL') || text.includes('DOMAIN')) return 120;
+                if (text.includes('META TITLE')) return 120;
+                if (text.includes('META DESCRIPTION')) return 150;
+                if (text.includes('H1') || text.includes('HEADING')) return 100;
+                if (text.includes('SEMANTIC')) return 130;
+                if (text.includes('INTERNAL')) return 110;
+                if (text.includes('EXTERNAL')) return 110;
+                if (text.includes('MISSING')) return 100;
+                if (text.includes('SEARCH') || text.includes('KEYWORD')) return 110;
+                if (text.includes('NOTES')) return 100;
+                if (text.includes('INDEXED') || text.includes('GSC')) return 130;
+                if (text.includes('CRAWL') || text.includes('ERRORS')) return 120;
+                return 80; // default safe fallback
+            };
+
             const headers = table.querySelectorAll('thead th');
             headers.forEach((th) => {
                 th.style.position = 'relative';
@@ -2281,6 +2298,7 @@ if (!isset($_SESSION['user_id'])) {
 
                 let startX, startWidth;
                 let totalTableWidth = 0;
+                let minWidthLimit = getMinWidthForHeader(th);
 
                 resizer.addEventListener('mousedown', (e) => {
                     e.preventDefault();
@@ -2294,6 +2312,7 @@ if (!isset($_SESSION['user_id'])) {
                     allHeaders.forEach((h) => {
                         const w = h.getBoundingClientRect().width;
                         h.style.width = w + 'px';
+                        h.style.minWidth = w + 'px';
                         totalTableWidth += w;
                     });
 
@@ -2304,10 +2323,11 @@ if (!isset($_SESSION['user_id'])) {
 
                     const onMouseMove = (moveEvent) => {
                         const deltaX = moveEvent.clientX - startX;
-                        const newWidth = Math.max(50, startWidth + deltaX);
+                        const newWidth = Math.max(minWidthLimit, startWidth + deltaX);
                         const widthDiff = newWidth - startWidth;
                         
                         th.style.width = newWidth + 'px';
+                        th.style.minWidth = newWidth + 'px';
                         table.style.width = (totalTableWidth + widthDiff) + 'px';
                     };
 
