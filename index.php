@@ -4171,63 +4171,87 @@ if (!isset($_SESSION['user_id'])) {
                         </div>
                         
                         <div style="display: ${isCollapsed ? 'none' : 'block'};">
-                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px;">
-                                <div class="form-group" style="margin: 0;">
-                                    <label style="font-size: 0.8rem; margin-bottom: 6px; color: var(--text-secondary);">Bounce Rate (%)</label>
-                                    <input type="number" step="0.01" min="0" max="100" id="comp-bounce-${c.id}" class="form-input" placeholder="e.g. 45.5" value="${c.bounce_rate !== null ? c.bounce_rate : ''}" onchange="saveCompetitorTraffic(${c.id})">
-                                </div>
-                                <div class="form-group" style="margin: 0;">
-                                    <label style="font-size: 0.8rem; margin-bottom: 6px; color: var(--text-secondary);">Pages per Visit</label>
-                                    <input type="number" step="0.01" min="0" id="comp-pages-${c.id}" class="form-input" placeholder="e.g. 2.5" value="${c.pages_per_visit !== null ? c.pages_per_visit : ''}" onchange="saveCompetitorTraffic(${c.id})">
-                                </div>
-                                <div class="form-group" style="margin: 0;">
-                                    <label style="font-size: 0.8rem; margin-bottom: 6px; color: var(--text-secondary);">Average Monthly Visits</label>
-                                    <input type="number" min="0" id="comp-monthly-visits-${c.id}" class="form-input" placeholder="e.g. 50000" value="${c.avg_monthly_visits !== null ? c.avg_monthly_visits : ''}" onchange="saveCompetitorTraffic(${c.id})">
-                                </div>
-                                <div class="form-group" style="margin: 0;">
-                                    <label style="font-size: 0.8rem; margin-bottom: 6px; color: var(--text-secondary);">Average Visit Duration</label>
-                                    <div style="display: flex; gap: 8px; align-items: center;">
-                                        <input type="number" min="0" id="comp-duration-min-${c.id}" class="form-input" placeholder="Min" value="${c.avg_visit_duration ? Math.floor(c.avg_visit_duration / 60) : ''}" style="flex: 1; text-align: center;" onchange="saveCompetitorTraffic(${c.id})">
-                                        <span style="font-size: 0.85rem; color: var(--text-muted);">m</span>
-                                        <input type="number" min="0" max="59" id="comp-duration-sec-${c.id}" class="form-input" placeholder="Sec" value="${c.avg_visit_duration ? (c.avg_visit_duration % 60) : ''}" style="flex: 1; text-align: center;" onchange="saveCompetitorTraffic(${c.id})">
-                                        <span style="font-size: 0.85rem; color: var(--text-muted);">s</span>
-                                    </div>
-                                </div>
-                                <div class="form-group" style="margin: 0;">
-                                    <label style="font-size: 0.8rem; margin-bottom: 6px; color: var(--text-secondary);">Global Ranking</label>
-                                    <input type="number" min="0" id="comp-global-rank-${c.id}" class="form-input" placeholder="e.g. 250000" value="${c.global_ranking !== null ? c.global_ranking : ''}" onchange="saveCompetitorTraffic(${c.id})">
-                                </div>
-                                <div class="form-group" style="margin: 0;">
-                                    <label style="font-size: 0.8rem; margin-bottom: 6px; color: var(--text-secondary);">Country Ranking</label>
-                                    <input type="number" min="0" id="comp-country-rank-${c.id}" class="form-input" placeholder="e.g. 45000" value="${c.country_ranking !== null ? c.country_ranking : ''}" onchange="saveCompetitorTraffic(${c.id})">
-                                </div>
-                            </div>
-                            
-                            <div class="form-group" style="margin-bottom: 0;">
-                                <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 8px;">
-                                    <label style="font-size: 0.8rem; margin-bottom: 0; color: var(--text-secondary);">Breakdown by Country</label>
-                                    <div class="mode-tabs" style="display: flex; gap: 4px;">
-                                        <button type="button" class="btn btn-secondary btn-sm" id="btn-comp-breakdown-mode-text-${c.id}" onclick="setCompBreakdownMode(${c.id}, 'text')" style="font-size: 0.7rem; padding: 1px 6px; ${!isScreenshotPath(c.breakdown_by_country) ? 'background: rgba(139, 92, 246, 0.15); border-color: rgba(139, 92, 246, 0.3); color: var(--primary);' : ''}">Text</button>
-                                        <button type="button" class="btn btn-secondary btn-sm" id="btn-comp-breakdown-mode-screenshot-${c.id}" onclick="setCompBreakdownMode(${c.id}, 'screenshot')" style="font-size: 0.7rem; padding: 1px 6px; ${isScreenshotPath(c.breakdown_by_country) ? 'background: rgba(139, 92, 246, 0.15); border-color: rgba(139, 92, 246, 0.3); color: var(--primary);' : ''}">Screenshot</button>
-                                    </div>
-                                </div>
-                                
-                                <div id="comp-breakdown-text-container-${c.id}" style="${isScreenshotPath(c.breakdown_by_country) ? 'display: none;' : ''}">
-                                    <textarea id="comp-breakdown-${c.id}" class="form-input" style="height: 80px; resize: vertical;" placeholder="e.g. United States: 40%, United Kingdom: 20%, France: 10%" onchange="saveCompetitorTraffic(${c.id})">${escapeHtml(!isScreenshotPath(c.breakdown_by_country) ? c.breakdown_by_country || '' : '')}</textarea>
-                                </div>
-                                
-                                <div id="comp-breakdown-screenshot-container-${c.id}" class="comp-breakdown-screenshot-container" data-comp-id="${c.id}" style="${!isScreenshotPath(c.breakdown_by_country) ? 'display: none;' : ''}">
-                                    <div class="screenshot-upload-zone" id="zone-comp-breakdown-${c.id}" onclick="triggerFileInput('comp-breakdown-file-${c.id}')" style="min-height: 120px; padding: 16px;">
-                                        <input type="file" id="comp-breakdown-file-${c.id}" accept="image/*" style="display: none;" onchange="handleCompBreakdownFileChange(event, ${c.id})">
-                                        <div class="upload-placeholder" id="placeholder-comp-breakdown-${c.id}" style="${isScreenshotPath(c.breakdown_by_country) ? 'display: none;' : ''}">
-                                            <i data-lucide="image" style="width: 20px; height: 20px; color: var(--text-muted); margin-bottom: 6px;"></i>
-                                            <p style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 500; margin: 0;">Click, drag & drop, or paste (Ctrl+V)</p>
+                            <div class="grid-form">
+                                <!-- Left Column: Metrics -->
+                                <div style="display: flex; flex-direction: column; gap: 20px;">
+                                    <!-- Row 1: Bounce Rate & Pages Per Visit -->
+                                    <div style="display: flex; gap: 15px;">
+                                        <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                                            <label style="font-size: 0.8rem; margin-bottom: 6px; color: var(--text-secondary);">Bounce Rate (%)</label>
+                                            <input type="number" step="0.01" min="0" max="100" id="comp-bounce-${c.id}" class="form-input" placeholder="e.g. 45.5" value="${c.bounce_rate !== null ? c.bounce_rate : ''}" onchange="saveCompetitorTraffic(${c.id})">
                                         </div>
-                                        <div class="upload-preview" id="preview-comp-breakdown-${c.id}" style="${isScreenshotPath(c.breakdown_by_country) ? 'display: block;' : 'display: none;'} position: relative; width: 100%;">
-                                            <img src="${isScreenshotPath(c.breakdown_by_country) ? escapeHtml(c.breakdown_by_country) : ''}" id="img-comp-breakdown-${c.id}" style="width: 100%; max-height: 180px; object-fit: contain; border-radius: var(--radius-sm);">
-                                            <button type="button" class="btn-delete-screenshot" onclick="removeCompBreakdownScreenshot(event, ${c.id})" style="padding: 4px 8px; top: 6px; right: 6px;">
-                                                <i data-lucide="trash-2" style="width: 12px; height: 12px;"></i>
-                                            </button>
+                                        <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                                            <label style="font-size: 0.8rem; margin-bottom: 6px; color: var(--text-secondary);">Pages per Visit</label>
+                                            <input type="number" step="0.01" min="0" id="comp-pages-${c.id}" class="form-input" placeholder="e.g. 2.5" value="${c.pages_per_visit !== null ? c.pages_per_visit : ''}" onchange="saveCompetitorTraffic(${c.id})">
+                                        </div>
+                                    </div>
+
+                                    <!-- Row 2: Average Monthly Visits & Average Visit Duration -->
+                                    <div style="display: flex; gap: 15px;">
+                                        <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                                            <label style="font-size: 0.8rem; margin-bottom: 6px; color: var(--text-secondary);">Average Monthly Visits</label>
+                                            <input type="number" min="0" id="comp-monthly-visits-${c.id}" class="form-input" placeholder="e.g. 50000" value="${c.avg_monthly_visits !== null ? c.avg_monthly_visits : ''}" onchange="saveCompetitorTraffic(${c.id})">
+                                        </div>
+                                        <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                                            <label style="font-size: 0.8rem; margin-bottom: 6px; color: var(--text-secondary);">Average Visit Duration</label>
+                                            <div style="display: flex; gap: 8px; align-items: center;">
+                                                <input type="number" min="0" id="comp-duration-min-${c.id}" class="form-input" placeholder="Min" value="${c.avg_visit_duration ? Math.floor(c.avg_visit_duration / 60) : ''}" style="flex: 1; text-align: center;" onchange="saveCompetitorTraffic(${c.id})">
+                                                <span style="font-size: 0.85rem; color: var(--text-muted);">m</span>
+                                                <input type="number" min="0" max="59" id="comp-duration-sec-${c.id}" class="form-input" placeholder="Sec" value="${c.avg_visit_duration ? (c.avg_visit_duration % 60) : ''}" style="flex: 1; text-align: center;" onchange="saveCompetitorTraffic(${c.id})">
+                                                <span style="font-size: 0.85rem; color: var(--text-muted);">s</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Row 3: Global Rank & Country Rank -->
+                                    <div style="display: flex; gap: 15px;">
+                                        <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                                            <label style="font-size: 0.8rem; margin-bottom: 6px; color: var(--text-secondary);">Global Rank</label>
+                                            <input type="number" min="0" id="comp-global-rank-${c.id}" class="form-input" placeholder="e.g. 250000" value="${c.global_ranking !== null ? c.global_ranking : ''}" onchange="saveCompetitorTraffic(${c.id})">
+                                        </div>
+                                        <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                                            <label style="font-size: 0.8rem; margin-bottom: 6px; color: var(--text-secondary);">Country Rank</label>
+                                            <div style="display: flex; gap: 8px; align-items: center;">
+                                                <input type="number" min="0" id="comp-country-rank-${c.id}" class="form-input" placeholder="e.g. 45000" value="${c.country_ranking !== null ? c.country_ranking : ''}" onchange="saveCompetitorTraffic(${c.id})" style="flex: 1;">
+                                                <span style="font-size: 0.85rem; color: var(--text-secondary);">in</span>
+                                                <input type="text" class="form-input" value="${escapeHtml(activeAuditCountry)}" style="flex: 1.5; opacity: 0.7;" disabled title="Competitors use the same target country as defined in the website audit Traffic & Performance tab.">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Right Column: Breakdown By Country -->
+                                <div style="display: flex; flex-direction: column; height: 100%;">
+                                    <div class="form-group" style="height: 100%; display: flex; flex-direction: column; margin-bottom: 0;">
+                                        <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 8px;">
+                                            <label style="font-size: 0.8rem; margin-bottom: 0; color: var(--text-secondary);">Breakdown by Country</label>
+                                            <div class="mode-tabs" style="display: flex; gap: 4px;">
+                                                <button type="button" class="btn btn-secondary btn-sm" id="btn-comp-breakdown-mode-text-${c.id}" onclick="setCompBreakdownMode(${c.id}, 'text')" style="font-size: 0.7rem; padding: 1px 6px; ${!isScreenshotPath(c.breakdown_by_country) ? 'background: rgba(139, 92, 246, 0.15); border-color: rgba(139, 92, 246, 0.3); color: var(--primary);' : ''}">Text</button>
+                                                <button type="button" class="btn btn-secondary btn-sm" id="btn-comp-breakdown-mode-screenshot-${c.id}" onclick="setCompBreakdownMode(${c.id}, 'screenshot')" style="font-size: 0.7rem; padding: 1px 6px; ${isScreenshotPath(c.breakdown_by_country) ? 'background: rgba(139, 92, 246, 0.15); border-color: rgba(139, 92, 246, 0.3); color: var(--primary);' : ''}">Screenshot</button>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Mode Text: Textarea -->
+                                        <div id="comp-breakdown-text-container-${c.id}" style="${isScreenshotPath(c.breakdown_by_country) ? 'display: none;' : ''} flex-grow: 1; display: flex; flex-direction: column; height: 100%;">
+                                            <textarea id="comp-breakdown-${c.id}" class="form-input" style="flex-grow: 1; min-height: 180px; resize: vertical; height: 100%;" placeholder="e.g. United States: 40%, United Kingdom: 20%, France: 10%" onchange="saveCompetitorTraffic(${c.id})">${escapeHtml(!isScreenshotPath(c.breakdown_by_country) ? c.breakdown_by_country || '' : '')}</textarea>
+                                        </div>
+                                        
+                                        <!-- Mode Screenshot: Upload Zone & Preview -->
+                                        <div id="comp-breakdown-screenshot-container-${c.id}" class="comp-breakdown-screenshot-container" data-comp-id="${c.id}" style="${!isScreenshotPath(c.breakdown_by_country) ? 'display: none;' : ''} flex-grow: 1; flex-direction: column; height: 100%;">
+                                            <div class="screenshot-upload-zone" id="zone-comp-breakdown-${c.id}" onclick="triggerFileInput('comp-breakdown-file-${c.id}')" style="min-height: 180px; flex-grow: 1; height: 100%;">
+                                                <input type="file" id="comp-breakdown-file-${c.id}" accept="image/*" style="display: none;" onchange="handleCompBreakdownFileChange(event, ${c.id})">
+                                                <div class="upload-placeholder" id="placeholder-comp-breakdown-${c.id}" style="${isScreenshotPath(c.breakdown_by_country) ? 'display: none;' : ''}">
+                                                    <i data-lucide="image" style="width: 28px; height: 28px; color: var(--text-muted); margin-bottom: 8px;"></i>
+                                                    <p style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 500; margin: 0;">Click, drag & drop, or paste (Ctrl+V) breakdown screenshot</p>
+                                                </div>
+                                                <div class="upload-preview" id="preview-comp-breakdown-${c.id}" style="${isScreenshotPath(c.breakdown_by_country) ? 'display: block;' : 'display: none;'} position: relative; width: 100%;">
+                                                    <img src="${isScreenshotPath(c.breakdown_by_country) ? escapeHtml(c.breakdown_by_country) : ''}" id="img-comp-breakdown-${c.id}" style="width: 100%; max-height: 400px; object-fit: contain; border-radius: var(--radius-sm);">
+                                                    <button type="button" class="btn-delete-screenshot" onclick="removeCompBreakdownScreenshot(event, ${c.id})">
+                                                        <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                                                        <span>Remove</span>
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

@@ -1195,7 +1195,7 @@
                         </div>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: 1fr 340px 300px; gap: 24px; align-items: stretch;">
+                    <div style="display: grid; grid-template-columns: 1fr 340px 520px; gap: 24px; align-items: stretch;">
                         
                         <!-- SEO State Column -->
                         <div style="display:flex; flex-direction:column; gap:16px; border-right:1px solid var(--border-glass); padding-right:24px;">
@@ -1277,42 +1277,65 @@
                                 <span>Traffic & Audience</span>
                             </h4>
 
-                            <div style="display:flex; flex-direction:column; gap:10px;">
-                                <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.03); padding-bottom:6px;">
-                                    <span style="font-size:0.8rem; color:var(--text-secondary);">Monthly Visits:</span>
-                                    <span style="font-size:0.85rem; font-weight:600; color:var(--text-primary);">${c.avg_monthly_visits !== null ? c.avg_monthly_visits.toLocaleString() : '-'}</span>
-                                </div>
-                                <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.03); padding-bottom:6px;">
-                                    <span style="font-size:0.8rem; color:var(--text-secondary);">Bounce Rate:</span>
-                                    <span style="font-size:0.85rem; font-weight:600; color:var(--text-primary);">${c.bounce_rate !== null ? c.bounce_rate + '%' : '-'}</span>
-                                </div>
-                                <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.03); padding-bottom:6px;">
-                                    <span style="font-size:0.8rem; color:var(--text-secondary);">Pages per Visit:</span>
-                                    <span style="font-size:0.85rem; font-weight:600; color:var(--text-primary);">${c.pages_per_visit !== null ? c.pages_per_visit : '-'}</span>
-                                </div>
-                                <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.03); padding-bottom:6px;">
-                                    <span style="font-size:0.8rem; color:var(--text-secondary);">Visit Duration:</span>
-                                    <span style="font-size:0.85rem; font-weight:600; color:var(--text-primary);">${formattedDuration}</span>
-                                </div>
-                                <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.03); padding-bottom:6px;">
-                                    <span style="font-size:0.8rem; color:var(--text-secondary);">Global Rank:</span>
-                                    <span style="font-size:0.85rem; font-weight:600; color:var(--text-primary);">${c.global_ranking !== null ? c.global_ranking.toLocaleString() : '-'}</span>
-                                </div>
-                                <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.03); padding-bottom:6px;">
-                                    <span style="font-size:0.8rem; color:var(--text-secondary);">${escapeHtml(activeAuditCountry)} Rank:</span>
-                                    <span style="font-size:0.85rem; font-weight:600; color:var(--text-primary);">${c.country_ranking !== null ? c.country_ranking.toLocaleString() : '-'}</span>
-                                </div>
-                            </div>
-
-                            <div style="display:flex; flex-direction:column; gap:4px; margin-top:6px; flex-grow:1;">
-                                <div style="font-size:0.75rem; color:var(--text-muted); font-weight:600; text-transform:uppercase; margin-bottom: 4px;">Country Breakdown</div>
-                                ${isScreenshotPath(c.breakdown_by_country) ? `
-                                    <div style="background:rgba(255,255,255,0.02); padding:8px; border-radius:6px; border:1px solid var(--border-glass);">
-                                        <img src="${escapeHtml(c.breakdown_by_country)}" style="width:100%; max-height:180px; object-fit:contain; border-radius:4px;">
+                            <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 20px; flex-grow: 1;">
+                                <!-- Left Column: Metrics -->
+                                <div style="display:flex; flex-direction:column; gap:12px;">
+                                    <!-- Row 1: Bounce Rate & Pages Per Visit -->
+                                    <div style="display: flex; gap: 12px;">
+                                        <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                                            <label style="font-size: 0.75rem; margin-bottom: 4px; color: var(--text-secondary);">Bounce Rate (%)</label>
+                                            <input type="text" class="form-input" style="opacity:0.8;" value="${c.bounce_rate !== null ? c.bounce_rate + '%' : '-'}" readonly>
+                                        </div>
+                                        <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                                            <label style="font-size: 0.75rem; margin-bottom: 4px; color: var(--text-secondary);">Pages per Visit</label>
+                                            <input type="text" class="form-input" style="opacity:0.8;" value="${c.pages_per_visit !== null ? c.pages_per_visit : '-'}" readonly>
+                                        </div>
                                     </div>
-                                ` : `
-                                    <div style="font-size:0.8rem; color:var(--text-secondary); background:rgba(255,255,255,0.02); padding:10px; border-radius:6px; border:1px solid var(--border-glass); flex-grow:1; min-height:60px; white-space:pre-wrap;">${escapeHtml(c.breakdown_by_country || 'No country breakdown provided.')}</div>
-                                `}
+
+                                    <!-- Row 2: Average Monthly Visits & Average Visit Duration -->
+                                    <div style="display: flex; gap: 12px;">
+                                        <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                                            <label style="font-size: 0.75rem; margin-bottom: 4px; color: var(--text-secondary);">Average Monthly Visits</label>
+                                            <input type="text" class="form-input" style="opacity:0.8;" value="${c.avg_monthly_visits !== null ? c.avg_monthly_visits.toLocaleString() : '-'}" readonly>
+                                        </div>
+                                        <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                                            <label style="font-size: 0.75rem; margin-bottom: 4px; color: var(--text-secondary);">Average Visit Duration</label>
+                                            <input type="text" class="form-input" style="opacity:0.8;" value="${formattedDuration}" readonly>
+                                        </div>
+                                    </div>
+
+                                    <!-- Row 3: Global Rank & Country Rank -->
+                                    <div style="display: flex; gap: 12px;">
+                                        <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                                            <label style="font-size: 0.75rem; margin-bottom: 4px; color: var(--text-secondary);">Global Rank</label>
+                                            <input type="text" class="form-input" style="opacity:0.8;" value="${c.global_ranking !== null ? c.global_ranking.toLocaleString() : '-'}" readonly>
+                                        </div>
+                                        <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                                            <label style="font-size: 0.75rem; margin-bottom: 4px; color: var(--text-secondary);">Country Rank</label>
+                                            <div style="display: flex; gap: 6px; align-items: center;">
+                                                <input type="text" class="form-input" style="opacity:0.8; flex: 1;" value="${c.country_ranking !== null ? c.country_ranking.toLocaleString() : '-'}" readonly>
+                                                <span style="font-size: 0.85rem; color: var(--text-secondary);">in</span>
+                                                <input type="text" class="form-input" style="opacity:0.8; flex: 1.5;" value="${escapeHtml(activeAuditCountry)}" readonly disabled>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Right Column: Country Breakdown -->
+                                <div style="display: flex; flex-direction: column; height: 100%;">
+                                    <div class="form-group" style="height: 100%; display: flex; flex-direction: column; margin-bottom: 0;">
+                                        <label style="font-size: 0.75rem; margin-bottom: 4px; color: var(--text-secondary);">Country Breakdown</label>
+                                        <div style="flex-grow: 1; display: flex; flex-direction: column; height: 100%;">
+                                            ${isScreenshotPath(c.breakdown_by_country) ? `
+                                                <div style="background:rgba(255,255,255,0.02); padding:8px; border-radius:6px; border:1px solid var(--border-glass); flex-grow:1; display:flex; align-items:center; justify-content:center; min-height:180px;">
+                                                    <img src="${escapeHtml(c.breakdown_by_country)}" style="width:100%; max-height:400px; object-fit:contain; border-radius:4px;">
+                                                </div>
+                                            ` : `
+                                                <textarea class="form-input" style="opacity:0.8; flex-grow: 1; min-height: 180px; resize: none; height: 100%;" readonly>${escapeHtml(c.breakdown_by_country || 'No country breakdown provided.')}</textarea>
+                                            `}
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
