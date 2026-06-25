@@ -599,7 +599,7 @@ if (!isset($_SESSION['user_id'])) {
 
                                 <!-- Row 2, Column 2: Sitemap Status & Setup Details -->
                                 <div class="glass-panel" style="grid-column: 2; grid-row: 2; padding: 24px; margin-bottom: 30px; display: flex; flex-direction: column;">
-                                    <h4 id="header-sitemap" style="margin-bottom: 16px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px;">Sitemap Status & Setup Details</h4>
+                                    <h4 id="header-sitemap" style="margin-bottom: 16px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; position: relative; padding-right: 60px;">Sitemap Status & Setup Details</h4>
                                     <div class="form-group" style="margin-bottom: 0; flex-grow: 1; display: flex; flex-direction: column;">
                                         <textarea id="sitemap-details" class="form-input" style="flex-grow: 1; min-height: 120px; resize: vertical;" placeholder="Add sitemap submission status, URL, last read dates, and crawl coverage..." onchange="window.lastChangedElement = this; saveAuditMetrics(true)"></textarea>
                                     </div>
@@ -607,7 +607,7 @@ if (!isset($_SESSION['user_id'])) {
 
                                 <!-- Row 2, Column 3: Additional Notes -->
                                 <div class="glass-panel" style="grid-column: 3; grid-row: 2; padding: 24px; margin-bottom: 30px; display: flex; flex-direction: column;">
-                                    <h4 id="header-additional-notes" style="margin-bottom: 16px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px;">Additional Notes</h4>
+                                    <h4 id="header-additional-notes" style="margin-bottom: 16px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; position: relative; padding-right: 60px;">Additional Notes</h4>
                                     <div class="form-group" style="margin-bottom: 0; flex-grow: 1; display: flex; flex-direction: column;">
                                         <textarea id="additional-notes" class="form-input" style="flex-grow: 1; min-height: 120px; resize: vertical;" placeholder="Add other observations, technical guidelines, or custom audit notes..." onchange="window.lastChangedElement = this; saveAuditMetrics(true)"></textarea>
                                     </div>
@@ -678,7 +678,7 @@ if (!isset($_SESSION['user_id'])) {
                                     <div style="display: flex; flex-direction: column; height: 100%;">
                                         <div class="form-group" style="height: 100%; display: flex; flex-direction: column; margin-bottom: 0;">
                                             <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 8px;">
-                                                <label style="margin-bottom: 0;">Breakdown By Country</label>
+                                                <label style="margin-bottom: 0; position: relative; padding-right: 60px; display: inline-block;">Breakdown By Country</label>
                                                 <div class="mode-tabs" style="display: flex; gap: 4px;">
                                                     <button type="button" class="btn btn-secondary btn-sm" id="btn-breakdown-mode-text" onclick="setBreakdownMode('text')" style="font-size: 0.75rem; padding: 2px 8px; background: rgba(139, 92, 246, 0.15); border-color: rgba(139, 92, 246, 0.3); color: var(--primary);">Text</button>
                                                     <button type="button" class="btn btn-secondary btn-sm" id="btn-breakdown-mode-screenshot" onclick="setBreakdownMode('screenshot')" style="font-size: 0.75rem; padding: 2px 8px;">Screenshot</button>
@@ -873,7 +873,7 @@ if (!isset($_SESSION['user_id'])) {
                             <div class="form-group" style="margin-bottom: 28px; display: flex; flex-direction: column; gap: 8px;">
                                 <label for="global-report-analysis" style="font-weight: 600; font-size: 0.95rem; color: var(--text-primary); display: flex; align-items: center; gap: 6px;">
                                     <i data-lucide="compass" style="width: 16px; height: 16px; color: var(--primary);"></i>
-                                    <span>Global Analysis & Audit Meaning</span>
+                                    <span style="position: relative; padding-right: 60px; display: inline-block;">Global Analysis & Audit Meaning</span>
                                 </label>
                                 <textarea id="global-report-analysis" class="form-input" style="min-height: 250px; resize: vertical; width: 100%; font-family: inherit; line-height: 1.5; padding: 14px;" placeholder="Explain the global findings of this audit. What do these metrics mean for the client's website? (e.g. Traffic Trends, Keyword Gaps, Core Web Vitals summary...)" onchange="window.lastChangedElement = this; saveAuditMetrics(true)"></textarea>
                             </div>
@@ -881,7 +881,7 @@ if (!isset($_SESSION['user_id'])) {
                             <div class="form-group" style="display: flex; flex-direction: column; gap: 8px;">
                                 <label for="global-report-strategy" style="font-weight: 600; font-size: 0.95rem; color: var(--text-primary); display: flex; align-items: center; gap: 6px;">
                                     <i data-lucide="trending-up" style="width: 16px; height: 16px; color: var(--secondary);"></i>
-                                    <span>Recommendations & Strategy to Adopt</span>
+                                    <span style="position: relative; padding-right: 60px; display: inline-block;">Recommendations & Strategy to Adopt</span>
                                 </label>
                                 <textarea id="global-report-strategy" class="form-input" style="min-height: 250px; resize: vertical; width: 100%; font-family: inherit; line-height: 1.5; padding: 14px;" placeholder="Outline the concrete recommendations and next steps. What strategy should they execute next?" onchange="window.lastChangedElement = this; saveAuditMetrics(true)"></textarea>
                             </div>
@@ -1365,7 +1365,11 @@ if (!isset($_SESSION['user_id'])) {
             const formGroup = element.closest('.form-group');
             if (formGroup) {
                 const label = formGroup.querySelector('label');
-                if (label) return label;
+                if (label) {
+                    const span = label.querySelector('span');
+                    if (span) return span;
+                    return label;
+                }
             }
             
             // Fallback to sitemap / additional notes headers
@@ -2630,17 +2634,21 @@ if (!isset($_SESSION['user_id'])) {
                             <a href="${escapeHtml(p.url)}" target="_blank" class="url-link" title="${escapeHtml(p.url)}">${escapeHtml(getUrlDisplayName(p.url))}</a>
                         </div>
                     </td>
-                    <td style="text-align: center; position: relative;">
-                        <span class="badge badge-clickable ${gscBadgeClass}" onclick="showGscSelector(event, this, ${p.id}, '${p.indexing_gsc || ''}')">
-                            ${gscText}
-                        </span>
-                        ${getSavedIndicatorHTML(p.id, 'indexing_gsc', 'page')}
+                    <td style="text-align: center;">
+                        <div style="display: inline-block; position: relative;">
+                            <span class="badge badge-clickable ${gscBadgeClass}" onclick="showGscSelector(event, this, ${p.id}, '${p.indexing_gsc || ''}')">
+                                ${gscText}
+                            </span>
+                            ${getSavedIndicatorHTML(p.id, 'indexing_gsc', 'page')}
+                        </div>
                     </td>
-                    <td style="text-align: center; position: relative;">
-                        <span class="badge badge-clickable ${errorsBadgeClass}" onclick="showCrawlErrorsSelector(event, this, ${p.id}, '${p.crawl_errors || ''}')">
-                            ${errorsText}
-                        </span>
-                        ${getSavedIndicatorHTML(p.id, 'crawl_errors', 'page')}
+                    <td style="text-align: center;">
+                        <div style="display: inline-block; position: relative;">
+                            <span class="badge badge-clickable ${errorsBadgeClass}" onclick="showCrawlErrorsSelector(event, this, ${p.id}, '${p.crawl_errors || ''}')">
+                                ${errorsText}
+                            </span>
+                            ${getSavedIndicatorHTML(p.id, 'crawl_errors', 'page')}
+                        </div>
                     </td>
                 `;
                 techTable.appendChild(techRow);
@@ -4495,7 +4503,7 @@ if (!isset($_SESSION['user_id'])) {
                                 <div style="display: flex; flex-direction: column; height: 100%;">
                                     <div class="form-group" style="height: 100%; display: flex; flex-direction: column; margin-bottom: 0;">
                                         <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 8px;">
-                                            <label style="font-size: 0.8rem; margin-bottom: 0; color: var(--text-secondary);">Breakdown by Country</label>
+                                            <label style="font-size: 0.8rem; margin-bottom: 0; color: var(--text-secondary); position: relative; padding-right: 60px; display: inline-block;">Breakdown by Country</label>
                                             <div class="mode-tabs" style="display: flex; gap: 4px;">
                                                 <button type="button" class="btn btn-secondary btn-sm" id="btn-comp-breakdown-mode-text-${c.id}" onclick="setCompBreakdownMode(${c.id}, 'text')" style="font-size: 0.7rem; padding: 1px 6px; ${!isScreenshotPath(c.breakdown_by_country) ? 'background: rgba(139, 92, 246, 0.15); border-color: rgba(139, 92, 246, 0.3); color: var(--primary);' : ''}">Text</button>
                                                 <button type="button" class="btn btn-secondary btn-sm" id="btn-comp-breakdown-mode-screenshot-${c.id}" onclick="setCompBreakdownMode(${c.id}, 'screenshot')" style="font-size: 0.7rem; padding: 1px 6px; ${isScreenshotPath(c.breakdown_by_country) ? 'background: rgba(139, 92, 246, 0.15); border-color: rgba(139, 92, 246, 0.3); color: var(--primary);' : ''}">Screenshot</button>
