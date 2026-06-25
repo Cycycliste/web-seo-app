@@ -393,14 +393,14 @@
                                 <textarea id="perf-breakdown-country" class="form-input" style="opacity:0.8; flex-grow: 1; min-height: 180px; resize: none;" readonly></textarea>
                             </div>
                         </div>
-                        <div class="form-group full-width">
-                            <label>Main Channels (Screenshot)</label>
+                        <div class="form-group">
+                            <label>Main Channels</label>
                             <div id="share-main-channels-box" style="margin-top: 8px;">
                                 <!-- Image populated dynamically -->
                             </div>
                         </div>
-                        <div class="form-group full-width">
-                            <label>Traffic Trends (Last 3-6 Months Screenshot)</label>
+                        <div class="form-group">
+                            <label>Traffic Trends (Last 3-6 Months)</label>
                             <div id="share-traffic-trends-box" style="margin-top: 8px;">
                                 <!-- Image populated dynamically -->
                             </div>

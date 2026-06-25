@@ -681,8 +681,8 @@ if (!isset($_SESSION['user_id'])) {
                                             <textarea id="perf-breakdown-country" class="form-input" style="flex-grow: 1; min-height: 180px; resize: vertical;" placeholder="e.g. USA: 40%, France: 20%, Germany: 15%..." onchange="saveAuditMetrics(true)"></textarea>
                                         </div>
                                     </div>
-                                    <div class="form-group full-width">
-                                        <label>Main Channels (Screenshot)</label>
+                                    <div class="form-group">
+                                        <label>Main Channels</label>
                                         <div class="screenshot-upload-zone" id="zone-main-channels" onclick="triggerFileInput('perf-main-channels-file')">
                                             <input type="file" id="perf-main-channels-file" accept="image/*" style="display: none;" onchange="handleFileChange(event, 'main-channels')">
                                             <div class="upload-placeholder" id="placeholder-main-channels">
@@ -698,8 +698,8 @@ if (!isset($_SESSION['user_id'])) {
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="form-group full-width">
-                                        <label>Traffic Trends (Last 3-6 Months Screenshot)</label>
+                                    <div class="form-group">
+                                        <label>Traffic Trends (Last 3-6 Months)</label>
                                         <div class="screenshot-upload-zone" id="zone-traffic-trends" onclick="triggerFileInput('perf-traffic-trends-file')">
                                             <input type="file" id="perf-traffic-trends-file" accept="image/*" style="display: none;" onchange="handleFileChange(event, 'traffic-trends')">
                                             <div class="upload-placeholder" id="placeholder-traffic-trends">
