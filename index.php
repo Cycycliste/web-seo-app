@@ -599,7 +599,7 @@ if (!isset($_SESSION['user_id'])) {
 
                                 <!-- Row 2, Column 2: Sitemap Status & Setup Details -->
                                 <div class="glass-panel" style="grid-column: 2; grid-row: 2; padding: 24px; margin-bottom: 30px; display: flex; flex-direction: column;">
-                                    <h4 style="margin-bottom: 16px; font-weight: 600;">Sitemap Status & Setup Details</h4>
+                                    <h4 id="header-sitemap" style="margin-bottom: 16px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px;">Sitemap Status & Setup Details</h4>
                                     <div class="form-group" style="margin-bottom: 0; flex-grow: 1; display: flex; flex-direction: column;">
                                         <textarea id="sitemap-details" class="form-input" style="flex-grow: 1; min-height: 120px; resize: vertical;" placeholder="Add sitemap submission status, URL, last read dates, and crawl coverage..." onchange="saveAuditMetrics(true)"></textarea>
                                     </div>
@@ -607,7 +607,7 @@ if (!isset($_SESSION['user_id'])) {
 
                                 <!-- Row 2, Column 3: Additional Notes -->
                                 <div class="glass-panel" style="grid-column: 3; grid-row: 2; padding: 24px; margin-bottom: 30px; display: flex; flex-direction: column;">
-                                    <h4 style="margin-bottom: 16px; font-weight: 600;">Additional Notes</h4>
+                                    <h4 id="header-additional-notes" style="margin-bottom: 16px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px;">Additional Notes</h4>
                                     <div class="form-group" style="margin-bottom: 0; flex-grow: 1; display: flex; flex-direction: column;">
                                         <textarea id="additional-notes" class="form-input" style="flex-grow: 1; min-height: 120px; resize: vertical;" placeholder="Add other observations, technical guidelines, or custom audit notes..." onchange="saveAuditMetrics(true)"></textarea>
                                     </div>
@@ -619,7 +619,7 @@ if (!isset($_SESSION['user_id'])) {
                         <!-- Subtab: Traffic & Performance -->
                         <div id="subtab-perf" style="display: none;">
                             <div class="glass-panel" style="padding: 30px;">
-                                <h3 style="font-weight: 700; margin-bottom: 24px; border-bottom: 1px solid var(--border-glass); padding-bottom: 12px;">Website Traffic & Performance Metrics</h3>
+                                <h3 id="header-perf" style="font-weight: 700; margin-bottom: 24px; border-bottom: 1px solid var(--border-glass); padding-bottom: 12px; display: flex; align-items: center; gap: 8px;">Website Traffic & Performance Metrics</h3>
                                 
                                 <div class="grid-form">
                                     <!-- Left Column: Metrics -->
@@ -862,7 +862,7 @@ if (!isset($_SESSION['user_id'])) {
                     <!-- Tab 4: Global Report & Strategy -->
                     <div id="tab-global-report" class="tab-pane">
                         <div class="glass-panel" style="padding: 28px; margin-bottom: 24px;">
-                            <h3 style="font-weight: 700; margin-bottom: 16px; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+                            <h3 id="header-global-report" style="font-weight: 700; margin-bottom: 16px; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
                                 <i data-lucide="file-text" style="width: 22px; height: 22px; color: var(--primary);"></i>
                                 <span>Global Analysis & Strategic Report</span>
                             </h3>
@@ -1294,6 +1294,95 @@ if (!isset($_SESSION['user_id'])) {
         let activeDropdown = null;
         window.activeSavePromise = null;
         window.showSaveToastNext = false;
+        window.lastChangedElement = null;
+
+        // Auto-save visual indicator helpers
+        function triggerIndicator(header, status) {
+            if (!header) return;
+            
+            let indicator = header.querySelector('.save-indicator');
+            if (!indicator) {
+                indicator = document.createElement('span');
+                indicator.className = 'save-indicator';
+                
+                // Insert before first span or anchor, or as first child
+                const insertTarget = header.querySelector('span, a');
+                if (insertTarget) {
+                    header.insertBefore(indicator, insertTarget);
+                } else {
+                    header.insertBefore(indicator, header.firstChild);
+                }
+            }
+            
+            if (status === 'saving') {
+                indicator.textContent = 'saving...';
+                indicator.className = 'save-indicator visible saving';
+                if (indicator.hideTimeout) {
+                    clearTimeout(indicator.hideTimeout);
+                    indicator.hideTimeout = null;
+                }
+            } else if (status === 'saved') {
+                indicator.textContent = 'saved';
+                indicator.className = 'save-indicator visible saved';
+                
+                if (indicator.hideTimeout) {
+                    clearTimeout(indicator.hideTimeout);
+                }
+                indicator.hideTimeout = setTimeout(() => {
+                    indicator.classList.remove('visible');
+                    setTimeout(() => {
+                        if (!indicator.classList.contains('visible') && indicator.parentNode) {
+                            indicator.remove();
+                        }
+                    }, 200);
+                }, 1200);
+            }
+        }
+
+        function showSavingIndicatorForElement(element) {
+            if (!element) return;
+            let header = null;
+            if (element.id && element.id.startsWith('comp-')) {
+                const compId = element.id.split('-').pop();
+                header = document.getElementById(`comp-header-${compId}`);
+            } else {
+                const panel = element.closest('.glass-panel');
+                header = panel ? panel.querySelector('h3, h4') : null;
+            }
+            if (header) {
+                triggerIndicator(header, 'saving');
+            }
+        }
+
+        function showSavedIndicatorForElement(element) {
+            if (!element) return;
+            let header = null;
+            if (element.id && element.id.startsWith('comp-')) {
+                const compId = element.id.split('-').pop();
+                header = document.getElementById(`comp-header-${compId}`);
+            } else {
+                const panel = element.closest('.glass-panel');
+                header = panel ? panel.querySelector('h3, h4') : null;
+            }
+            if (header) {
+                triggerIndicator(header, 'saved');
+            }
+        }
+
+        // Global capture phase listener to trace which element fired change
+        document.addEventListener('change', (e) => {
+            const id = e.target.id;
+            if (id && (
+                id === 'sitemap-details' || 
+                id === 'additional-notes' || 
+                id.startsWith('perf-') || 
+                id === 'global-report-analysis' || 
+                id === 'global-report-strategy' ||
+                id.startsWith('comp-')
+            )) {
+                window.lastChangedElement = e.target;
+            }
+        }, true);
 
         // Toggle Sidebar collapsed state
         function toggleSidebar() {
@@ -1933,6 +2022,13 @@ if (!isset($_SESSION['user_id'])) {
         function saveAuditMetrics(silent = false, showToastNotification = !silent) {
             if (!activeAuditId) return Promise.resolve();
 
+            const triggeringElement = window.lastChangedElement;
+            window.lastChangedElement = null; // Clear immediately
+
+            if (triggeringElement) {
+                showSavingIndicatorForElement(triggeringElement);
+            }
+
             const min = parseInt(document.getElementById('perf-avg-visit-duration-min').value) || 0;
             const sec = parseInt(document.getElementById('perf-avg-visit-duration-sec').value) || 0;
             const avg_visit_duration = (min * 60) + sec;
@@ -1979,6 +2075,9 @@ if (!isset($_SESSION['user_id'])) {
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
+                    if (triggeringElement) {
+                        showSavedIndicatorForElement(triggeringElement);
+                    }
                     if (showToastNotification || window.showSaveToastNext) {
                         showToast('Metrics saved');
                         window.showSaveToastNext = false;
@@ -1994,11 +2093,21 @@ if (!isset($_SESSION['user_id'])) {
                     }
                     return true;
                 } else {
+                    if (triggeringElement) {
+                        const header = triggeringElement.closest('.glass-panel')?.querySelector('h3, h4');
+                        const indicator = header?.querySelector('.save-indicator');
+                        if (indicator) indicator.classList.remove('visible');
+                    }
                     alert(data.error);
                     return false;
                 }
             })
             .catch(err => {
+                if (triggeringElement) {
+                    const header = triggeringElement.closest('.glass-panel')?.querySelector('h3, h4');
+                    const indicator = header?.querySelector('.save-indicator');
+                    if (indicator) indicator.classList.remove('visible');
+                }
                 console.error(err);
                 alert('Failed to save metrics.');
                 return false;
@@ -2081,6 +2190,16 @@ if (!isset($_SESSION['user_id'])) {
             
             showFullscreenLoader("Uploading breakdown screenshot...");
             
+            let header = null;
+            if (type === 'audit') {
+                header = document.getElementById('header-perf');
+            } else {
+                header = document.getElementById(`comp-header-${id}`);
+            }
+            if (header) {
+                triggerIndicator(header, 'saving');
+            }
+            
             fetch('api.php?action=upload_breakdown_screenshot', {
                 method: 'POST',
                 body: formData
@@ -2094,6 +2213,7 @@ if (!isset($_SESSION['user_id'])) {
                         document.getElementById('img-breakdown-country').src = data.filepath + '?v=' + new Date().getTime();
                         document.getElementById('preview-breakdown-country').style.display = 'block';
                         document.getElementById('placeholder-breakdown-country').style.display = 'none';
+                        window.lastChangedElement = document.getElementById('perf-breakdown-country-file');
                         saveAuditMetrics(true);
                     } else {
                         const compId = id;
@@ -2106,14 +2226,23 @@ if (!isset($_SESSION['user_id'])) {
                         
                         // Update in memory
                         competitorAnalysesData = competitorAnalysesData.map(c => c.id == compId ? data.competitor : c);
+                        window.lastChangedElement = document.getElementById(`comp-breakdown-file-${compId}`);
                         saveAuditMetrics(true);
                     }
                 } else {
+                    if (header) {
+                        const indicator = header.querySelector('.save-indicator');
+                        if (indicator) indicator.classList.remove('visible');
+                    }
                     alert(data.error);
                 }
             })
             .catch(err => {
                 hideFullscreenLoader();
+                if (header) {
+                    const indicator = header.querySelector('.save-indicator');
+                    if (indicator) indicator.classList.remove('visible');
+                }
                 console.error(err);
                 alert("Upload failed.");
             });
@@ -2140,6 +2269,9 @@ if (!isset($_SESSION['user_id'])) {
             // Save empty breakdown
             const comp = competitorAnalysesData.find(c => c.id === compId);
             if (comp) {
+                const header = document.getElementById(`comp-header-${compId}`);
+                if (header) triggerIndicator(header, 'saving');
+
                 const formData = new FormData();
                 formData.append('id', compId);
                 formData.append('url', comp.url);
@@ -2166,9 +2298,22 @@ if (!isset($_SESSION['user_id'])) {
                 .then(res => res.json())
                 .then(data => {
                     if (data.success) {
+                        if (header) triggerIndicator(header, 'saved');
                         competitorAnalysesData = competitorAnalysesData.map(c => c.id === compId ? data.competitor : c);
                         saveAuditMetrics(true);
+                    } else {
+                        if (header) {
+                            const indicator = header.querySelector('.save-indicator');
+                            if (indicator) indicator.classList.remove('visible');
+                        }
                     }
+                })
+                .catch(err => {
+                    if (header) {
+                        const indicator = header.querySelector('.save-indicator');
+                        if (indicator) indicator.classList.remove('visible');
+                    }
+                    console.error(err);
                 });
             }
         }
@@ -2191,6 +2336,7 @@ if (!isset($_SESSION['user_id'])) {
                 document.getElementById(`img-${type}`).src = e.target.result;
                 document.getElementById(`placeholder-${type}`).style.display = 'none';
                 document.getElementById(`preview-${type}`).style.display = 'block';
+                window.lastChangedElement = document.getElementById(`perf-${type}-file`);
                 saveAuditMetrics(true); // Auto-save after file upload/change
             };
             reader.readAsDataURL(file);
@@ -2200,7 +2346,8 @@ if (!isset($_SESSION['user_id'])) {
             if (event) {
                 event.stopPropagation(); // prevent triggering browser file browse popup click
             }
-            document.getElementById(`perf-${type}-file`).value = '';
+            const fileInput = document.getElementById(`perf-${type}-file`);
+            fileInput.value = '';
             document.getElementById(`img-${type}`).src = '';
             document.getElementById(`placeholder-${type}`).style.display = 'flex';
             document.getElementById(`preview-${type}`).style.display = 'none';
@@ -2212,6 +2359,7 @@ if (!isset($_SESSION['user_id'])) {
             } else if (type === 'breakdown-country') {
                 currentBreakdownPath = '';
             }
+            window.lastChangedElement = fileInput;
             saveAuditMetrics(true); // Auto-save after screenshot removal
         }
 
@@ -4238,7 +4386,7 @@ if (!isset($_SESSION['user_id'])) {
                     card.innerHTML = `
                         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: ${isCollapsed ? 'none' : '1px solid var(--border-glass)'}; padding-bottom: 12px; margin-bottom: ${isCollapsed ? '0' : '20px'};">
                             <div style="display: flex; align-items: center; gap: 12px;">
-                                <h4 style="font-weight: 700; margin: 0; font-size: 1.15rem; color: var(--primary);">
+                                <h4 id="comp-header-${c.id}" style="font-weight: 700; margin: 0; font-size: 1.15rem; color: var(--primary); display: inline-flex; align-items: center; gap: 8px;">
                                     <a href="${escapeHtml(c.url)}" target="_blank" class="url-link">${escapeHtml(getDomainFromUrl(c.url))}</a>
                                 </h4>
                                 <button class="btn btn-secondary btn-icon" style="padding: 4px; border-radius: 4px; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center;" onclick="toggleCompetitorPerfCollapse(${c.id})" title="${isCollapsed ? 'Expand' : 'Collapse'}">
@@ -4567,6 +4715,11 @@ if (!isset($_SESSION['user_id'])) {
             const comp = competitorAnalysesData.find(c => c.id === competitorId);
             if (!comp) return;
 
+            const header = document.getElementById(`comp-header-${competitorId}`);
+            if (header) {
+                triggerIndicator(header, 'saving');
+            }
+
             const bounce = document.getElementById(`comp-bounce-${competitorId}`).value;
             const pages = document.getElementById(`comp-pages-${competitorId}`).value;
             const visits = document.getElementById(`comp-monthly-visits-${competitorId}`).value;
@@ -4607,13 +4760,24 @@ if (!isset($_SESSION['user_id'])) {
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
+                    if (header) {
+                        triggerIndicator(header, 'saved');
+                    }
                     competitorAnalysesData = competitorAnalysesData.map(c => c.id === competitorId ? data.competitor : c);
                     saveAuditMetrics(true); // Save audit silently
                 } else {
+                    if (header) {
+                        const indicator = header.querySelector('.save-indicator');
+                        if (indicator) indicator.classList.remove('visible');
+                    }
                     showToast('Failed to auto-save competitor data: ' + (data.error || ''), 'error');
                 }
             })
             .catch(err => {
+                if (header) {
+                    const indicator = header.querySelector('.save-indicator');
+                    if (indicator) indicator.classList.remove('visible');
+                }
                 console.error(err);
                 showToast('Request failed or timed out.', 'error');
             })
