@@ -2262,6 +2262,7 @@ if (!isset($_SESSION['user_id'])) {
                         // Trigger preview
                         const eventObj = { target: { files: files } };
                         handleFileChange(eventObj, type);
+                    }
                 }, false);
             });
         }
