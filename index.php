@@ -692,13 +692,13 @@ if (!isset($_SESSION['user_id'])) {
                                             
                                             <!-- Mode Screenshot: Upload Zone & Preview -->
                                             <div id="breakdown-screenshot-container" style="display: none; flex-grow: 1; flex-direction: column; height: 100%;">
-                                                <div class="screenshot-upload-zone" id="zone-breakdown-country" onclick="triggerFileInput('perf-breakdown-country-file')" style="height: 180px; min-height: 180px; max-height: 180px; padding: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; box-sizing: border-box; overflow: hidden;">
+                                                <div class="screenshot-upload-zone" id="zone-breakdown-country" onclick="triggerFileInput('perf-breakdown-country-file')" style="flex-grow: 1; height: 100%; min-height: 180px; padding: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; box-sizing: border-box; overflow: hidden; position: relative;">
                                                     <input type="file" id="perf-breakdown-country-file" accept="image/*" style="display: none;" onchange="handleFileChange(event, 'breakdown-country')">
                                                     <div class="upload-placeholder" id="placeholder-breakdown-country" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px;">
                                                         <i data-lucide="image" style="width: 28px; height: 28px; color: var(--text-muted); margin-bottom: 8px;"></i>
                                                         <p style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 500; margin: 0; text-align: center; line-height: 1.4;">Click, drag & drop, or paste (Ctrl+V) breakdown screenshot</p>
                                                     </div>
-                                                    <div class="upload-preview" id="preview-breakdown-country" style="display: none; position: relative; width: 100%; height: 100%;">
+                                                    <div class="upload-preview" id="preview-breakdown-country" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
                                                         <img src="" id="img-breakdown-country" style="width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius-sm); cursor: zoom-in;" onclick="event.stopPropagation(); openImageLightbox(this.src)">
                                                         <button type="button" class="btn-delete-screenshot" onclick="removeScreenshot(event, 'breakdown-country')">
                                                             <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
@@ -4238,13 +4238,13 @@ if (!isset($_SESSION['user_id'])) {
                                         
                                         <!-- Mode Screenshot: Upload Zone & Preview -->
                                         <div id="comp-breakdown-screenshot-container-${c.id}" class="comp-breakdown-screenshot-container" data-comp-id="${c.id}" style="${!isScreenshotPath(c.breakdown_by_country) ? 'display: none;' : ''} flex-grow: 1; flex-direction: column; height: 100%;">
-                                            <div class="screenshot-upload-zone" id="zone-comp-breakdown-${c.id}" onclick="triggerFileInput('comp-breakdown-file-${c.id}')" style="height: 180px; min-height: 180px; max-height: 180px; padding: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; box-sizing: border-box; overflow: hidden;">
+                                            <div class="screenshot-upload-zone" id="zone-comp-breakdown-${c.id}" onclick="triggerFileInput('comp-breakdown-file-${c.id}')" style="flex-grow: 1; height: 100%; min-height: 180px; padding: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; box-sizing: border-box; overflow: hidden; position: relative;">
                                                 <input type="file" id="comp-breakdown-file-${c.id}" accept="image/*" style="display: none;" onchange="handleCompBreakdownFileChange(event, ${c.id})">
                                                 <div class="upload-placeholder" id="placeholder-comp-breakdown-${c.id}" style="${isScreenshotPath(c.breakdown_by_country) ? 'display: none;' : ''} display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px;">
                                                     <i data-lucide="image" style="width: 28px; height: 28px; color: var(--text-muted); margin-bottom: 8px;"></i>
                                                     <p style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 500; margin: 0; text-align: center; line-height: 1.4;">Click, drag & drop, or paste (Ctrl+V) breakdown screenshot</p>
                                                 </div>
-                                                <div class="upload-preview" id="preview-comp-breakdown-${c.id}" style="${isScreenshotPath(c.breakdown_by_country) ? 'display: block;' : 'display: none;'} position: relative; width: 100%; height: 100%;">
+                                                <div class="upload-preview" id="preview-comp-breakdown-${c.id}" style="${isScreenshotPath(c.breakdown_by_country) ? 'display: block;' : 'display: none;'} position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
                                                     <img src="${isScreenshotPath(c.breakdown_by_country) ? escapeHtml(c.breakdown_by_country) : ''}" id="img-comp-breakdown-${c.id}" style="width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius-sm); cursor: zoom-in;" onclick="event.stopPropagation(); openImageLightbox(this.src)">
                                                     <button type="button" class="btn-delete-screenshot" onclick="removeCompBreakdownScreenshot(event, ${c.id})">
                                                         <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>

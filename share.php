@@ -645,7 +645,7 @@
                     const breakdownVal = data.audit.breakdown_by_country || '';
                     const breakdownContainer = document.getElementById('share-breakdown-country-container');
                     if (isScreenshotPath(breakdownVal)) {
-                        breakdownContainer.innerHTML = `<img src="${breakdownVal}" style="width: 100%; height: 180px; object-fit: cover; border-radius: var(--radius-sm); border: 1px solid var(--border-glass); cursor: zoom-in; box-sizing: border-box;" onclick="openImageLightbox(this.src)">`;
+                        breakdownContainer.innerHTML = `<img src="${breakdownVal}" style="width: 100%; height: 100%; min-height: 180px; object-fit: cover; border-radius: var(--radius-sm); border: 1px solid var(--border-glass); cursor: zoom-in; box-sizing: border-box;" onclick="openImageLightbox(this.src)">`;
                     } else {
                         breakdownContainer.innerHTML = `<textarea id="perf-breakdown-country" class="form-input" style="opacity:0.8; flex-grow: 1; min-height: 180px; resize: none; height: 100%;" readonly></textarea>`;
                         document.getElementById('perf-breakdown-country').value = breakdownVal || 'No country breakdown registered.';
@@ -1327,7 +1327,7 @@
                                         <label style="font-size: 0.75rem; margin-bottom: 4px; color: var(--text-secondary);">Country Breakdown</label>
                                         <div style="flex-grow: 1; display: flex; flex-direction: column; height: 100%;">
                                             ${isScreenshotPath(c.breakdown_by_country) ? `
-                                                <div style="background:rgba(255,255,255,0.02); padding:8px; border-radius:6px; border:1px solid var(--border-glass); flex-grow:1; display:flex; align-items:center; justify-content:center; min-height:180px; height: 180px; box-sizing: border-box; overflow: hidden;">
+                                                <div style="background:rgba(255,255,255,0.02); padding:8px; border-radius:6px; border:1px solid var(--border-glass); flex-grow:1; display:flex; align-items:center; justify-content:center; min-height:180px; height: 100%; box-sizing: border-box; overflow: hidden;">
                                                     <img src="${escapeHtml(c.breakdown_by_country)}" style="width:100%; height:100%; object-fit:cover; border-radius:4px; cursor:zoom-in;" onclick="openImageLightbox(this.src)">
                                                 </div>
                                             ` : `
