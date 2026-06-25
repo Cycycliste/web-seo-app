@@ -699,7 +699,7 @@ if (!isset($_SESSION['user_id'])) {
                                                         <p style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 500;">Click, drag & drop, or paste (Ctrl+V) breakdown screenshot</p>
                                                     </div>
                                                     <div class="upload-preview" id="preview-breakdown-country" style="display: none; position: relative; width: 100%;">
-                                                        <img src="" id="img-breakdown-country" style="width: 100%; max-height: 400px; object-fit: contain; border-radius: var(--radius-sm);">
+                                                        <img src="" id="img-breakdown-country" style="width: 100%; height: 180px; object-fit: cover; border-radius: var(--radius-sm); cursor: zoom-in;" onclick="event.stopPropagation(); openImageLightbox(this.src)">
                                                         <button type="button" class="btn-delete-screenshot" onclick="removeScreenshot(event, 'breakdown-country')">
                                                             <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
                                                             <span>Remove</span>
@@ -4245,7 +4245,7 @@ if (!isset($_SESSION['user_id'])) {
                                                     <p style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 500; margin: 0;">Click, drag & drop, or paste (Ctrl+V) breakdown screenshot</p>
                                                 </div>
                                                 <div class="upload-preview" id="preview-comp-breakdown-${c.id}" style="${isScreenshotPath(c.breakdown_by_country) ? 'display: block;' : 'display: none;'} position: relative; width: 100%;">
-                                                    <img src="${isScreenshotPath(c.breakdown_by_country) ? escapeHtml(c.breakdown_by_country) : ''}" id="img-comp-breakdown-${c.id}" style="width: 100%; max-height: 400px; object-fit: contain; border-radius: var(--radius-sm);">
+                                                    <img src="${isScreenshotPath(c.breakdown_by_country) ? escapeHtml(c.breakdown_by_country) : ''}" id="img-comp-breakdown-${c.id}" style="width: 100%; height: 180px; object-fit: cover; border-radius: var(--radius-sm); cursor: zoom-in;" onclick="event.stopPropagation(); openImageLightbox(this.src)">
                                                     <button type="button" class="btn-delete-screenshot" onclick="removeCompBreakdownScreenshot(event, ${c.id})">
                                                         <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
                                                         <span>Remove</span>
@@ -5474,6 +5474,27 @@ if (!isset($_SESSION['user_id'])) {
             html += '</ul>';
             return html;
         }
+
+        function openImageLightbox(src) {
+            const modal = document.getElementById('image-lightbox-modal');
+            const img = document.getElementById('lightbox-image');
+            if (modal && img) {
+                img.src = src;
+                modal.style.display = 'flex';
+            }
+        }
+
+        function closeImageLightbox() {
+            const modal = document.getElementById('image-lightbox-modal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
     </script>
+    <!-- Lightbox Modal for fullscreen image view -->
+    <div id="image-lightbox-modal" class="modal-overlay" onclick="closeImageLightbox()" style="display: none; justify-content: center; align-items: center; background: rgba(0,0,0,0.9); z-index: 10000; position: fixed; top: 0; left: 0; width: 100%; height: 100%;">
+        <button type="button" onclick="closeImageLightbox()" style="position: absolute; top: 20px; right: 25px; background: none; border: none; color: #fff; font-size: 35px; cursor: pointer; font-weight: 300; line-height: 1;">&times;</button>
+        <img id="lightbox-image" src="" style="max-width: 90%; max-height: 90%; object-fit: contain; border-radius: 4px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);" onclick="event.stopPropagation();">
+    </div>
 </body>
 </html>
