@@ -599,16 +599,20 @@ if (!isset($_SESSION['user_id'])) {
 
                                 <!-- Row 2, Column 2: Sitemap Status & Setup Details -->
                                 <div class="glass-panel" style="grid-column: 2; grid-row: 2; padding: 24px; margin-bottom: 30px; display: flex; flex-direction: column;">
-                                    <h4 id="header-sitemap" style="margin-bottom: 16px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; position: relative; padding-right: 60px;">Sitemap Status & Setup Details</h4>
                                     <div class="form-group" style="margin-bottom: 0; flex-grow: 1; display: flex; flex-direction: column;">
+                                        <label id="header-sitemap" for="sitemap-details" style="margin-bottom: 16px; font-weight: 600; font-size: 1rem; color: var(--text-primary); display: block;">
+                                            <span class="indicator-container-right">Sitemap Status & Setup Details</span>
+                                        </label>
                                         <textarea id="sitemap-details" class="form-input" style="flex-grow: 1; min-height: 120px; resize: vertical;" placeholder="Add sitemap submission status, URL, last read dates, and crawl coverage..." onchange="window.lastChangedElement = this; saveAuditMetrics(true)"></textarea>
                                     </div>
                                 </div>
 
                                 <!-- Row 2, Column 3: Additional Notes -->
                                 <div class="glass-panel" style="grid-column: 3; grid-row: 2; padding: 24px; margin-bottom: 30px; display: flex; flex-direction: column;">
-                                    <h4 id="header-additional-notes" style="margin-bottom: 16px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; position: relative; padding-right: 60px;">Additional Notes</h4>
                                     <div class="form-group" style="margin-bottom: 0; flex-grow: 1; display: flex; flex-direction: column;">
+                                        <label id="header-additional-notes" for="additional-notes" style="margin-bottom: 16px; font-weight: 600; font-size: 1rem; color: var(--text-primary); display: block;">
+                                            <span class="indicator-container-right">Additional Notes</span>
+                                        </label>
                                         <textarea id="additional-notes" class="form-input" style="flex-grow: 1; min-height: 120px; resize: vertical;" placeholder="Add other observations, technical guidelines, or custom audit notes..." onchange="window.lastChangedElement = this; saveAuditMetrics(true)"></textarea>
                                     </div>
                                 </div>
@@ -678,7 +682,7 @@ if (!isset($_SESSION['user_id'])) {
                                     <div style="display: flex; flex-direction: column; height: 100%;">
                                         <div class="form-group" style="height: 100%; display: flex; flex-direction: column; margin-bottom: 0;">
                                             <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 8px;">
-                                                <label style="margin-bottom: 0; position: relative; padding-right: 60px; display: inline-block;">Breakdown By Country</label>
+                                                <label class="indicator-container-right" style="margin-bottom: 0;">Breakdown By Country</label>
                                                 <div class="mode-tabs" style="display: flex; gap: 4px;">
                                                     <button type="button" class="btn btn-secondary btn-sm" id="btn-breakdown-mode-text" onclick="setBreakdownMode('text')" style="font-size: 0.75rem; padding: 2px 8px; background: rgba(139, 92, 246, 0.15); border-color: rgba(139, 92, 246, 0.3); color: var(--primary);">Text</button>
                                                     <button type="button" class="btn btn-secondary btn-sm" id="btn-breakdown-mode-screenshot" onclick="setBreakdownMode('screenshot')" style="font-size: 0.75rem; padding: 2px 8px;">Screenshot</button>
@@ -873,7 +877,7 @@ if (!isset($_SESSION['user_id'])) {
                             <div class="form-group" style="margin-bottom: 28px; display: flex; flex-direction: column; gap: 8px;">
                                 <label for="global-report-analysis" style="font-weight: 600; font-size: 0.95rem; color: var(--text-primary); display: flex; align-items: center; gap: 6px;">
                                     <i data-lucide="compass" style="width: 16px; height: 16px; color: var(--primary);"></i>
-                                    <span style="position: relative; padding-right: 60px; display: inline-block;">Global Analysis & Audit Meaning</span>
+                                    <span class="indicator-container-right">Global Analysis & Audit Meaning</span>
                                 </label>
                                 <textarea id="global-report-analysis" class="form-input" style="min-height: 250px; resize: vertical; width: 100%; font-family: inherit; line-height: 1.5; padding: 14px;" placeholder="Explain the global findings of this audit. What do these metrics mean for the client's website? (e.g. Traffic Trends, Keyword Gaps, Core Web Vitals summary...)" onchange="window.lastChangedElement = this; saveAuditMetrics(true)"></textarea>
                             </div>
@@ -881,7 +885,7 @@ if (!isset($_SESSION['user_id'])) {
                             <div class="form-group" style="display: flex; flex-direction: column; gap: 8px;">
                                 <label for="global-report-strategy" style="font-weight: 600; font-size: 0.95rem; color: var(--text-primary); display: flex; align-items: center; gap: 6px;">
                                     <i data-lucide="trending-up" style="width: 16px; height: 16px; color: var(--secondary);"></i>
-                                    <span style="position: relative; padding-right: 60px; display: inline-block;">Recommendations & Strategy to Adopt</span>
+                                    <span class="indicator-container-right">Recommendations & Strategy to Adopt</span>
                                 </label>
                                 <textarea id="global-report-strategy" class="form-input" style="min-height: 250px; resize: vertical; width: 100%; font-family: inherit; line-height: 1.5; padding: 14px;" placeholder="Outline the concrete recommendations and next steps. What strategy should they execute next?" onchange="window.lastChangedElement = this; saveAuditMetrics(true)"></textarea>
                             </div>
@@ -1361,12 +1365,31 @@ if (!isset($_SESSION['user_id'])) {
         function getLabelOrHeaderForElement(element) {
             if (!element) return null;
             
-            // For competitor card inputs and performance metrics, find closest .form-group's label
+            // Explicit overrides for Sitemap Details and Additional Notes
+            if (element.id === 'sitemap-details') {
+                const header = document.getElementById('header-sitemap');
+                if (header) {
+                    const span = header.querySelector('.indicator-container-right') || header;
+                    return span;
+                }
+            }
+            if (element.id === 'additional-notes') {
+                const header = document.getElementById('header-additional-notes');
+                if (header) {
+                    const span = header.querySelector('.indicator-container-right') || header;
+                    return span;
+                }
+            }
+            
+            // Check closest form group first
             const formGroup = element.closest('.form-group');
             if (formGroup) {
+                const rightContainer = formGroup.querySelector('.indicator-container-right');
+                if (rightContainer) return rightContainer;
+                
                 const label = formGroup.querySelector('label');
                 if (label) {
-                    const span = label.querySelector('span');
+                    const span = label.querySelector('.indicator-container-right') || label.querySelector('span');
                     if (span) return span;
                     return label;
                 }
@@ -1375,8 +1398,15 @@ if (!isset($_SESSION['user_id'])) {
             // Fallback to sitemap / additional notes headers
             const panel = element.closest('.glass-panel');
             if (panel) {
-                const heading = panel.querySelector('h3, h4');
-                if (heading) return heading;
+                const rightContainer = panel.querySelector('.indicator-container-right');
+                if (rightContainer) return rightContainer;
+                
+                const heading = panel.querySelector('h3, h4, label');
+                if (heading) {
+                    const span = heading.querySelector('.indicator-container-right') || heading.querySelector('span');
+                    if (span) return span;
+                    return heading;
+                }
             }
             
             return null;
@@ -4503,7 +4533,7 @@ if (!isset($_SESSION['user_id'])) {
                                 <div style="display: flex; flex-direction: column; height: 100%;">
                                     <div class="form-group" style="height: 100%; display: flex; flex-direction: column; margin-bottom: 0;">
                                         <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 8px;">
-                                            <label style="font-size: 0.8rem; margin-bottom: 0; color: var(--text-secondary); position: relative; padding-right: 60px; display: inline-block;">Breakdown by Country</label>
+                                            <label class="indicator-container-right" style="font-size: 0.8rem; margin-bottom: 0; color: var(--text-secondary);">Breakdown by Country</label>
                                             <div class="mode-tabs" style="display: flex; gap: 4px;">
                                                 <button type="button" class="btn btn-secondary btn-sm" id="btn-comp-breakdown-mode-text-${c.id}" onclick="setCompBreakdownMode(${c.id}, 'text')" style="font-size: 0.7rem; padding: 1px 6px; ${!isScreenshotPath(c.breakdown_by_country) ? 'background: rgba(139, 92, 246, 0.15); border-color: rgba(139, 92, 246, 0.3); color: var(--primary);' : ''}">Text</button>
                                                 <button type="button" class="btn btn-secondary btn-sm" id="btn-comp-breakdown-mode-screenshot-${c.id}" onclick="setCompBreakdownMode(${c.id}, 'screenshot')" style="font-size: 0.7rem; padding: 1px 6px; ${isScreenshotPath(c.breakdown_by_country) ? 'background: rgba(139, 92, 246, 0.15); border-color: rgba(139, 92, 246, 0.3); color: var(--primary);' : ''}">Screenshot</button>
