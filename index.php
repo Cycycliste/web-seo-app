@@ -287,7 +287,7 @@ if (!isset($_SESSION['user_id'])) {
                     <!-- Tab 1: Website Audit -->
                     <div id="tab-website-audit" class="tab-pane active">
                         <!-- Sub tabs for Website Audit -->
-                        <div class="flex-space" style="margin-bottom: 24px;">
+                        <div class="flex-space subtabs-header" style="margin-bottom: 24px;">
                             <div style="display: flex; gap: 10px;">
                                 <button class="btn btn-secondary btn-sm" id="subtab-btn-seo" onclick="switchSubTab('seo')" style="background: rgba(139, 92, 246, 0.1); border-color: rgba(139, 92, 246, 0.3); color: var(--primary);">SEO State</button>
                                 <button class="btn btn-secondary btn-sm" id="subtab-btn-tech" onclick="switchSubTab('tech')">Technical State</button>
@@ -752,8 +752,10 @@ if (!isset($_SESSION['user_id'])) {
                         <div class="glass-panel scraper-box">
                             <h4 style="margin-bottom: 12px; font-weight: 600;">Add Keyword / Search Term</h4>
                             <form id="search-term-form" class="scraper-form" onsubmit="addSearchTerm(event)">
-                                <input type="text" id="new-search-term" class="form-input" placeholder="e.g. best seo agency in paris..." required>
-                                <button type="submit" class="btn btn-primary" style="white-space: nowrap;">
+                                <div style="flex-grow: 1; height: 80px;">
+                                    <textarea id="new-search-term" class="form-input" placeholder="Paste keyword(s) / search term(s) (one per line, e.g. best seo agency in paris)..." style="width: 100%; height: 80px; min-height: 80px; resize: vertical; display: block;" required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary" style="white-space: nowrap; height: 38px; display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
                                     <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
                                     <span>Add Term</span>
                                 </button>
@@ -776,7 +778,7 @@ if (!isset($_SESSION['user_id'])) {
                     <!-- Tab 3: Competitor Analysis -->
                     <div id="tab-competitor-analysis" class="tab-pane">
                         <!-- Sub-navigation for Competitor Analysis -->
-                        <div class="flex-space" style="margin-bottom: 24px;">
+                        <div class="flex-space subtabs-header" style="margin-bottom: 24px;">
                             <div style="display: flex; gap: 10px;">
                                 <button class="btn btn-secondary btn-sm" id="comp-subtab-btn-seo" onclick="switchCompSubTab('seo')" style="background: rgba(139, 92, 246, 0.1); border-color: rgba(139, 92, 246, 0.3); color: var(--primary);">SEO State</button>
                                 <button class="btn btn-secondary btn-sm" id="comp-subtab-btn-tech" onclick="switchCompSubTab('tech')">Technical State</button>
@@ -1318,7 +1320,7 @@ if (!isset($_SESSION['user_id'])) {
                             }
                         }, 200);
                     }
-                }, 1200);
+                }, 800);
                 return ` <span class="save-indicator visible saved">saved</span>`;
             }
             return '';
@@ -1355,7 +1357,7 @@ if (!isset($_SESSION['user_id'])) {
                             indicator.remove();
                         }
                     }, 200);
-                }, 1200);
+                }, 800);
             }
         }
 
@@ -1386,7 +1388,7 @@ if (!isset($_SESSION['user_id'])) {
                 
                 const label = formGroup.querySelector('label');
                 if (label) {
-                    const span = label.querySelector('.indicator-container-right') || label.querySelector('span');
+                    const span = label.querySelector('.indicator-container-right') || label.querySelector('span:not(.save-indicator)');
                     if (span) return span;
                     return label;
                 }
@@ -1400,7 +1402,7 @@ if (!isset($_SESSION['user_id'])) {
                 
                 const heading = panel.querySelector('h3, h4, label');
                 if (heading) {
-                    const span = heading.querySelector('.indicator-container-right') || heading.querySelector('span');
+                    const span = heading.querySelector('.indicator-container-right') || heading.querySelector('span:not(.save-indicator)');
                     if (span) return span;
                     return heading;
                 }
@@ -1532,6 +1534,39 @@ if (!isset($_SESSION['user_id'])) {
                                 }
                             }, 50);
                         }
+                    }
+                }
+            });
+
+            // Intercept Tab key in Country Breakdown textareas to insert spaces instead of shifting focus
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Tab') {
+                    const target = e.target;
+                    if (target && (target.id === 'perf-breakdown-country' || target.id.startsWith('comp-breakdown-'))) {
+                        e.preventDefault();
+                        
+                        const start = target.selectionStart;
+                        const end = target.selectionEnd;
+                        const value = target.value;
+                        
+                        // Find current column index in the line
+                        const textBeforeCaret = value.substring(0, start);
+                        const lines = textBeforeCaret.split('\n');
+                        const currentLineText = lines[lines.length - 1];
+                        const currentColumn = currentLineText.length;
+                        
+                        // Calculate spaces needed to align to next multiple of 10
+                        const tabSize = 10;
+                        const spacesNeeded = tabSize - (currentColumn % tabSize);
+                        const tabSpaces = ' '.repeat(spacesNeeded);
+                        
+                        target.value = value.substring(0, start) + tabSpaces + value.substring(end);
+                        
+                        // Put caret in the right position
+                        target.selectionStart = target.selectionEnd = start + spacesNeeded;
+                        
+                        // Trigger input event to update any change state or handlers
+                        target.dispatchEvent(new Event('input', { bubbles: true }));
                     }
                 }
             });
@@ -2136,6 +2171,21 @@ if (!isset($_SESSION['user_id'])) {
                         showToast('Metrics saved');
                         window.showSaveToastNext = false;
                     }
+
+                    // Update in-memory paths
+                    if (data.main_channels !== undefined) {
+                        currentMainChannelsPath = data.main_channels;
+                    }
+                    if (data.traffic_trends !== undefined) {
+                        currentTrafficTrendsPath = data.traffic_trends;
+                    }
+
+                    // Clear the file inputs value to prevent re-uploads on subsequent saves
+                    const channelsInput = document.getElementById('perf-main-channels-file');
+                    if (channelsInput) channelsInput.value = '';
+                    const trendsInput = document.getElementById('perf-traffic-trends-file');
+                    if (trendsInput) trendsInput.value = '';
+
                     const oldCountry = activeAuditCountry;
                     activeAuditCountry = document.getElementById('perf-target-country').value || "Website's Country";
                     if (oldCountry !== activeAuditCountry) {
@@ -2148,9 +2198,16 @@ if (!isset($_SESSION['user_id'])) {
                     return true;
                 } else {
                     if (triggeringElement) {
-                        const header = triggeringElement.closest('.glass-panel')?.querySelector('h3, h4');
-                        const indicator = header?.querySelector('.save-indicator');
-                        if (indicator) indicator.classList.remove('visible');
+                        const target = getLabelOrHeaderForElement(triggeringElement);
+                        const indicator = target?.querySelector('.save-indicator');
+                        if (indicator) {
+                            indicator.classList.remove('visible');
+                            setTimeout(() => {
+                                if (!indicator.classList.contains('visible') && indicator.parentNode) {
+                                    indicator.remove();
+                                }
+                            }, 200);
+                        }
                     }
                     alert(data.error);
                     return false;
@@ -2158,9 +2215,16 @@ if (!isset($_SESSION['user_id'])) {
             })
             .catch(err => {
                 if (triggeringElement) {
-                    const header = triggeringElement.closest('.glass-panel')?.querySelector('h3, h4');
-                    const indicator = header?.querySelector('.save-indicator');
-                    if (indicator) indicator.classList.remove('visible');
+                    const target = getLabelOrHeaderForElement(triggeringElement);
+                    const indicator = target?.querySelector('.save-indicator');
+                    if (indicator) {
+                        indicator.classList.remove('visible');
+                        setTimeout(() => {
+                            if (!indicator.classList.contains('visible') && indicator.parentNode) {
+                                indicator.remove();
+                            }
+                        }, 200);
+                    }
                 }
                 console.error(err);
                 alert('Failed to save metrics.');
@@ -2520,6 +2584,7 @@ if (!isset($_SESSION['user_id'])) {
                     table.style.width = totalTableWidth + 'px';
                     table.style.minWidth = '0';
                     table.style.tableLayout = 'fixed';
+                    table.classList.add('table-resized');
 
                     document.body.classList.add('is-resizing-table');
 
@@ -2574,12 +2639,12 @@ if (!isset($_SESSION['user_id'])) {
                 const h1Len = p.h1 ? p.h1.length : 0;
 
                 seoRow.innerHTML = `
-                    <td style="white-space: nowrap; vertical-align: middle;">
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <button class="btn btn-secondary btn-icon action-trigger-btn" style="padding: 2px; width: 20px; height: 20px; min-width: 20px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center;" onclick="showUrlActionsDropdown(event, this, ${p.id}, 'page', '${escapeHtml(p.url)}')">
+                    <td style="vertical-align: middle;">
+                        <div class="url-cell-container">
+                            <button class="btn btn-secondary btn-icon action-trigger-btn" style="padding: 2px; width: 20px; height: 20px; min-width: 20px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;" onclick="showUrlActionsDropdown(event, this, ${p.id}, 'page', '${escapeHtml(p.url)}')">
                                 <i data-lucide="more-vertical" style="width: 12px; height: 12px;"></i>
                             </button>
-                            <a href="${escapeHtml(p.url)}" target="_blank" class="url-link" title="${escapeHtml(p.url)}">${escapeHtml(getUrlDisplayName(p.url))}</a>
+                            <a href="${escapeHtml(p.url)}" target="_blank" class="url-link" title="${escapeHtml(p.url)}" style="min-width: 0; flex: 1;">${escapeHtml(getUrlDisplayName(p.url))}</a>
                         </div>
                     </td>
                     <td data-editable="true" data-id="${p.id}" data-type="page" data-field="meta_title" data-value="${escapeHtml(p.meta_title || '')}">
@@ -2661,12 +2726,12 @@ if (!isset($_SESSION['user_id'])) {
                     techRow.classList.add('row-flash');
                 }
                 techRow.innerHTML = `
-                    <td style="white-space: nowrap; vertical-align: middle;">
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <button class="btn btn-secondary btn-icon action-trigger-btn" style="padding: 2px; width: 20px; height: 20px; min-width: 20px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center;" onclick="showUrlActionsDropdown(event, this, ${p.id}, 'page', '${escapeHtml(p.url)}')">
+                    <td style="vertical-align: middle;">
+                        <div class="url-cell-container">
+                            <button class="btn btn-secondary btn-icon action-trigger-btn" style="padding: 2px; width: 20px; height: 20px; min-width: 20px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;" onclick="showUrlActionsDropdown(event, this, ${p.id}, 'page', '${escapeHtml(p.url)}')">
                                 <i data-lucide="more-vertical" style="width: 12px; height: 12px;"></i>
                             </button>
-                            <a href="${escapeHtml(p.url)}" target="_blank" class="url-link" title="${escapeHtml(p.url)}">${escapeHtml(getUrlDisplayName(p.url))}</a>
+                            <a href="${escapeHtml(p.url)}" target="_blank" class="url-link" title="${escapeHtml(p.url)}" style="min-width: 0; flex: 1;">${escapeHtml(getUrlDisplayName(p.url))}</a>
                         </div>
                     </td>
                     <td style="text-align: center;">
@@ -2690,6 +2755,7 @@ if (!isset($_SESSION['user_id'])) {
             });
             lucide.createIcons();
             scrollToNewPage();
+            window.recentlyAddedPageIds.clear();
         }
 
         function scrollToNewPage() {
@@ -2807,9 +2873,6 @@ if (!isset($_SESSION['user_id'])) {
                     if (data.pages && Array.isArray(data.pages)) {
                         data.pages.forEach(p => {
                             window.recentlyAddedPageIds.add(p.id);
-                            setTimeout(() => {
-                                window.recentlyAddedPageIds.delete(p.id);
-                            }, 3000);
                         });
                         pagesData.push(...data.pages);
                     }
@@ -2861,9 +2924,6 @@ if (!isset($_SESSION['user_id'])) {
                     if (data.pages && Array.isArray(data.pages)) {
                         data.pages.forEach(p => {
                             window.recentlyAddedPageIds.add(p.id);
-                            setTimeout(() => {
-                                window.recentlyAddedPageIds.delete(p.id);
-                            }, 3000);
                         });
                         pagesData.push(...data.pages);
                     }
@@ -3806,7 +3866,11 @@ if (!isset($_SESSION['user_id'])) {
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    searchTermsData.push(data.term);
+                    if (data.terms && Array.isArray(data.terms)) {
+                        data.terms.forEach(t => searchTermsData.push(t));
+                    } else if (data.term) {
+                        searchTermsData.push(data.term);
+                    }
                     renderSearchTerms();
                     termInput.value = '';
                 } else {
@@ -3870,6 +3934,14 @@ if (!isset($_SESSION['user_id'])) {
             if (!form) return;
             if (form.style.display === 'none') {
                 form.style.display = 'flex';
+                // Focus and scroll to URL input directly
+                setTimeout(() => {
+                    const input = form.querySelector('.comp-url');
+                    if (input) {
+                        input.focus();
+                        input.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    }
+                }, 50);
             } else {
                 form.style.display = 'none';
             }
@@ -4136,9 +4208,6 @@ if (!isset($_SESSION['user_id'])) {
                             const newCompetitors = d.competitor_analyses.filter(c => !oldIds.has(c.id));
                             newCompetitors.forEach(c => {
                                 window.recentlyAddedCompetitorIds.add(c.id);
-                                setTimeout(() => {
-                                    window.recentlyAddedCompetitorIds.delete(c.id);
-                                }, 3000);
                             });
                             competitorAnalysesData = d.competitor_analyses;
                             renderCompetitorAnalyses();
@@ -4216,12 +4285,12 @@ if (!isset($_SESSION['user_id'])) {
                                          (parseInt(c.h6_count) || 0);
 
                     row.innerHTML = `
-                        <td style="white-space: nowrap; vertical-align: middle;">
-                            <div style="display: flex; align-items: center; gap: 8px;">
-                                <button class="btn btn-secondary btn-icon action-trigger-btn" style="padding: 2px; width: 20px; height: 20px; min-width: 20px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center;" onclick="showUrlActionsDropdown(event, this, ${c.id}, 'competitor', '${escapeHtml(c.url)}')">
+                        <td style="vertical-align: middle;">
+                            <div class="url-cell-container">
+                                <button class="btn btn-secondary btn-icon action-trigger-btn" style="padding: 2px; width: 20px; height: 20px; min-width: 20px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;" onclick="showUrlActionsDropdown(event, this, ${c.id}, 'competitor', '${escapeHtml(c.url)}')">
                                     <i data-lucide="more-vertical" style="width: 12px; height: 12px;"></i>
                                 </button>
-                                <a href="${escapeHtml(c.url)}" target="_blank" class="url-link" title="${escapeHtml(c.url)}">${escapeHtml(getDomainFromUrl(c.url))}</a>
+                                <a href="${escapeHtml(c.url)}" target="_blank" class="url-link" title="${escapeHtml(c.url)}" style="min-width: 0; flex: 1;">${escapeHtml(getDomainFromUrl(c.url))}</a>
                             </div>
                         </td>
                         <td data-editable="true" data-id="${c.id}" data-type="competitor_analysis" data-field="meta_title" data-value="${escapeHtml(c.meta_title || '')}">
@@ -4683,6 +4752,7 @@ if (!isset($_SESSION['user_id'])) {
 
             lucide.createIcons();
             scrollToNewCompetitor();
+            window.recentlyAddedCompetitorIds.clear();
         }
 
         function addCompetitorManual(e) {
@@ -4709,9 +4779,6 @@ if (!isset($_SESSION['user_id'])) {
                 hideFullscreenLoader();
                 if (data.success) {
                     window.recentlyAddedCompetitorIds.add(data.competitor.id);
-                    setTimeout(() => {
-                        window.recentlyAddedCompetitorIds.delete(data.competitor.id);
-                    }, 3000);
                     competitorAnalysesData.push(data.competitor);
                     renderCompetitorAnalyses();
                     urlInput.value = '';
@@ -4755,9 +4822,6 @@ if (!isset($_SESSION['user_id'])) {
                 btn.innerHTML = originalBtnHTML;
                 if (data.success) {
                     window.recentlyAddedCompetitorIds.add(data.competitor.id);
-                    setTimeout(() => {
-                        window.recentlyAddedCompetitorIds.delete(data.competitor.id);
-                    }, 3000);
                     competitorAnalysesData.push(data.competitor);
                     renderCompetitorAnalyses();
                     urlInput.value = '';
@@ -4801,9 +4865,6 @@ if (!isset($_SESSION['user_id'])) {
                 btn.innerHTML = originalBtnHTML;
                 if (data.success) {
                     window.recentlyAddedCompetitorIds.add(data.competitor.id);
-                    setTimeout(() => {
-                        window.recentlyAddedCompetitorIds.delete(data.competitor.id);
-                    }, 3000);
                     competitorAnalysesData.push(data.competitor);
                     renderCompetitorAnalyses();
                     urlInput.value = '';
@@ -5866,6 +5927,8 @@ if (!isset($_SESSION['user_id'])) {
             }
 
             openModal('text-viewer-modal');
+            textarea.focus();
+            textarea.select();
         }
 
         function saveTextViewerContent() {
@@ -5979,9 +6042,17 @@ if (!isset($_SESSION['user_id'])) {
                 const pathname = parsed.pathname;
                 
                 if (!pathname || pathname === '/' || pathname === '') {
-                    const host = parsed.hostname.replace('www.', '');
-                    const firstPart = host.split('.')[0];
-                    return firstPart.charAt(0).toUpperCase() + firstPart.slice(1);
+                    const host = parsed.hostname.replace(/^www\./i, '');
+                    let domainOnly = host;
+                    const doubleTlds = /\.(?:com?|org|net|gov|edu|co)\.[a-z]{2,3}$/i;
+                    if (doubleTlds.test(host)) {
+                        domainOnly = host.replace(doubleTlds, '');
+                    } else {
+                        domainOnly = host.replace(/\.[a-z]{2,8}$/i, '');
+                    }
+                    return domainOnly.split('.')
+                        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+                        .join('.');
                 }
                 
                 const parts = pathname.split('/').filter(x => x.length > 0);

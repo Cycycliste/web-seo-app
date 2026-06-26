@@ -88,7 +88,7 @@
 
         <!-- Tab 1: Website Audit -->
         <div id="tab-website-audit" class="tab-pane active">
-            <div class="flex-space" style="margin-bottom: 24px;">
+            <div class="flex-space subtabs-header" style="margin-bottom: 24px;">
                 <div style="display: flex; gap: 10px;">
                     <button class="btn btn-secondary btn-sm" id="subtab-btn-seo" onclick="switchSubTab('seo')" style="background: rgba(139, 92, 246, 0.1); border-color: rgba(139, 92, 246, 0.3); color: var(--primary);">SEO State</button>
                     <button class="btn btn-secondary btn-sm" id="subtab-btn-tech" onclick="switchSubTab('tech')">Technical & Speed State</button>
@@ -838,7 +838,11 @@
                 const h1Len = p.h1 ? p.h1.length : 0;
 
                 seoRow.innerHTML = `
-                    <td style="white-space: nowrap;"><a href="${escapeHtml(p.url)}" target="_blank" class="url-link" title="${escapeHtml(p.url)}">${escapeHtml(getUrlDisplayName(p.url))}</a></td>
+                    <td style="vertical-align: middle;">
+                        <div class="url-cell-container">
+                            <a href="${escapeHtml(p.url)}" target="_blank" class="url-link" title="${escapeHtml(p.url)}" style="min-width: 0; flex: 1;">${escapeHtml(getUrlDisplayName(p.url))}</a>
+                        </div>
+                    </td>
                     <td data-viewable="true" data-field="meta_title" data-value="${escapeHtml(p.meta_title || '')}" data-url="${escapeHtml(p.url)}">
                         <div class="text-truncate-cell" style="font-weight: 500;" title="${escapeHtml(p.meta_title || '')}">${escapeHtml(truncateCellText(p.meta_title))}</div>
                         <div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">
@@ -901,7 +905,11 @@
 
                 const techRow = document.createElement('tr');
                 techRow.innerHTML = `
-                    <td style="white-space: nowrap;"><a href="${escapeHtml(p.url)}" target="_blank" class="url-link" title="${escapeHtml(p.url)}">${escapeHtml(getUrlDisplayName(p.url))}</a></td>
+                    <td style="vertical-align: middle;">
+                        <div class="url-cell-container">
+                            <a href="${escapeHtml(p.url)}" target="_blank" class="url-link" title="${escapeHtml(p.url)}" style="min-width: 0; flex: 1;">${escapeHtml(getUrlDisplayName(p.url))}</a>
+                        </div>
+                    </td>
                     <td style="text-align: center;">
                         <span class="badge ${gscBadgeClass}">
                             ${gscText}
@@ -1799,9 +1807,17 @@
                 const pathname = parsed.pathname;
                 
                 if (!pathname || pathname === '/' || pathname === '') {
-                    const host = parsed.hostname.replace('www.', '');
-                    const firstPart = host.split('.')[0];
-                    return firstPart.charAt(0).toUpperCase() + firstPart.slice(1);
+                    const host = parsed.hostname.replace(/^www\./i, '');
+                    let domainOnly = host;
+                    const doubleTlds = /\.(?:com?|org|net|gov|edu|co)\.[a-z]{2,3}$/i;
+                    if (doubleTlds.test(host)) {
+                        domainOnly = host.replace(doubleTlds, '');
+                    } else {
+                        domainOnly = host.replace(/\.[a-z]{2,8}$/i, '');
+                    }
+                    return domainOnly.split('.')
+                        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+                        .join('.');
                 }
                 
                 const parts = pathname.split('/').filter(x => x.length > 0);
@@ -1903,6 +1919,7 @@
                     table.style.width = totalTableWidth + 'px';
                     table.style.minWidth = '0';
                     table.style.tableLayout = 'fixed';
+                    table.classList.add('table-resized');
 
                     document.body.classList.add('is-resizing-table');
 

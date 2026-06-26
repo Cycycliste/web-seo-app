@@ -306,7 +306,11 @@ switch ($action) {
         try {
             $stmt = $pdo->prepare("UPDATE audits SET bounce_rate = ?, pages_per_visit = ?, avg_monthly_visits = ?, avg_visit_duration = ?, breakdown_by_country = ?, main_channels = ?, traffic_trends = ?, sitemap_details = ?, additional_notes = ?, global_analysis = ?, global_strategy = ?, global_ranking = ?, country_ranking = ?, target_country = ? WHERE id = ?");
             $stmt->execute([$bounce_rate, $pages_per_visit, $avg_monthly_visits, $avg_visit_duration, $breakdown_by_country, $main_channels, $traffic_trends, $sitemap_details, $additional_notes, $global_analysis, $global_strategy, $global_ranking, $country_ranking, $target_country, $id]);
-            echo json_encode(['success' => true]);
+            echo json_encode([
+                'success' => true,
+                'main_channels' => $main_channels,
+                'traffic_trends' => $traffic_trends
+            ]);
         } catch (PDOException $e) {
             echo json_encode(['error' => 'Failed to save audit metrics: ' . $e->getMessage()]);
         }
@@ -1062,18 +1066,41 @@ switch ($action) {
             exit;
         }
 
-        try {
-            $stmt = $pdo->prepare("INSERT INTO search_terms (audit_id, term) VALUES (?, ?)");
-            $stmt->execute([$audit_id, $term]);
-            $term_id = $pdo->lastInsertId();
+        $lines = preg_split('/\r\n|\r|\n/', $term);
+        $terms_to_add = [];
+        foreach ($lines as $line) {
+            $trimmed = trim($line);
+            if ($trimmed !== '') {
+                $terms_to_add[] = $trimmed;
+            }
+        }
 
-            echo json_encode(['success' => true, 'term' => [
-                'id' => $term_id,
-                'audit_id' => $audit_id,
-                'term' => $term
-            ]]);
+        if (empty($terms_to_add)) {
+            echo json_encode(['error' => 'No valid search terms provided.']);
+            exit;
+        }
+
+        try {
+            $added_terms = [];
+            $pdo->beginTransaction();
+            $stmt = $pdo->prepare("INSERT INTO search_terms (audit_id, term) VALUES (?, ?)");
+            foreach ($terms_to_add as $t) {
+                $stmt->execute([$audit_id, $t]);
+                $term_id = $pdo->lastInsertId();
+                $added_terms[] = [
+                    'id' => (int)$term_id,
+                    'audit_id' => $audit_id,
+                    'term' => $t
+                ];
+            }
+            $pdo->commit();
+
+            echo json_encode(['success' => true, 'terms' => $added_terms]);
         } catch (PDOException $e) {
-            echo json_encode(['error' => 'Failed to add search term: ' . $e->getMessage()]);
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            echo json_encode(['error' => 'Failed to add search terms: ' . $e->getMessage()]);
         }
         break;
 

@@ -420,10 +420,43 @@ body {
 
 /* Tabs */
 .tabs-header {
+    position: sticky;
+    top: 0;
+    z-index: 500;
+    background: rgba(10, 14, 23, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    margin-left: -40px;
+    margin-right: -40px;
+    padding-left: 40px;
+    padding-right: 40px;
+    height: 64px;
     display: flex;
+    align-items: flex-end;
     gap: 8px;
     border-bottom: 1px solid var(--border-glass);
-    margin-bottom: 30px;
+    margin-bottom: 16px;
+}
+
+#audit-workspace-view .tabs-header {
+    margin-top: -40px;
+}
+
+.subtabs-header {
+    position: sticky;
+    top: 64px;
+    z-index: 499;
+    background: rgba(10, 14, 23, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    margin-left: -40px;
+    margin-right: -40px;
+    padding-left: 40px;
+    padding-right: 40px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-glass);
+    margin-bottom: 24px !important;
 }
 .tab-link {
     background: none;
@@ -566,6 +599,32 @@ body {
     text-decoration: underline;
 }
 
+/* URL Cell Container and Dynamic Truncation */
+.url-cell-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.table-custom .url-link {
+    display: inline-block;
+    vertical-align: middle;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    max-width: 25ch; /* Limit initially to 25 characters */
+    min-width: 0;
+    flex: 1;
+    transition: max-width 0.15s ease;
+}
+
+.table-custom.table-resized .url-link {
+    max-width: 100%;
+}
+
 .badge {
     display: inline-flex;
     padding: 4px 10px;
@@ -590,7 +649,7 @@ body {
     display: none;
     align-items: center;
     justify-content: center;
-    z-index: 100;
+    z-index: 20000;
 }
 .modal-content {
     width: 90%;
@@ -1278,19 +1337,32 @@ textarea.inline-editor {
 .table-resizer {
     position: absolute;
     top: 0;
-    right: 0;
-    width: 6px;
-    height: 100%;
+    right: -8px;
+    width: 16px;
+    height: 600px; /* Continue down the table body height */
     cursor: col-resize;
     user-select: none;
-    z-index: 10;
-    border-right: 2px solid transparent;
-    transition: border-color 0.2s ease;
+    z-index: 100; /* High z-index to stay above body cell contents */
+    background: transparent;
 }
 
-.table-resizer:hover,
-.table-resizer.is-resizing {
-    border-right: 2px solid var(--primary);
+.table-resizer::before {
+    content: '';
+    position: absolute;
+    top: 50px; /* Hide from thead header area, show only in table body */
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 1px;
+    background-color: rgba(255, 255, 255, 0.12); /* Subtle visual guideline */
+    transition: background-color 0.2s ease, width 0.2s ease, top 0.2s ease;
+}
+
+.table-resizer:hover::before,
+.table-resizer.is-resizing::before {
+    top: 0; /* Show visual line all the way up through header on hover/drag */
+    background-color: var(--primary); /* Vibrant primary highlight on hover/drag */
+    width: 3px; /* Thicker line when active */
 }
 
 /* Global resizing feedback style */
