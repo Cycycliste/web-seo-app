@@ -763,7 +763,7 @@ if (!isset($_SESSION['user_id'])) {
                         </div>
 
                         <div class="flex-space" style="margin-bottom: 24px;">
-                            <h3 style="font-weight: 700;">Configured Search Terms</h3>
+                            <h3 style="font-weight: 700;" id="search-terms-header-title">Configured Search Terms</h3>
                             <button class="btn btn-secondary" onclick="suggestCompetitors()">
                                 <i data-lucide="sparkles" style="width: 16px; height: 16px; color: var(--secondary);"></i>
                                 <span>Generate Competitor Suggestions</span>
@@ -3636,6 +3636,12 @@ if (!isset($_SESSION['user_id'])) {
             const wrapper = document.getElementById('search-terms-wrapper');
             wrapper.innerHTML = '';
 
+            const headerTitle = document.getElementById('search-terms-header-title');
+            if (headerTitle) {
+                const count = searchTermsData.length;
+                headerTitle.innerHTML = `Registered Search Terms <span class="badge" style="background: rgba(139, 92, 246, 0.15); color: #c084fc; border: 1px solid rgba(139, 92, 246, 0.3); margin-left: 10px; font-size: 0.85rem; font-weight: 700; vertical-align: middle; text-transform: none;">${count}</span>`;
+            }
+
             if (searchTermsData.length === 0) {
                 wrapper.innerHTML = '<div class="glass-panel" style="padding:40px; text-align:center; color:var(--text-muted);">No search terms added. Add one above to begin profiling competitors.</div>';
                 return;
@@ -3659,6 +3665,15 @@ if (!isset($_SESSION['user_id'])) {
                                 <i data-lucide="key" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 6px;"></i>
                                 <span>${escapeHtml(t.term)}</span>
                             </h4>
+                            <div style="display: inline-flex; align-items: center; gap: 6px; margin-right: 12px;">
+                                <span class="badge badge-success" style="font-size: 0.7rem; font-weight: 600; text-transform: none; padding: 2px 8px; border-radius: 12px; display: inline-flex; align-items: center; gap: 4px;">
+                                    <i data-lucide="users" style="width: 10px; height: 10px;"></i>
+                                    <span>${organic.length} Organic</span>
+                                </span>
+                                <span class="badge" style="font-size: 0.7rem; font-weight: 500; text-transform: none; padding: 2px 8px; border-radius: 12px; display: inline-flex; align-items: center; gap: 4px; background: rgba(255, 255, 255, 0.03); color: var(--text-muted); border: 1px dashed rgba(255, 255, 255, 0.1);">
+                                    <span>${sponsored.length} Sponsored</span>
+                                </span>
+                            </div>
                             <button class="btn btn-secondary btn-icon" style="padding: 4px; border-radius: 4px; width: 24px; height: 24px;" onclick="toggleSearchTermCollapse(${t.id})" title="${isCollapsed ? 'Expand' : 'Collapse'}">
                                 <i data-lucide="${isCollapsed ? 'chevron-down' : 'chevron-up'}" style="width: 14px; height: 14px;"></i>
                             </button>

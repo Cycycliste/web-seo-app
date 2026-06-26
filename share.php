@@ -414,7 +414,7 @@
 
         <!-- Tab 2: Search Terms & Competitors -->
         <div id="tab-search-terms" class="tab-pane">
-            <h3 style="font-weight: 700; margin-bottom: 20px;">Keywords & Target Competitor Mapping</h3>
+            <h3 style="font-weight: 700; margin-bottom: 20px;" id="search-terms-header-title">Keywords & Target Competitor Mapping</h3>
             <div id="search-terms-wrapper" style="display: flex; flex-direction: column; gap: 24px; margin-bottom: 40px;">
                 <!-- Filled via JS -->
             </div>
@@ -931,6 +931,12 @@
             const wrapper = document.getElementById('search-terms-wrapper');
             wrapper.innerHTML = '';
 
+            const headerTitle = document.getElementById('search-terms-header-title');
+            if (headerTitle) {
+                const count = searchTermsData.length;
+                headerTitle.innerHTML = `Keywords & Target Competitor Mapping <span class="badge" style="background: rgba(139, 92, 246, 0.15); color: #c084fc; border: 1px solid rgba(139, 92, 246, 0.3); margin-left: 10px; font-size: 0.85rem; font-weight: 700; vertical-align: middle; text-transform: none;">${count}</span>`;
+            }
+
             if (searchTermsData.length === 0) {
                 wrapper.innerHTML = '<div class="glass-panel" style="padding:40px; text-align:center; color:var(--text-muted);">No search terms mapped in this report.</div>';
                 return;
@@ -947,9 +953,16 @@
 
                 card.innerHTML = `
                     <div style="margin-bottom:20px; border-bottom:1px solid var(--border-glass); padding-bottom:12px;">
-                        <h4 style="font-size: 1.15rem; font-weight: 700; color: var(--secondary);">
+                        <h4 style="font-size: 1.15rem; font-weight: 700; color: var(--secondary); display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                             <i data-lucide="key" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 6px;"></i>
                             <span>${escapeHtml(t.term)}</span>
+                            <span class="badge badge-success" style="font-size: 0.7rem; font-weight: 600; text-transform: none; padding: 2px 8px; border-radius: 12px; display: inline-flex; align-items: center; gap: 4px;">
+                                <i data-lucide="users" style="width: 10px; height: 10px;"></i>
+                                <span>${organic.length} Organic</span>
+                            </span>
+                            <span class="badge" style="font-size: 0.7rem; font-weight: 500; text-transform: none; padding: 2px 8px; border-radius: 12px; display: inline-flex; align-items: center; gap: 4px; background: rgba(255, 255, 255, 0.03); color: var(--text-muted); border: 1px dashed rgba(255, 255, 255, 0.1);">
+                                <span>${sponsored.length} Sponsored</span>
+                            </span>
                         </h4>
                     </div>
 
