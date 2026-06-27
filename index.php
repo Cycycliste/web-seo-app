@@ -1708,13 +1708,18 @@ if (!isset($_SESSION['user_id'])) {
                         item.className = `client-item glass-card ${activeClientId === parseInt(c.id) ? 'active' : ''}`;
                         item.style.padding = '8px 12px'; // slightly smaller padding
                         item.onclick = () => selectClient(parseInt(c.id));
-                        
+
+                        const favicon = faviconUrl(c.homepage_url);
+                        const faviconHtml = favicon
+                            ? `<img src="${favicon}" alt="" width="16" height="16" style="flex-shrink: 0; border-radius: 3px;" onerror="this.style.display='none';">`
+                            : '';
+
                         item.innerHTML = `
                             <div style="display: flex; align-items: center; justify-content: space-between; flex-grow: 1; min-width: 0; padding-right: 4px; overflow: hidden;">
-                                <a href="${escapeHtml(c.homepage_url)}" target="_blank" onclick="event.stopPropagation();" class="client-name" style="font-weight: 600; font-size: 0.95rem; color: var(--text-primary); text-decoration: none; display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0;" title="Visit ${escapeHtml(c.homepage_url)}">
+                                <span class="client-name" style="font-weight: 600; font-size: 0.95rem; color: var(--text-primary); display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0;">
+                                    ${faviconHtml}
                                     <span>${escapeHtml(c.name)}</span>
-                                    <i data-lucide="external-link" style="width: 11px; height: 11px; color: var(--text-muted); flex-shrink: 0;"></i>
-                                </a>
+                                </span>
                                 ${c.industry ? `
                                     <span class="client-industry-text" title="${escapeHtml(c.industry)}" style="font-size: 0.75rem; color: var(--text-muted); font-style: italic; margin-left: auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 150px; text-align: right;">
                                         ${escapeHtml(c.industry)}
@@ -5292,6 +5297,16 @@ if (!isset($_SESSION['user_id'])) {
         function escapeJs(str) {
             if (!str) return '';
             return str.replace(/'/g, "\\'");
+        }
+
+        function faviconUrl(homepageUrl, size = 32) {
+            if (!homepageUrl) return '';
+            try {
+                const u = new URL(/^https?:\/\//i.test(homepageUrl) ? homepageUrl : 'https://' + homepageUrl);
+                return `https://www.google.com/s2/favicons?sz=${size}&domain=${encodeURIComponent(u.hostname)}`;
+            } catch (e) {
+                return '';
+            }
         }
 
         function getCompetitorDisplayName(url) {

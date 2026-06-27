@@ -20,9 +20,11 @@
                 </div>
                 <div>
                     <h1 style="font-weight: 800; font-size: 1.5rem;" id="audit-title">SEO Audit Report</h1>
-                    <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 4px;">
-                        Prepared for <span id="client-name" style="font-weight: 600; color: white;">...</span> 
-                        <span id="client-industry" style="font-style: italic; color: var(--text-muted); margin-left: 6px;"></span>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 4px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                        <span>Prepared for</span>
+                        <img id="client-favicon" alt="" width="16" height="16" style="border-radius: 3px; display: none;" onerror="this.style.display='none';">
+                        <span id="client-name" style="font-weight: 600; color: white;">...</span>
+                        <span id="client-industry" style="font-style: italic; color: var(--text-muted);"></span>
                     </p>
                 </div>
             </div>
@@ -625,7 +627,14 @@
                     document.getElementById('audit-title').textContent = data.audit.name + ' - SEO Audit';
                     document.getElementById('client-name').textContent = data.audit.client_name;
                     document.getElementById('client-industry').textContent = data.audit.client_industry ? `(${data.audit.client_industry})` : '';
-                    
+
+                    const favicon = faviconUrl(data.audit.client_homepage_url);
+                    if (favicon) {
+                        const favEl = document.getElementById('client-favicon');
+                        favEl.src = favicon;
+                        favEl.style.display = 'inline-block';
+                    }
+
                     document.getElementById('client-homepage').href = data.audit.client_homepage_url;
                     document.getElementById('client-homepage-text').textContent = data.audit.client_homepage_url.replace(/^https?:\/\//, '');
 
@@ -1613,6 +1622,16 @@
         function escapeJs(str) {
             if (!str) return '';
             return str.replace(/'/g, "\\'");
+        }
+
+        function faviconUrl(homepageUrl, size = 32) {
+            if (!homepageUrl) return '';
+            try {
+                const u = new URL(/^https?:\/\//i.test(homepageUrl) ? homepageUrl : 'https://' + homepageUrl);
+                return `https://www.google.com/s2/favicons?sz=${size}&domain=${encodeURIComponent(u.hostname)}`;
+            } catch (e) {
+                return '';
+            }
         }
 
         // Country name to ISO code mapping for FlagCDN flags
