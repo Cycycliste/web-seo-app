@@ -68,7 +68,11 @@
 
         <!-- Tabs Headers -->
         <div class="tabs-header">
-            <button class="tab-link active" onclick="switchTab(event, 'tab-website-audit')">
+            <button class="tab-link active" onclick="switchTab(event, 'tab-global-report')">
+                <i data-lucide="file-text" style="width: 16px; height: 16px; display: inline; vertical-align: middle; margin-right: 6px;"></i>
+                <span>Global Report & Strategy</span>
+            </button>
+            <button class="tab-link" onclick="switchTab(event, 'tab-website-audit')">
                 <i data-lucide="search-code" style="width: 16px; height: 16px; display: inline; vertical-align: middle; margin-right: 6px;"></i>
                 <span>Website Audit Summary</span>
             </button>
@@ -80,52 +84,44 @@
                 <i data-lucide="swords" style="width: 16px; height: 16px; display: inline; vertical-align: middle; margin-right: 6px;"></i>
                 <span>Competitor Analysis</span>
             </button>
-            <button class="tab-link" onclick="switchTab(event, 'tab-global-report')">
-                <i data-lucide="file-text" style="width: 16px; height: 16px; display: inline; vertical-align: middle; margin-right: 6px;"></i>
-                <span>Global Report & Strategy</span>
-            </button>
         </div>
 
-        <!-- Tab 1: Website Audit -->
-        <div id="tab-website-audit" class="tab-pane active">
-            <div class="flex-space subtabs-header" style="margin-bottom: 24px;">
-                <div style="display: flex; gap: 10px;">
-                    <button class="btn btn-secondary btn-sm" id="subtab-btn-seo" onclick="switchSubTab('seo')" style="background: rgba(139, 92, 246, 0.1); border-color: rgba(139, 92, 246, 0.3); color: var(--primary);">SEO State</button>
-                    <button class="btn btn-secondary btn-sm" id="subtab-btn-tech" onclick="switchSubTab('tech')">Technical & Speed State</button>
-                    <button class="btn btn-secondary btn-sm" id="subtab-btn-perf" onclick="switchSubTab('perf')">Detailed Traffic Analytics</button>
+        <!-- Tab 1: Global Report & Strategy -->
+        <div id="tab-global-report" class="tab-pane active">
+            <h3 style="font-weight: 700; margin-bottom: 24px;">Global Analysis & Strategic Report</h3>
+            <div class="glass-panel" style="padding: 30px; margin-bottom: 24px;">
+                <h4 style="font-weight: 600; margin-bottom: 16px; color: var(--primary); display: flex; align-items: center; gap: 6px; font-size: 1.1rem;">
+                    <i data-lucide="compass" style="width: 18px; height: 18px;"></i>
+                    <span>Global Analysis & Audit Meaning</span>
+                </h4>
+                <div id="share-global-analysis" style="color: var(--text-secondary); line-height: 1.6; white-space: pre-wrap; font-size: 0.95rem; margin-bottom: 36px; padding: 14px; background: rgba(0,0,0,0.15); border-radius: var(--radius-sm); border: 1px solid var(--border-glass);">
+                    <!-- JS populated -->
+                </div>
+                
+                <h4 style="font-weight: 600; margin-bottom: 16px; color: var(--secondary); display: flex; align-items: center; gap: 6px; font-size: 1.1rem; border-top: 1px solid var(--border-glass); padding-top: 28px;">
+                    <i data-lucide="trending-up" style="width: 18px; height: 18px;"></i>
+                    <span>Recommendations & Strategy to Adopt</span>
+                </h4>
+                <div id="share-global-strategy" style="color: var(--text-secondary); line-height: 1.6; white-space: pre-wrap; font-size: 0.95rem; padding: 14px; background: rgba(0,0,0,0.15); border-radius: var(--radius-sm); border: 1px solid var(--border-glass);">
+                    <!-- JS populated -->
                 </div>
             </div>
+        </div>
 
-            <!-- Subtab: SEO State -->
-            <div id="subtab-seo">
-                <h3 style="font-weight: 700; margin-bottom: 16px;">Audited Website Pages (SEO)</h3>
-                <div class="table-wrapper">
-                    <table class="table-custom table-wide" id="seo-pages-table">
-                        <thead>
-                            <tr>
-                                <th>URL</th>
-                                <th>Meta Title</th>
-                                <th>Meta Description</th>
-                                <th>H1</th>
-                                <th>Semantic Headers</th>
-                                <th>Internal Links</th>
-                                <th>External Links</th>
-                                <th>Missing Alt</th>
-                                <th>Search Terms</th>
-                                <th>Notes</th>
-                            </tr>
-                        </thead>
-                        <tbody id="seo-pages-list">
-                            <!-- JS populated -->
-                        </tbody>
-                    </table>
+        <!-- Tab 2: Website Audit Summary -->
+        <div id="tab-website-audit" class="tab-pane">
+            <div class="flex-space subtabs-header" style="margin-bottom: 24px;">
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-secondary btn-sm" id="subtab-btn-tech" onclick="switchSubTab('tech')" style="background: rgba(139, 92, 246, 0.1); border-color: rgba(139, 92, 246, 0.3); color: var(--primary);">Technical & Speed State</button>
+                    <button class="btn btn-secondary btn-sm" id="subtab-btn-perf" onclick="switchSubTab('perf')">Detailed Traffic Analytics</button>
+                    <button class="btn btn-secondary btn-sm" id="subtab-btn-seo" onclick="switchSubTab('seo')">SEO State</button>
                 </div>
             </div>
 
             <!-- Subtab: Technical State -->
-            <div id="subtab-tech" style="display: none;">
+            <div id="subtab-tech">
                 <!-- Web Vitals homepage -->
-                <div class="glass-panel" style="padding: 30px; margin-bottom: 30px; width: 100%;">
+                <div class="glass-panel" style="padding: 24px 30px 16px 30px; margin-bottom: 12px; width: 100%;">
                     <div class="flex-space" style="margin-bottom: 24px; border-bottom: 1px solid var(--border-glass); padding-bottom: 16px;">
                         <div style="display: flex; align-items: center; gap: 12px;">
                             <h3 style="font-weight: 700; margin: 0; display: flex; align-items: center; gap: 8px;">
@@ -410,9 +406,35 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Subtab: SEO State -->
+            <div id="subtab-seo" style="display: none;">
+                <h3 style="font-weight: 700; margin-bottom: 16px;">Audited Website Pages (SEO)</h3>
+                <div class="table-wrapper">
+                    <table class="table-custom table-wide" id="seo-pages-table">
+                        <thead>
+                            <tr>
+                                <th>URL</th>
+                                <th>Meta Title</th>
+                                <th>Meta Description</th>
+                                <th>H1</th>
+                                <th>Semantic Headers</th>
+                                <th>Internal Links</th>
+                                <th>External Links</th>
+                                <th>Missing Alt</th>
+                                <th>Search Terms</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="seo-pages-list">
+                            <!-- JS populated -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
 
-        <!-- Tab 2: Search Terms & Competitors -->
+        <!-- Tab 3: Search Terms & Competitors -->
         <div id="tab-search-terms" class="tab-pane">
             <h3 style="font-weight: 700; margin-bottom: 20px;" id="search-terms-header-title">Keywords & Target Competitor Mapping</h3>
             <div id="search-terms-wrapper" style="display: flex; flex-direction: column; gap: 24px; margin-bottom: 40px;">
@@ -420,33 +442,11 @@
             </div>
         </div>
 
-        <!-- Tab 3: Competitor Analyses -->
+        <!-- Tab 4: Competitor Analyses -->
         <div id="tab-competitor-analysis" class="tab-pane">
             <h3 style="font-weight: 700; margin-bottom: 24px;">In-Depth Competitor Page Audits</h3>
             <div id="competitor-analysis-cards" style="display: flex; flex-direction: column; gap: 28px;">
                 <!-- JS populated cards -->
-            </div>
-        </div>
-
-        <!-- Tab 4: Global Report & Strategy -->
-        <div id="tab-global-report" class="tab-pane">
-            <h3 style="font-weight: 700; margin-bottom: 24px;">Global Analysis & Strategic Report</h3>
-            <div class="glass-panel" style="padding: 30px; margin-bottom: 24px;">
-                <h4 style="font-weight: 600; margin-bottom: 16px; color: var(--primary); display: flex; align-items: center; gap: 6px; font-size: 1.1rem;">
-                    <i data-lucide="compass" style="width: 18px; height: 18px;"></i>
-                    <span>Global Analysis & Audit Meaning</span>
-                </h4>
-                <div id="share-global-analysis" style="color: var(--text-secondary); line-height: 1.6; white-space: pre-wrap; font-size: 0.95rem; margin-bottom: 36px; padding: 14px; background: rgba(0,0,0,0.15); border-radius: var(--radius-sm); border: 1px solid var(--border-glass);">
-                    <!-- JS populated -->
-                </div>
-                
-                <h4 style="font-weight: 600; margin-bottom: 16px; color: var(--secondary); display: flex; align-items: center; gap: 6px; font-size: 1.1rem; border-top: 1px solid var(--border-glass); padding-top: 28px;">
-                    <i data-lucide="trending-up" style="width: 18px; height: 18px;"></i>
-                    <span>Recommendations & Strategy to Adopt</span>
-                </h4>
-                <div id="share-global-strategy" style="color: var(--text-secondary); line-height: 1.6; white-space: pre-wrap; font-size: 0.95rem; padding: 14px; background: rgba(0,0,0,0.15); border-radius: var(--radius-sm); border: 1px solid var(--border-glass);">
-                    <!-- JS populated -->
-                </div>
             </div>
         </div>
 
@@ -556,14 +556,14 @@
 
         function getActiveTab() {
             const activePane = document.querySelector('.tab-pane.active');
-            return activePane ? activePane.id : 'tab-website-audit';
+            return activePane ? activePane.id : 'tab-global-report';
         }
 
         function getActiveSubTab() {
-            if (document.getElementById('subtab-seo').style.display === 'block') return 'seo';
-            if (document.getElementById('subtab-tech').style.display === 'block') return 'tech';
-            if (document.getElementById('subtab-perf').style.display === 'block') return 'perf';
-            return 'seo';
+            if (document.getElementById('subtab-tech') && document.getElementById('subtab-tech').style.display !== 'none') return 'tech';
+            if (document.getElementById('subtab-perf') && document.getElementById('subtab-perf').style.display !== 'none') return 'perf';
+            if (document.getElementById('subtab-seo') && document.getElementById('subtab-seo').style.display !== 'none') return 'seo';
+            return 'tech';
         }
 
         function updateUrlHash() {
@@ -942,18 +942,20 @@
                 return;
             }
 
-            searchTermsData.forEach(t => {
+            searchTermsData.forEach((t, idx) => {
+                const bodyId = `st-body-${t.id}`;
                 const card = document.createElement('div');
                 card.className = 'glass-panel';
-                card.style.padding = '24px';
+                card.style.cssText = 'overflow: hidden;';
 
                 const comps = competitorsData.filter(c => c.search_term_id === t.id);
                 const organic = comps.filter(c => c.type === 'organic');
                 const sponsored = comps.filter(c => c.type === 'sponsored');
 
                 card.innerHTML = `
-                    <div style="margin-bottom:20px; border-bottom:1px solid var(--border-glass); padding-bottom:12px;">
-                        <h4 style="font-size: 1.15rem; font-weight: 700; color: var(--secondary); display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                    <!-- Clickable Header -->
+                    <div onclick="toggleSearchTerm('${bodyId}')" style="padding: 20px 24px 16px 24px; border-bottom: 1px solid var(--border-glass); cursor: pointer; display: flex; align-items: center; justify-content: space-between; user-select: none;" id="${bodyId}-header">
+                        <h4 style="font-size: 1.15rem; font-weight: 700; color: var(--secondary); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 0;">
                             <i data-lucide="key" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 6px;"></i>
                             <span>${escapeHtml(t.term)}</span>
                             <span class="badge badge-success" style="font-size: 0.7rem; font-weight: 600; text-transform: none; padding: 2px 8px; border-radius: 12px; display: inline-flex; align-items: center; gap: 4px;">
@@ -964,9 +966,13 @@
                                 <span>${sponsored.length} Sponsored</span>
                             </span>
                         </h4>
+                        <button onclick="event.stopPropagation(); toggleSearchTerm('${bodyId}')" class="btn btn-secondary btn-icon" style="padding: 4px; border-radius: 4px; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;" title="Collapse">
+                            <i data-lucide="chevron-up" id="${bodyId}-icon" style="width: 14px; height: 14px; transition: transform 0.3s ease;"></i>
+                        </button>
                     </div>
 
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:24px;">
+                    <!-- Collapsible Body -->
+                    <div id="${bodyId}" style="padding: 20px 24px 24px 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 24px; transition: opacity 0.25s ease;">
                         
                         <!-- Organic competitors -->
                         <div>
@@ -1000,7 +1006,7 @@
                     el.style.padding = '12px 16px';
                     el.innerHTML = `
                         <div class="flex-space">
-                            <a href="${escapeHtml(o.url)}" target="_blank" class="url-link" style="font-size:0.85rem; font-weight:500;">${escapeHtml(o.url)}</a>
+                            <a href="${escapeHtml(o.url)}" target="_blank" class="url-link" style="font-size:0.85rem; font-weight:500;" title="${escapeHtml(o.url)}">${escapeHtml(getDomainFromUrl(o.url))}</a>
                         </div>
                         <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:10px; margin-top:8px; font-size:0.75rem; text-align:center; color:var(--text-secondary);">
                             <div>Bounce: <b>${o.bounce_rate !== null ? o.bounce_rate + '%' : '-'}</b></div>
@@ -1018,7 +1024,7 @@
                     el.className = 'glass-card';
                     el.style.padding = '10px 14px';
                     el.innerHTML = `
-                        <a href="${escapeHtml(s.url)}" target="_blank" class="url-link" style="font-size:0.85rem; font-weight:500;">${escapeHtml(s.url)}</a>
+                        <a href="${escapeHtml(s.url)}" target="_blank" class="url-link" style="font-size:0.85rem; font-weight:500;" title="${escapeHtml(s.url)}">${escapeHtml(getDomainFromUrl(s.url))}</a>
                     `;
                     spList.appendChild(el);
                 });
@@ -1571,6 +1577,26 @@
         function closeModalOnOuterClick(e, id) {
             if (e.target.id === id) {
                 closeModal(id);
+            }
+        }
+
+        function toggleSearchTerm(bodyId) {
+            const body = document.getElementById(bodyId);
+            const icon = document.getElementById(bodyId + '-icon');
+            const btn = icon ? icon.closest('button') : null;
+            if (!body) return;
+            const isCollapsed = body.style.display === 'none';
+            if (isCollapsed) {
+                body.style.display = 'grid';
+                body.style.opacity = '0';
+                setTimeout(() => { body.style.opacity = '1'; }, 10);
+                if (icon) icon.style.transform = 'rotate(0deg)';
+                if (btn) btn.title = 'Collapse';
+            } else {
+                body.style.opacity = '0';
+                setTimeout(() => { body.style.display = 'none'; }, 250);
+                if (icon) icon.style.transform = 'rotate(180deg)';
+                if (btn) btn.title = 'Expand';
             }
         }
 

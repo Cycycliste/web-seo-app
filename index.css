@@ -713,16 +713,16 @@ body {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 24px;
-    margin-bottom: 30px;
+    margin-bottom: 0;
 }
 .cwv-strategy-card {
-    padding: 24px;
+    padding: 16px;
 }
 .cwv-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 12px;
 }
 .cwv-score {
     width: 64px;
@@ -743,12 +743,12 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 24px;
-    padding: 16px;
+    margin-bottom: 12px;
+    padding: 10px;
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid var(--border-glass);
     border-radius: var(--radius-md);
-    gap: 12px;
+    gap: 10px;
 }
 .cwv-score-card {
     display: flex;
@@ -847,11 +847,11 @@ body {
 .cwv-metrics-list {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 16px;
+    gap: 10px;
 }
 .cwv-metric-item {
     background: rgba(0, 0, 0, 0.15);
-    padding: 12px;
+    padding: 8px 10px;
     border-radius: var(--radius-sm);
     text-align: center;
 }
@@ -861,9 +861,9 @@ body {
     text-transform: uppercase;
 }
 .cwv-metric-val {
-    font-size: 1.1rem;
+    font-size: 0.95rem;
     font-weight: bold;
-    margin-top: 4px;
+    margin-top: 2px;
 }
 
 /* Loading Spinner */

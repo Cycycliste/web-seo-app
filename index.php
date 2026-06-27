@@ -1247,6 +1247,34 @@ if (!isset($_SESSION['user_id'])) {
 
 
 
+    <!-- Modal: Share Link -->
+    <div id="share-link-modal" class="modal-overlay" onclick="closeModalOnOuterClick(event, 'share-link-modal')">
+        <div class="modal-content glass-panel" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3 style="font-weight: 700;">Read-only Share Link</h3>
+                <button class="modal-close" onclick="closeModal('share-link-modal')">&times;</button>
+            </div>
+            <div style="margin-bottom: 20px;">
+                <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 12px;">Anyone with this link can view the audit as a read-only report.</p>
+                <div style="display: flex; gap: 8px; align-items: stretch;">
+                    <input type="text" id="share-link-input" class="form-input" readonly style="flex: 1; font-family: monospace; font-size: 0.85rem;" onclick="this.select()">
+                    <button type="button" class="btn btn-primary" onclick="copyShareLinkFromModal()" style="white-space: nowrap; display: flex; align-items: center; gap: 6px;">
+                        <i data-lucide="copy" style="width: 14px; height: 14px;"></i>
+                        <span>Copy</span>
+                    </button>
+                </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--border-glass); padding-top: 20px;">
+                <a id="share-link-open" href="#" target="_blank" rel="noopener" class="btn btn-secondary" style="display: flex; align-items: center; gap: 6px;">
+                    <i data-lucide="external-link" style="width: 14px; height: 14px;"></i>
+                    <span>Open in new tab</span>
+                </a>
+                <button type="button" class="btn btn-primary" onclick="closeModal('share-link-modal')">Done</button>
+            </div>
+        </div>
+    </div>
+
+
     <!-- Modal 8: Audience Countries -->
     <div id="audience-modal" class="modal-overlay" onclick="closeModalOnOuterClick(event, 'audience-modal')">
         <div class="modal-content glass-panel" style="max-width: 650px;">
@@ -2091,21 +2119,65 @@ if (!isset($_SESSION['user_id'])) {
 
         function copyShareLink() {
             if (!activeAuditId) return;
-            
+
             fetch(`api.php?action=audit_get&id=${activeAuditId}`)
                 .then(res => res.json())
                 .then(data => {
                     const token = data.audit.share_token;
-                    // Construct absolute URL path
                     const url = window.location.origin + window.location.pathname.replace('index.php', '') + 'share.php?token=' + token;
-                    
-                    navigator.clipboard.writeText(url).then(() => {
-                        alert('Read-only client share link copied to clipboard:\n' + url);
-                    }, () => {
-                        // Fallback
-                        prompt('Copy share link manually:', url);
+
+                    const input = document.getElementById('share-link-input');
+                    const openLink = document.getElementById('share-link-open');
+                    input.value = url;
+                    openLink.href = url;
+
+                    openModal('share-link-modal');
+                    if (typeof lucide !== 'undefined') lucide.createIcons();
+
+                    // Try clipboard immediately while we still have the user-gesture context.
+                    writeToClipboard(url).then(ok => {
+                        if (ok) showToast('Share link copied to clipboard', 'success');
                     });
+
+                    // Pre-select the URL so the user can copy it manually as a guaranteed fallback.
+                    setTimeout(() => { input.focus(); input.select(); }, 50);
                 });
+        }
+
+        function copyShareLinkFromModal() {
+            const input = document.getElementById('share-link-input');
+            writeToClipboard(input.value).then(ok => {
+                if (ok) {
+                    showToast('Share link copied to clipboard', 'success');
+                } else {
+                    input.focus();
+                    input.select();
+                    showToast('Press Ctrl+C to copy the selected link', 'info');
+                }
+            });
+        }
+
+        function writeToClipboard(text) {
+            if (navigator.clipboard && window.isSecureContext) {
+                return navigator.clipboard.writeText(text).then(() => true, () => legacyCopy(text));
+            }
+            return Promise.resolve(legacyCopy(text));
+        }
+
+        function legacyCopy(text) {
+            try {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                ta.style.position = 'fixed';
+                ta.style.opacity = '0';
+                document.body.appendChild(ta);
+                ta.select();
+                const ok = document.execCommand('copy');
+                document.body.removeChild(ta);
+                return ok;
+            } catch (e) {
+                return false;
+            }
         }
 
         function saveAuditMetrics(silent = false, showToastNotification = !silent) {
@@ -3659,7 +3731,7 @@ if (!isset($_SESSION['user_id'])) {
                 const isCollapsed = collapsedSearchTerms.has(t.id);
 
                 card.innerHTML = `
-                    <div class="flex-space" style="margin-bottom:${isCollapsed ? '0' : '20px'}; border-bottom:${isCollapsed ? 'none' : '1px solid var(--border-glass)'}; padding-bottom:${isCollapsed ? '0' : '12px'};">
+                    <div onclick="toggleSearchTermCollapse(${t.id})" style="margin-bottom:${isCollapsed ? '0' : '20px'}; border-bottom:${isCollapsed ? 'none' : '1px solid var(--border-glass)'}; padding-bottom:${isCollapsed ? '0' : '12px'}; display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none;">
                         <div style="display: flex; align-items: center; gap: 8px;">
                             <h4 style="font-size: 1.15rem; font-weight: 700; color: var(--secondary); margin-right: 8px; display: flex; align-items: center;">
                                 <i data-lucide="key" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 6px;"></i>
@@ -3674,12 +3746,12 @@ if (!isset($_SESSION['user_id'])) {
                                     <span>${sponsored.length} Sponsored</span>
                                 </span>
                             </div>
-                            <button class="btn btn-secondary btn-icon" style="padding: 4px; border-radius: 4px; width: 24px; height: 24px;" onclick="toggleSearchTermCollapse(${t.id})" title="${isCollapsed ? 'Expand' : 'Collapse'}">
+                            <button onclick="event.stopPropagation(); toggleSearchTermCollapse(${t.id})" class="btn btn-secondary btn-icon" style="padding: 4px; border-radius: 4px; width: 24px; height: 24px;" title="${isCollapsed ? 'Expand' : 'Collapse'}">
                                 <i data-lucide="${isCollapsed ? 'chevron-down' : 'chevron-up'}" style="width: 14px; height: 14px;"></i>
                             </button>
                         </div>
                         <div style="display:flex; gap: 8px;">
-                            <button class="btn btn-danger btn-icon" style="padding:6px;" onclick="deleteSearchTerm(${t.id})">
+                            <button class="btn btn-danger btn-icon" style="padding:6px;" onclick="event.stopPropagation(); deleteSearchTerm(${t.id})">
                                 <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
                             </button>
                         </div>
