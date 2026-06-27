@@ -1263,13 +1263,26 @@ if (!isset($_SESSION['user_id'])) {
                         <span>Copy</span>
                     </button>
                 </div>
+                <div id="share-link-status" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 10px; display: flex; align-items: center; gap: 6px;"></div>
             </div>
-            <div style="display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--border-glass); padding-top: 20px;">
-                <a id="share-link-open" href="#" target="_blank" rel="noopener" class="btn btn-secondary" style="display: flex; align-items: center; gap: 6px;">
-                    <i data-lucide="external-link" style="width: 14px; height: 14px;"></i>
-                    <span>Open in new tab</span>
-                </a>
-                <button type="button" class="btn btn-primary" onclick="closeModal('share-link-modal')">Done</button>
+            <div style="display: flex; justify-content: space-between; gap: 12px; border-top: 1px solid var(--border-glass); padding-top: 20px; flex-wrap: wrap;">
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" class="btn btn-secondary" onclick="regenerateShareToken()" style="display: flex; align-items: center; gap: 6px;" title="Revoke the current link and issue a new one">
+                        <i data-lucide="refresh-cw" style="width: 14px; height: 14px;"></i>
+                        <span>Regenerate</span>
+                    </button>
+                    <button type="button" class="btn btn-danger" onclick="revokeShareToken()" style="display: flex; align-items: center; gap: 6px;" title="Disable this link immediately">
+                        <i data-lucide="ban" style="width: 14px; height: 14px;"></i>
+                        <span>Revoke</span>
+                    </button>
+                </div>
+                <div style="display: flex; gap: 12px;">
+                    <a id="share-link-open" href="#" target="_blank" rel="noopener" class="btn btn-secondary" style="display: flex; align-items: center; gap: 6px;">
+                        <i data-lucide="external-link" style="width: 14px; height: 14px;"></i>
+                        <span>Open in new tab</span>
+                    </a>
+                    <button type="button" class="btn btn-primary" onclick="closeModal('share-link-modal')">Done</button>
+                </div>
             </div>
         </div>
     </div>
@@ -2135,14 +2148,15 @@ if (!isset($_SESSION['user_id'])) {
             fetch(`api.php?action=audit_get&id=${activeAuditId}`)
                 .then(res => res.json())
                 .then(data => {
-                    const token = data.audit.share_token;
-                    const url = window.location.origin + window.location.pathname.replace('index.php', '') + 'share.php?token=' + token;
+                    const audit = data.audit;
+                    const url = buildShareUrl(audit.share_token);
 
                     const input = document.getElementById('share-link-input');
                     const openLink = document.getElementById('share-link-open');
                     input.value = url;
                     openLink.href = url;
 
+                    renderShareLinkStatus(audit);
                     openModal('share-link-modal');
                     if (typeof lucide !== 'undefined') lucide.createIcons();
 
@@ -2153,6 +2167,109 @@ if (!isset($_SESSION['user_id'])) {
 
                     // Pre-select the URL so the user can copy it manually as a guaranteed fallback.
                     setTimeout(() => { input.focus(); input.select(); }, 50);
+                });
+        }
+
+        function buildShareUrl(token) {
+            return window.location.origin + window.location.pathname.replace('index.php', '') + 'share.php?token=' + token;
+        }
+
+        function renderShareLinkStatus(audit) {
+            const status = document.getElementById('share-link-status');
+            const revoked = audit.share_token_revoked_at;
+            const expires = audit.share_token_expires_at;
+            let icon = 'shield-check';
+            let color = 'var(--success)';
+            let label = 'Active';
+
+            if (revoked) {
+                icon = 'shield-off';
+                color = 'var(--danger)';
+                label = `Revoked on ${formatShareDate(revoked)} — this link no longer works`;
+            } else if (expires) {
+                const exp = new Date(expires.replace(' ', 'T'));
+                if (!isNaN(exp) && exp.getTime() < Date.now()) {
+                    icon = 'shield-off';
+                    color = 'var(--danger)';
+                    label = `Expired on ${formatShareDate(expires)} — regenerate to share again`;
+                } else {
+                    icon = 'shield-check';
+                    color = 'var(--success)';
+                    label = `Active — expires ${formatShareDate(expires)}`;
+                }
+            } else {
+                label = 'Active — no expiration set (legacy link)';
+                color = 'var(--warning, var(--text-muted))';
+                icon = 'shield-alert';
+            }
+
+            status.innerHTML = '';
+            const i = document.createElement('i');
+            i.setAttribute('data-lucide', icon);
+            i.style.width = '14px';
+            i.style.height = '14px';
+            i.style.color = color;
+            const span = document.createElement('span');
+            span.textContent = label;
+            span.style.color = color;
+            status.appendChild(i);
+            status.appendChild(span);
+        }
+
+        function formatShareDate(sqlDateTime) {
+            if (!sqlDateTime) return '';
+            const d = new Date(sqlDateTime.replace(' ', 'T'));
+            if (isNaN(d)) return sqlDateTime;
+            return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+        }
+
+        function regenerateShareToken() {
+            if (!activeAuditId) return;
+            if (!confirm('Regenerate the share link?\n\nThe current link will stop working immediately and anyone using it will lose access.')) return;
+
+            const formData = new FormData();
+            formData.append('id', activeAuditId);
+
+            fetch('api.php?action=share_token_regenerate', { method: 'POST', body: formData })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.error) {
+                        showToast(data.error, 'error');
+                        return;
+                    }
+                    const url = buildShareUrl(data.share_token);
+                    document.getElementById('share-link-input').value = url;
+                    document.getElementById('share-link-open').href = url;
+                    renderShareLinkStatus({
+                        share_token: data.share_token,
+                        share_token_expires_at: data.share_token_expires_at,
+                        share_token_revoked_at: data.share_token_revoked_at,
+                    });
+                    if (typeof lucide !== 'undefined') lucide.createIcons();
+                    showToast('New share link issued', 'success');
+                });
+        }
+
+        function revokeShareToken() {
+            if (!activeAuditId) return;
+            if (!confirm('Revoke this share link?\n\nIt will stop working immediately. You can issue a new one later with Regenerate.')) return;
+
+            const formData = new FormData();
+            formData.append('id', activeAuditId);
+
+            fetch('api.php?action=share_token_revoke', { method: 'POST', body: formData })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.error) {
+                        showToast(data.error, 'error');
+                        return;
+                    }
+                    renderShareLinkStatus({
+                        share_token_expires_at: null,
+                        share_token_revoked_at: data.share_token_revoked_at,
+                    });
+                    if (typeof lucide !== 'undefined') lucide.createIcons();
+                    showToast('Share link revoked', 'success');
                 });
         }
 

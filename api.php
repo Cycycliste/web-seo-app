@@ -2,6 +2,12 @@
 require_once 'db.php';
 require_once 'crawler.php';
 
+// Production error policy: never leak warnings, stack traces, SQL fragments, or paths
+// to the HTTP response. Errors are logged server-side; the response stays generic.
+ini_set('display_errors', '0');
+ini_set('log_errors', '1');
+error_reporting(E_ALL);
+
 header('Content-Type: application/json');
 safe_session_start();
 
@@ -15,10 +21,109 @@ if (!$isAuthenticated && $action !== 'login' && $action !== 'get_share_audit') {
     exit;
 }
 
+/**
+ * Validate and store an uploaded image, rejecting anything that is not a real image.
+ *
+ * Trusts the file's real MIME type via finfo, not the client-supplied filename or
+ * Content-Type, then forces a random server-side filename with the canonical extension.
+ *
+ * @param array  $file     A single $_FILES entry, e.g. $_FILES['main_channels_file'].
+ * @param string $dest_dir Absolute or relative path to the upload directory.
+ * @param string $prefix   Filename prefix, e.g. 'main_channels'.
+ * @param int    $owner_id Owner id (audit/page/competitor) used in the generated filename.
+ * @return string|false    Relative stored path (uploads/...) on success, false on rejection.
+ */
+function store_uploaded_image($file, $dest_dir, $prefix, $owner_id) {
+    $allowed = [
+        'image/jpeg' => 'jpg',
+        'image/png'  => 'png',
+        'image/webp' => 'webp',
+        'image/gif'  => 'gif',
+    ];
+
+    if (!isset($file['tmp_name']) || !is_uploaded_file($file['tmp_name'])) {
+        return false;
+    }
+
+    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+    $mime  = $finfo ? finfo_file($finfo, $file['tmp_name']) : false;
+    if ($finfo) {
+        finfo_close($finfo);
+    }
+
+    if (!$mime || !isset($allowed[$mime])) {
+        return false;
+    }
+
+    // Confirm it actually decodes as an image, not just a matching magic header.
+    if (getimagesize($file['tmp_name']) === false) {
+        return false;
+    }
+
+    if (!is_dir($dest_dir) && !mkdir($dest_dir, 0777, true) && !is_dir($dest_dir)) {
+        return false;
+    }
+
+    $ext  = $allowed[$mime];
+    $name = sprintf(
+        '%s_%d_%d_%s.%s',
+        preg_replace('/[^A-Za-z0-9_]/', '', $prefix),
+        (int)$owner_id,
+        time(),
+        bin2hex(random_bytes(8)),
+        $ext
+    );
+    $path = rtrim($dest_dir, '/\\') . DIRECTORY_SEPARATOR . $name;
+
+    if (!move_uploaded_file($file['tmp_name'], $path)) {
+        return false;
+    }
+
+    return 'uploads/' . $name;
+}
+
+// Default lifetime, in days, of a freshly-minted share-link token.
+if (!defined('SHARE_TOKEN_DEFAULT_DAYS')) {
+    define('SHARE_TOKEN_DEFAULT_DAYS', 90);
+}
+
+/**
+ * Log the real exception server-side and emit a sanitized JSON error to the client.
+ *
+ * The exception's full text (which can include the failed SQL statement, file
+ * paths, or other implementation detail) goes to the PHP error log only; the
+ * HTTP response carries the generic prefix the caller passed in.
+ *
+ * @param string    $prefix Human-readable label describing the failed step.
+ * @param Throwable $e      The thrown exception.
+ * @return void
+ */
+function report_error($prefix, Throwable $e) {
+    error_log($prefix . ': ' . $e->getMessage());
+    echo json_encode(['error' => $prefix . '.']);
+}
+
+/**
+ * Validate a client-supplied stored-image path.
+ *
+ * Accepts only paths that look like one produced by store_uploaded_image() — i.e.
+ * inside uploads/, no directory traversal, and ending in an allowed image extension.
+ *
+ * @param string $path The candidate path.
+ * @return bool  True when the path is shaped like a stored upload.
+ */
+function is_safe_upload_path($path) {
+    if (!is_string($path) || $path === '') {
+        return false;
+    }
+    return (bool)preg_match('#^uploads/[A-Za-z0-9_\-]+\.(?:png|jpe?g|webp|gif)$#', $path);
+}
+
 // -------------------------------------------------------------
 // Core Actions
 // -------------------------------------------------------------
 
+try {
 switch ($action) {
     case 'login':
         $username = trim($_POST['username'] ?? '');
@@ -86,7 +191,7 @@ switch ($action) {
             $stmt->execute([$name, $homepage_url, $industry]);
             echo json_encode(['success' => true, 'id' => $pdo->lastInsertId()]);
         } catch (PDOException $e) {
-            echo json_encode(['error' => 'Failed to create client: ' . $e->getMessage()]);
+            report_error('Failed to create client', $e);
         }
         break;
 
@@ -129,7 +234,7 @@ switch ($action) {
             
             echo json_encode(['success' => true, 'client' => $client]);
         } catch (PDOException $e) {
-            echo json_encode(['error' => 'Failed to update client: ' . $e->getMessage()]);
+            report_error('Failed to update client', $e);
         }
         break;
 
@@ -158,13 +263,14 @@ switch ($action) {
         }
 
         $share_token = bin2hex(random_bytes(16));
+        $expires_at  = (new DateTimeImmutable('+' . SHARE_TOKEN_DEFAULT_DAYS . ' days'))->format('Y-m-d H:i:s');
 
         try {
-            $stmt = $pdo->prepare("INSERT INTO audits (client_id, name, share_token) VALUES (?, ?, ?)");
-            $stmt->execute([$client_id, $name, $share_token]);
+            $stmt = $pdo->prepare("INSERT INTO audits (client_id, name, share_token, share_token_expires_at) VALUES (?, ?, ?, ?)");
+            $stmt->execute([$client_id, $name, $share_token, $expires_at]);
             echo json_encode(['success' => true, 'id' => $pdo->lastInsertId()]);
         } catch (PDOException $e) {
-            echo json_encode(['error' => 'Failed to create audit: ' . $e->getMessage()]);
+            report_error('Failed to create audit', $e);
         }
         break;
 
@@ -261,44 +367,46 @@ switch ($action) {
         $oldChannels = $currentAudit['main_channels'] ?? '';
         $oldTrends = $currentAudit['traffic_trends'] ?? '';
 
+        // Client-supplied paths are only accepted when they match the shape of a stored
+        // upload — anything else is coerced to empty so an attacker can't smuggle
+        // arbitrary URLs (e.g. javascript:, data:, https://evil/) into the share view.
         $main_channels = $_POST['main_channels'] ?? '';
+        if ($main_channels !== '' && !is_safe_upload_path($main_channels)) {
+            $main_channels = '';
+        }
         $traffic_trends = $_POST['traffic_trends'] ?? '';
-
-        // Handle file uploads
-        if (!file_exists('uploads')) {
-            mkdir('uploads', 0777, true);
+        if ($traffic_trends !== '' && !is_safe_upload_path($traffic_trends)) {
+            $traffic_trends = '';
         }
 
         if (isset($_FILES['main_channels_file']) && $_FILES['main_channels_file']['error'] === UPLOAD_ERR_OK) {
-            $ext = pathinfo($_FILES['main_channels_file']['name'], PATHINFO_EXTENSION);
-            $filename = 'uploads/main_channels_' . $id . '_' . time() . '.' . $ext;
-            if (move_uploaded_file($_FILES['main_channels_file']['tmp_name'], $filename)) {
-                $main_channels = $filename;
-                // Delete old file if it exists and is different
-                if (!empty($oldChannels) && file_exists($oldChannels) && $oldChannels !== $filename) {
-                    @unlink($oldChannels);
-                }
+            $stored = store_uploaded_image($_FILES['main_channels_file'], 'uploads', 'main_channels', $id);
+            if ($stored === false) {
+                echo json_encode(['error' => 'Main channels file rejected. Only PNG, JPG, WEBP, or GIF images are allowed.']);
+                exit;
+            }
+            $main_channels = $stored;
+            if (!empty($oldChannels) && is_safe_upload_path($oldChannels) && file_exists($oldChannels) && $oldChannels !== $stored) {
+                @unlink($oldChannels);
             }
         } else if (empty($main_channels) && !empty($oldChannels)) {
-            // Deleted old file
-            if (file_exists($oldChannels)) {
+            if (is_safe_upload_path($oldChannels) && file_exists($oldChannels)) {
                 @unlink($oldChannels);
             }
         }
 
         if (isset($_FILES['traffic_trends_file']) && $_FILES['traffic_trends_file']['error'] === UPLOAD_ERR_OK) {
-            $ext = pathinfo($_FILES['traffic_trends_file']['name'], PATHINFO_EXTENSION);
-            $filename = 'uploads/traffic_trends_' . $id . '_' . time() . '.' . $ext;
-            if (move_uploaded_file($_FILES['traffic_trends_file']['tmp_name'], $filename)) {
-                $traffic_trends = $filename;
-                // Delete old file if it exists and is different
-                if (!empty($oldTrends) && file_exists($oldTrends) && $oldTrends !== $filename) {
-                    @unlink($oldTrends);
-                }
+            $stored = store_uploaded_image($_FILES['traffic_trends_file'], 'uploads', 'traffic_trends', $id);
+            if ($stored === false) {
+                echo json_encode(['error' => 'Traffic trends file rejected. Only PNG, JPG, WEBP, or GIF images are allowed.']);
+                exit;
+            }
+            $traffic_trends = $stored;
+            if (!empty($oldTrends) && is_safe_upload_path($oldTrends) && file_exists($oldTrends) && $oldTrends !== $stored) {
+                @unlink($oldTrends);
             }
         } else if (empty($traffic_trends) && !empty($oldTrends)) {
-            // Deleted old file
-            if (file_exists($oldTrends)) {
+            if (is_safe_upload_path($oldTrends) && file_exists($oldTrends)) {
                 @unlink($oldTrends);
             }
         }
@@ -312,7 +420,7 @@ switch ($action) {
                 'traffic_trends' => $traffic_trends
             ]);
         } catch (PDOException $e) {
-            echo json_encode(['error' => 'Failed to save audit metrics: ' . $e->getMessage()]);
+            report_error('Failed to save audit metrics', $e);
         }
         break;
 
@@ -410,7 +518,7 @@ switch ($action) {
                     'errors' => $errors
                 ]);
             } catch (Exception $e) {
-                echo json_encode(['error' => 'Website crawl failed: ' . $e->getMessage()]);
+                report_error('Website crawl failed', $e);
             }
         } else {
             // mode === 'single' (Bulk or single pasted URLs)
@@ -531,7 +639,7 @@ switch ($action) {
             $stmt->execute([$id]);
             echo json_encode(['success' => true, 'page' => $stmt->fetch()]);
         } catch (PDOException $e) {
-            echo json_encode(['error' => 'Failed to update page fields: ' . $e->getMessage()]);
+            report_error('Failed to update page fields', $e);
         }
         break;
 
@@ -571,7 +679,7 @@ switch ($action) {
             $stmtGet->execute([$id]);
             echo json_encode(['success' => true, 'page' => $stmtGet->fetch()]);
         } catch (Exception $e) {
-            echo json_encode(['error' => 'Failed to refresh page audit: ' . $e->getMessage()]);
+            report_error('Failed to refresh page audit', $e);
         }
         break;
 
@@ -616,7 +724,7 @@ switch ($action) {
                 echo json_encode(['success' => true, 'competitor' => $stmt->fetch()]);
             }
         } catch (PDOException $e) {
-            echo json_encode(['error' => 'Failed to save headers: ' . $e->getMessage()]);
+            report_error('Failed to save headers', $e);
         }
         break;
 
@@ -634,43 +742,31 @@ switch ($action) {
             exit;
         }
 
-        $file = $_FILES['screenshot'];
-        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-        $allowed = ['png', 'jpg', 'jpeg', 'webp', 'gif'];
-        if (!in_array($ext, $allowed)) {
-            echo json_encode(['error' => 'Invalid file extension. Only PNG, JPG, JPEG, WEBP, and GIF are allowed.']);
+        $filename = store_uploaded_image($_FILES['screenshot'], 'uploads', 'headers_' . ($type === 'competitor' ? 'comp' : 'page'), $id);
+        if ($filename === false) {
+            echo json_encode(['error' => 'File rejected. Only real PNG, JPG, WEBP, or GIF images are allowed.']);
             exit;
         }
 
-        if (!file_exists('uploads')) {
-            mkdir('uploads', 0777, true);
-        }
+        try {
+            if ($type === 'page') {
+                $stmt = $pdo->prepare("UPDATE audit_pages SET headers_screenshot = ? WHERE id = ?");
+                $stmt->execute([$filename, $id]);
 
-        $filename = 'uploads/headers_screenshot_' . $type . '_' . $id . '_' . time() . '.' . $ext;
-        if (move_uploaded_file($file['tmp_name'], $filename)) {
-            try {
-                if ($type === 'page') {
-                    $stmt = $pdo->prepare("UPDATE audit_pages SET headers_screenshot = ? WHERE id = ?");
-                    $stmt->execute([$filename, $id]);
-                    
-                    // Re-fetch
-                    $stmt = $pdo->prepare("SELECT * FROM audit_pages WHERE id = ?");
-                    $stmt->execute([$id]);
-                    echo json_encode(['success' => true, 'filepath' => $filename, 'page' => $stmt->fetch()]);
-                } else {
-                    $stmt = $pdo->prepare("UPDATE competitor_analyses SET headers_screenshot = ? WHERE id = ?");
-                    $stmt->execute([$filename, $id]);
-                    
-                    // Re-fetch
-                    $stmt = $pdo->prepare("SELECT * FROM competitor_analyses WHERE id = ?");
-                    $stmt->execute([$id]);
-                    echo json_encode(['success' => true, 'filepath' => $filename, 'competitor' => $stmt->fetch()]);
-                }
-            } catch (PDOException $e) {
-                echo json_encode(['error' => 'Database update failed: ' . $e->getMessage()]);
+                $stmt = $pdo->prepare("SELECT * FROM audit_pages WHERE id = ?");
+                $stmt->execute([$id]);
+                echo json_encode(['success' => true, 'filepath' => $filename, 'page' => $stmt->fetch()]);
+            } else {
+                $stmt = $pdo->prepare("UPDATE competitor_analyses SET headers_screenshot = ? WHERE id = ?");
+                $stmt->execute([$filename, $id]);
+
+                $stmt = $pdo->prepare("SELECT * FROM competitor_analyses WHERE id = ?");
+                $stmt->execute([$id]);
+                echo json_encode(['success' => true, 'filepath' => $filename, 'competitor' => $stmt->fetch()]);
             }
-        } else {
-            echo json_encode(['error' => 'Failed to move uploaded file.']);
+        } catch (PDOException $e) {
+            error_log('headers_screenshot db update failed: ' . $e->getMessage());
+            echo json_encode(['error' => 'Database update failed.']);
         }
         break;
 
@@ -688,56 +784,43 @@ switch ($action) {
             exit;
         }
 
-        $file = $_FILES['screenshot'];
-        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-        $allowed = ['png', 'jpg', 'jpeg', 'webp', 'gif'];
-        if (!in_array($ext, $allowed)) {
-            echo json_encode(['error' => 'Invalid file extension. Only PNG, JPG, JPEG, WEBP, and GIF are allowed.']);
+        $filename = store_uploaded_image($_FILES['screenshot'], 'uploads', 'breakdown_' . ($type === 'competitor' ? 'comp' : 'audit'), $id);
+        if ($filename === false) {
+            echo json_encode(['error' => 'File rejected. Only real PNG, JPG, WEBP, or GIF images are allowed.']);
             exit;
         }
 
-        if (!file_exists('uploads')) {
-            mkdir('uploads', 0777, true);
-        }
-
-        $filename = 'uploads/breakdown_screenshot_' . $type . '_' . $id . '_' . time() . '.' . $ext;
-        if (move_uploaded_file($file['tmp_name'], $filename)) {
-            try {
-                if ($type === 'audit') {
-                    // Fetch old screenshot to delete
-                    $stmt = $pdo->prepare("SELECT breakdown_by_country FROM audits WHERE id = ?");
-                    $stmt->execute([$id]);
-                    $old = $stmt->fetchColumn();
-                    if ($old && file_exists($old) && is_file($old)) {
-                        @unlink($old);
-                    }
-                    
-                    $stmt = $pdo->prepare("UPDATE audits SET breakdown_by_country = ? WHERE id = ?");
-                    $stmt->execute([$filename, $id]);
-                    
-                    echo json_encode(['success' => true, 'filepath' => $filename]);
-                } else {
-                    // Fetch old screenshot to delete
-                    $stmt = $pdo->prepare("SELECT breakdown_by_country FROM competitor_analyses WHERE id = ?");
-                    $stmt->execute([$id]);
-                    $old = $stmt->fetchColumn();
-                    if ($old && file_exists($old) && is_file($old)) {
-                        @unlink($old);
-                    }
-                    
-                    $stmt = $pdo->prepare("UPDATE competitor_analyses SET breakdown_by_country = ? WHERE id = ?");
-                    $stmt->execute([$filename, $id]);
-                    
-                    // Re-fetch competitor
-                    $stmt = $pdo->prepare("SELECT * FROM competitor_analyses WHERE id = ?");
-                    $stmt->execute([$id]);
-                    echo json_encode(['success' => true, 'filepath' => $filename, 'competitor' => $stmt->fetch()]);
+        try {
+            if ($type === 'audit') {
+                $stmt = $pdo->prepare("SELECT breakdown_by_country FROM audits WHERE id = ?");
+                $stmt->execute([$id]);
+                $old = $stmt->fetchColumn();
+                if ($old && is_safe_upload_path($old) && file_exists($old) && is_file($old)) {
+                    @unlink($old);
                 }
-            } catch (PDOException $e) {
-                echo json_encode(['error' => 'Database update failed: ' . $e->getMessage()]);
+
+                $stmt = $pdo->prepare("UPDATE audits SET breakdown_by_country = ? WHERE id = ?");
+                $stmt->execute([$filename, $id]);
+
+                echo json_encode(['success' => true, 'filepath' => $filename]);
+            } else {
+                $stmt = $pdo->prepare("SELECT breakdown_by_country FROM competitor_analyses WHERE id = ?");
+                $stmt->execute([$id]);
+                $old = $stmt->fetchColumn();
+                if ($old && is_safe_upload_path($old) && file_exists($old) && is_file($old)) {
+                    @unlink($old);
+                }
+
+                $stmt = $pdo->prepare("UPDATE competitor_analyses SET breakdown_by_country = ? WHERE id = ?");
+                $stmt->execute([$filename, $id]);
+
+                $stmt = $pdo->prepare("SELECT * FROM competitor_analyses WHERE id = ?");
+                $stmt->execute([$id]);
+                echo json_encode(['success' => true, 'filepath' => $filename, 'competitor' => $stmt->fetch()]);
             }
-        } else {
-            echo json_encode(['error' => 'Failed to move uploaded file.']);
+        } catch (PDOException $e) {
+            error_log('breakdown_screenshot db update failed: ' . $e->getMessage());
+            echo json_encode(['error' => 'Database update failed.']);
         }
         break;
 
@@ -792,7 +875,7 @@ switch ($action) {
 
             echo json_encode(['success' => true, 'record' => $record]);
         } catch (PDOException $e) {
-            echo json_encode(['error' => 'Update failed: ' . $e->getMessage()]);
+            report_error('Update failed', $e);
         }
         break;
 
@@ -1050,7 +1133,7 @@ switch ($action) {
                 ]);
             }
         } catch (PDOException $e) {
-            echo json_encode(['error' => 'Failed to save speed data: ' . $e->getMessage()]);
+            report_error('Failed to save speed data', $e);
         }
         break;
 
@@ -1100,7 +1183,7 @@ switch ($action) {
             if ($pdo->inTransaction()) {
                 $pdo->rollBack();
             }
-            echo json_encode(['error' => 'Failed to add search terms: ' . $e->getMessage()]);
+            report_error('Failed to add search terms', $e);
         }
         break;
 
@@ -1151,7 +1234,7 @@ switch ($action) {
             $stmt->execute([$comp_id]);
             echo json_encode(['success' => true, 'competitor' => $stmt->fetch()]);
         } catch (PDOException $e) {
-            echo json_encode(['error' => 'Failed to add competitor: ' . $e->getMessage()]);
+            report_error('Failed to add competitor', $e);
         }
         break;
 
@@ -1209,7 +1292,7 @@ switch ($action) {
             $stmt->execute([$id]);
             echo json_encode(['success' => true, 'competitor' => $stmt->fetch()]);
         } catch (PDOException $e) {
-            echo json_encode(['error' => 'Failed to update competitor: ' . $e->getMessage()]);
+            report_error('Failed to update competitor', $e);
         }
         break;
 
@@ -1401,7 +1484,7 @@ switch ($action) {
             $stmt->execute([$comp_analysis_id]);
             echo json_encode(['success' => true, 'competitor' => $stmt->fetch()]);
         } catch (Exception $e) {
-            echo json_encode(['error' => 'Failed to crawl and add competitor: ' . $e->getMessage()]);
+            report_error('Failed to crawl and add competitor', $e);
         }
         break;
 
@@ -1482,7 +1565,7 @@ switch ($action) {
             $stmt->execute([$id]);
             echo json_encode(['success' => true, 'competitor' => $stmt->fetch()]);
         } catch (PDOException $e) {
-            echo json_encode(['error' => 'Failed to update competitor: ' . $e->getMessage()]);
+            report_error('Failed to update competitor', $e);
         }
         break;
 
@@ -1522,7 +1605,64 @@ switch ($action) {
             $stmtGet->execute([$id]);
             echo json_encode(['success' => true, 'competitor' => $stmtGet->fetch()]);
         } catch (Exception $e) {
-            echo json_encode(['error' => 'Failed to refresh competitor audit: ' . $e->getMessage()]);
+            report_error('Failed to refresh competitor audit', $e);
+        }
+        break;
+
+    // -------------------------------------------------------------
+    // Share-token lifecycle (admin only)
+    // -------------------------------------------------------------
+    case 'share_token_regenerate':
+        $id = (int)($_POST['id'] ?? 0);
+        $days = isset($_POST['days']) && $_POST['days'] !== '' ? (int)$_POST['days'] : SHARE_TOKEN_DEFAULT_DAYS;
+        if ($days < 1)   { $days = 1; }
+        if ($days > 365) { $days = 365; }
+        if ($id <= 0) {
+            echo json_encode(['error' => 'Invalid audit ID.']);
+            exit;
+        }
+
+        $new_token   = bin2hex(random_bytes(16));
+        $expires_at  = (new DateTimeImmutable('+' . $days . ' days'))->format('Y-m-d H:i:s');
+
+        try {
+            // Revoking + rotating in one update ensures the previous token is dead
+            // before the new one becomes usable.
+            $stmt = $pdo->prepare(
+                "UPDATE audits
+                 SET share_token = ?, share_token_expires_at = ?, share_token_revoked_at = NULL
+                 WHERE id = ?"
+            );
+            $stmt->execute([$new_token, $expires_at, $id]);
+            echo json_encode([
+                'success' => true,
+                'share_token' => $new_token,
+                'share_token_expires_at' => $expires_at,
+                'share_token_revoked_at' => null,
+            ]);
+        } catch (PDOException $e) {
+            report_error('Failed to regenerate share token', $e);
+        }
+        break;
+
+    case 'share_token_revoke':
+        $id = (int)($_POST['id'] ?? 0);
+        if ($id <= 0) {
+            echo json_encode(['error' => 'Invalid audit ID.']);
+            exit;
+        }
+
+        try {
+            $stmt = $pdo->prepare("UPDATE audits SET share_token_revoked_at = NOW() WHERE id = ?");
+            $stmt->execute([$id]);
+            $stmt = $pdo->prepare("SELECT share_token_revoked_at FROM audits WHERE id = ?");
+            $stmt->execute([$id]);
+            echo json_encode([
+                'success' => true,
+                'share_token_revoked_at' => $stmt->fetchColumn(),
+            ]);
+        } catch (PDOException $e) {
+            report_error('Failed to revoke share token', $e);
         }
         break;
 
@@ -1536,7 +1676,16 @@ switch ($action) {
             exit;
         }
 
-        $stmt = $pdo->prepare("SELECT a.*, c.name as client_name, c.homepage_url as client_homepage_url, c.industry as client_industry FROM audits a JOIN clients c ON a.client_id = c.id WHERE a.share_token = ?");
+        // Validity is enforced in the WHERE clause so the lookup itself returns nothing
+        // for revoked or expired tokens — there's no separate "this token exists but is
+        // dead" leak. NULL expires_at means "no expiration" (legacy rows only).
+        $stmt = $pdo->prepare(
+            "SELECT a.*, c.name as client_name, c.homepage_url as client_homepage_url, c.industry as client_industry
+             FROM audits a JOIN clients c ON a.client_id = c.id
+             WHERE a.share_token = ?
+               AND a.share_token_revoked_at IS NULL
+               AND (a.share_token_expires_at IS NULL OR a.share_token_expires_at > NOW())"
+        );
         $stmt->execute([$token]);
         $audit = $stmt->fetch();
 
@@ -1585,4 +1734,14 @@ switch ($action) {
     default:
         echo json_encode(['error' => 'Invalid API action.']);
         break;
+}
+} catch (Throwable $e) {
+    // Safety net: any exception that bypasses an inner catch (including TypeError,
+    // unexpected PDOException from the dispatcher itself, etc.) lands here. The full
+    // message is logged; the client sees a generic error so we don't leak SQL or paths.
+    error_log('Unhandled API exception in action "' . $action . '": ' . $e->getMessage());
+    if (!headers_sent()) {
+        http_response_code(500);
+    }
+    echo json_encode(['error' => 'Internal server error.']);
 }

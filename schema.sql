@@ -24,6 +24,10 @@ CREATE TABLE IF NOT EXISTS `audits` (
   `client_id` INT NOT NULL,
   `name` VARCHAR(255) NOT NULL,
   `share_token` VARCHAR(64) UNIQUE NOT NULL,
+  -- Share-link lifecycle: expires_at NULL means "no expiration" (legacy rows only);
+  -- revoked_at being non-NULL invalidates the token regardless of expires_at.
+  `share_token_expires_at` TIMESTAMP NULL DEFAULT NULL,
+  `share_token_revoked_at` TIMESTAMP NULL DEFAULT NULL,
   `bounce_rate` DECIMAL(5,2) DEFAULT NULL,
   `pages_per_visit` DECIMAL(4,2) DEFAULT NULL,
   `avg_monthly_visits` INT DEFAULT NULL,

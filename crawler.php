@@ -5,16 +5,22 @@ class Crawler {
             throw new Exception("Invalid URL format.");
         }
 
+        // SSRF guard: reject loopback, link-local, RFC1918, and other reserved IPs
+        // before opening a socket. Caller never sees why beyond a generic message.
+        if (!self::isFetchableUrl($url)) {
+            throw new Exception("Refusing to fetch non-public address.");
+        }
+
         $res = self::fetchUrl($url);
-        
+
         if (!empty($res['error'])) {
             throw new Exception("Connection failed: " . $res['error']);
         }
-        
+
         if ($res['http_code'] === 403) {
             throw new Exception("Access blocked by target server's bot protection (HTTP 403 Forbidden)");
         }
-        
+
         if ($res['http_code'] !== 200) {
             throw new Exception("Server returned HTTP status code " . $res['http_code']);
         }
@@ -26,29 +32,102 @@ class Crawler {
         return self::analyzeHtml($res['content'], $url);
     }
 
+    /**
+     * Tell whether a URL is safe to fetch server-side.
+     *
+     * Only http/https schemes are accepted. The host must resolve to at least one
+     * IP, and every resolved IP must be a public (non-private, non-reserved) address.
+     * Bare IP literals (v4 or v6) are validated directly with the same rules.
+     *
+     * Note: this resolves DNS once and cURL resolves again at connect time, so a
+     * hostile DNS server could in theory flip the answer between the two. Combined
+     * with redirects-disabled and a short timeout, the practical risk is low.
+     *
+     * @param string $url Candidate URL.
+     * @return bool       True when every resolved address is public.
+     */
+    public static function isFetchableUrl($url) {
+        $parts = parse_url($url);
+        if (!$parts || !isset($parts['scheme'], $parts['host'])) {
+            return false;
+        }
+        if (!in_array(strtolower($parts['scheme']), ['http', 'https'], true)) {
+            return false;
+        }
+
+        $host = $parts['host'];
+        $ips  = [];
+
+        // Direct IP literal (handles v4 and bracketed v6).
+        $literal = trim($host, '[]');
+        if (filter_var($literal, FILTER_VALIDATE_IP)) {
+            $ips[] = $literal;
+        } else {
+            foreach (@dns_get_record($host, DNS_A | DNS_AAAA) ?: [] as $rec) {
+                if (!empty($rec['ip']))   { $ips[] = $rec['ip']; }
+                if (!empty($rec['ipv6'])) { $ips[] = $rec['ipv6']; }
+            }
+            if ($ips === []) {
+                // Fallback for hosts that resolve via the system resolver only.
+                $fallback = @gethostbynamel($host) ?: [];
+                $ips = $fallback;
+            }
+        }
+
+        if ($ips === []) {
+            return false;
+        }
+
+        foreach ($ips as $ip) {
+            if (!filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     private static function fetchUrl($url) {
         $ch = curl_init();
-        curl_setopt_array($ch, [
-            CURLOPT_URL => $url,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_MAXREDIRS => 5,
-            CURLOPT_TIMEOUT => 12,
-            CURLOPT_CONNECTTIMEOUT => 6,
-            CURLOPT_SSL_VERIFYPEER => false, // To avoid local certificate path issues
-            CURLOPT_SSL_VERIFYHOST => false,
-            CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:155.0) Gecko/20100101 Firefox/155.0'
-        ]);
+        $maxBytes = 5 * 1024 * 1024; // 5 MiB response cap.
+        $body     = '';
 
-        $content = curl_exec($ch);
+        $protocols = defined('CURLPROTO_HTTP') ? (CURLPROTO_HTTP | CURLPROTO_HTTPS) : 0;
+
+        $opts = [
+            CURLOPT_URL            => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            // Redirects disabled: a 3xx Location could otherwise re-introduce SSRF
+            // by pointing the second hop at a private address after the first hop
+            // passed isFetchableUrl().
+            CURLOPT_FOLLOWLOCATION => false,
+            CURLOPT_TIMEOUT        => 12,
+            CURLOPT_CONNECTTIMEOUT => 6,
+            CURLOPT_SSL_VERIFYPEER => false, // local cert path issues
+            CURLOPT_SSL_VERIFYHOST => false,
+            CURLOPT_USERAGENT      => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:155.0) Gecko/20100101 Firefox/155.0',
+            // Hard cap response size by aborting the write callback when over limit.
+            CURLOPT_WRITEFUNCTION  => function ($curl, $data) use (&$body, $maxBytes) {
+                $body .= $data;
+                if (strlen($body) > $maxBytes) {
+                    return 0; // signals abort to libcurl
+                }
+                return strlen($data);
+            },
+        ];
+        if ($protocols !== 0) {
+            $opts[CURLOPT_PROTOCOLS] = $protocols;
+        }
+        curl_setopt_array($ch, $opts);
+
+        curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $error = curl_error($ch);
+        $error    = curl_error($ch);
         curl_close($ch);
 
         return [
-            'content' => $content,
+            'content'   => $body,
             'http_code' => $httpCode,
-            'error' => $error
+            'error'     => $error,
         ];
     }
 

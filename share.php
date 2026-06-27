@@ -654,27 +654,37 @@
                     const breakdownVal = data.audit.breakdown_by_country || '';
                     const breakdownContainer = document.getElementById('share-breakdown-country-container');
                     if (isScreenshotPath(breakdownVal)) {
-                        breakdownContainer.innerHTML = `<img src="${breakdownVal}" style="width: 100%; height: 100%; min-height: 180px; object-fit: cover; border-radius: var(--radius-sm); border: 1px solid var(--border-glass); cursor: zoom-in; box-sizing: border-box;" onclick="openImageLightbox(this.src)">`;
+                        const img = document.createElement('img');
+                        img.src = breakdownVal;
+                        img.alt = 'Country breakdown screenshot';
+                        img.style.cssText = 'width: 100%; height: 100%; min-height: 180px; object-fit: cover; border-radius: var(--radius-sm); border: 1px solid var(--border-glass); cursor: zoom-in; box-sizing: border-box;';
+                        img.addEventListener('click', () => openImageLightbox(img.src));
+                        breakdownContainer.replaceChildren(img);
                     } else {
-                        breakdownContainer.innerHTML = `<textarea id="perf-breakdown-country" class="form-input" style="opacity:0.8; flex-grow: 1; min-height: 180px; resize: none; height: 100%;" readonly></textarea>`;
-                        document.getElementById('perf-breakdown-country').value = breakdownVal || 'No country breakdown registered.';
-                    }
-                    
-                    // Render Main Channels screenshot
-                    const mainChannelsBox = document.getElementById('share-main-channels-box');
-                    if (data.audit.main_channels) {
-                        mainChannelsBox.innerHTML = `<img src="${data.audit.main_channels}" style="width: 100%; max-height: 400px; object-fit: contain; border-radius: var(--radius-md); border: 1px solid var(--border-glass);">`;
-                    } else {
-                        mainChannelsBox.innerHTML = `<div style="min-height: 280px; display: flex; align-items: center; justify-content: center; text-align: center; color: var(--text-muted); background: rgba(0,0,0,0.15); border-radius: var(--radius-sm); border: 1px dashed var(--border-glass); font-size: 0.85rem; padding: 24px;">No Main Channels screenshot uploaded.</div>`;
+                        const ta = document.createElement('textarea');
+                        ta.id = 'perf-breakdown-country';
+                        ta.className = 'form-input';
+                        ta.style.cssText = 'opacity:0.8; flex-grow: 1; min-height: 180px; resize: none; height: 100%;';
+                        ta.readOnly = true;
+                        ta.value = breakdownVal || 'No country breakdown registered.';
+                        breakdownContainer.replaceChildren(ta);
                     }
 
+                    // Render Main Channels screenshot
+                    renderScreenshotBox(
+                        document.getElementById('share-main-channels-box'),
+                        data.audit.main_channels,
+                        'Main channels screenshot',
+                        'No Main Channels screenshot uploaded.'
+                    );
+
                     // Render Traffic Trends screenshot
-                    const trafficTrendsBox = document.getElementById('share-traffic-trends-box');
-                    if (data.audit.traffic_trends) {
-                        trafficTrendsBox.innerHTML = `<img src="${data.audit.traffic_trends}" style="width: 100%; max-height: 400px; object-fit: contain; border-radius: var(--radius-md); border: 1px solid var(--border-glass);">`;
-                    } else {
-                        trafficTrendsBox.innerHTML = `<div style="min-height: 280px; display: flex; align-items: center; justify-content: center; text-align: center; color: var(--text-muted); background: rgba(0,0,0,0.15); border-radius: var(--radius-sm); border: 1px dashed var(--border-glass); font-size: 0.85rem; padding: 24px;">No Traffic Trends screenshot uploaded.</div>`;
-                    }
+                    renderScreenshotBox(
+                        document.getElementById('share-traffic-trends-box'),
+                        data.audit.traffic_trends,
+                        'Traffic trends screenshot',
+                        'No Traffic Trends screenshot uploaded.'
+                    );
 
                     document.getElementById('perf-global-ranking').value = data.audit.global_ranking !== null ? data.audit.global_ranking.toLocaleString() : '-';
                     document.getElementById('perf-country-ranking').value = data.audit.country_ranking !== null ? data.audit.country_ranking.toLocaleString() : '-';
@@ -1406,9 +1416,28 @@
             lucide.createIcons();
         }
 
+        // Only accept paths that look exactly like one produced by store_uploaded_image():
+        // begins with uploads/, no traversal, ends with an allowed image extension.
         function isScreenshotPath(str) {
-            if (!str) return false;
-            return str.startsWith('uploads/') || /\.(png|jpe?g|gif|webp|svg)$/i.test(str);
+            return typeof str === 'string' && /^uploads\/[A-Za-z0-9_\-]+\.(?:png|jpe?g|webp|gif)$/.test(str);
+        }
+
+        // Build a screenshot-or-empty box via the DOM rather than innerHTML so a hostile
+        // string in `path` cannot smuggle an <img onerror=...> payload onto the page.
+        function renderScreenshotBox(box, path, altText, emptyText) {
+            if (!box) return;
+            if (isScreenshotPath(path)) {
+                const img = document.createElement('img');
+                img.src = path;
+                img.alt = altText;
+                img.style.cssText = 'width: 100%; max-height: 400px; object-fit: contain; border-radius: var(--radius-md); border: 1px solid var(--border-glass);';
+                box.replaceChildren(img);
+            } else {
+                const empty = document.createElement('div');
+                empty.style.cssText = 'min-height: 280px; display: flex; align-items: center; justify-content: center; text-align: center; color: var(--text-muted); background: rgba(0,0,0,0.15); border-radius: var(--radius-sm); border: 1px dashed var(--border-glass); font-size: 0.85rem; padding: 24px;';
+                empty.textContent = emptyText;
+                box.replaceChildren(empty);
+            }
         }
 
         // Modal tree views

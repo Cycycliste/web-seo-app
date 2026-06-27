@@ -1,0 +1,17 @@
+# Disable directory listings (audit finding #6).
+Options -Indexes
+
+# Refuse to execute anything in this directory as PHP. Even if an attacker
+# manages to drop a .php file under uploads/, Apache will serve it as plain
+# bytes rather than running it (audit finding #1 - RCE via upload).
+php_admin_flag engine off
+
+# Strip any PHP handlers/types that might still be associated by extension.
+RemoveHandler .php .phtml .php3 .php4 .php5 .php7
+RemoveType .php .phtml
+
+# Belt-and-braces: deny direct access to .ht* / .php* files in case the
+# handler removals above are ignored on a misconfigured Apache.
+<FilesMatch "\.(php|phtml|php3|php4|php5|php7|htaccess|htpasswd)$">
+    Require all denied
+</FilesMatch>
