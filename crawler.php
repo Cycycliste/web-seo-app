@@ -55,8 +55,20 @@ class Crawler {
             return false;
         }
 
-        $host = $parts['host'];
-        $ips  = [];
+        // Normalize the host: lowercase, strip trailing dot, convert IDN/Punycode to
+        // ASCII so libcurl and our resolver see the same name.
+        $host = strtolower(rtrim($parts['host'], '.'));
+        if ($host === '') {
+            return false;
+        }
+        if (function_exists('idn_to_ascii')) {
+            $ascii = @idn_to_ascii($host, IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46);
+            if (is_string($ascii) && $ascii !== '') {
+                $host = $ascii;
+            }
+        }
+
+        $ips = [];
 
         // Direct IP literal (handles v4 and bracketed v6).
         $literal = trim($host, '[]');
@@ -67,11 +79,9 @@ class Crawler {
                 if (!empty($rec['ip']))   { $ips[] = $rec['ip']; }
                 if (!empty($rec['ipv6'])) { $ips[] = $rec['ipv6']; }
             }
-            if ($ips === []) {
-                // Fallback for hosts that resolve via the system resolver only.
-                $fallback = @gethostbynamel($host) ?: [];
-                $ips = $fallback;
-            }
+            // Fail closed: if DNS returns nothing, refuse rather than guessing via
+            // gethostbynamel, which can yield IPv4 results for a host whose AAAA
+            // record points at loopback and would be preferred by libcurl.
         }
 
         if ($ips === []) {
@@ -79,11 +89,83 @@ class Crawler {
         }
 
         foreach ($ips as $ip) {
-            if (!filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+            if (!self::isPublicIp($ip)) {
                 return false;
             }
         }
         return true;
+    }
+
+    /**
+     * True only for IPs that should be reachable from the public internet.
+     *
+     * Layers PHP's FILTER_FLAG_NO_PRIV_RANGE / NO_RES_RANGE checks with extra
+     * rejects for ranges PHP doesn't class as reserved: CGNAT, IPv4-mapped IPv6
+     * (e.g. ::ffff:127.0.0.1 — would otherwise tunnel to localhost), and the
+     * NAT64 / 6to4 well-known prefixes.
+     *
+     * @param string $ip
+     * @return bool
+     */
+    private static function isPublicIp($ip) {
+        if (!filter_var($ip, FILTER_VALIDATE_IP)) {
+            return false;
+        }
+
+        // IPv4-mapped IPv6: ::ffff:1.2.3.4 — re-validate the embedded v4 portion.
+        if (stripos($ip, '::ffff:') === 0) {
+            $v4 = substr($ip, 7);
+            return self::isPublicIp($v4);
+        }
+
+        // 6to4 (2002::/16): the v4 sits in the next 32 bits.
+        if (strncasecmp($ip, '2002:', 5) === 0) {
+            $hex = inet_pton($ip);
+            if ($hex !== false && strlen($hex) === 16) {
+                $v4 = long2ip(unpack('N', substr($hex, 2, 4))[1]);
+                if (!self::isPublicIp($v4)) {
+                    return false;
+                }
+            }
+        }
+
+        // Standard reserved/private check.
+        if (!filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+            return false;
+        }
+
+        // Extra rejects PHP's flags don't cover.
+        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+            // 100.64.0.0/10 — CGNAT (RFC 6598).
+            if (self::ipv4InCidr($ip, '100.64.0.0', 10)) {
+                return false;
+            }
+            // 169.254.169.254 (cloud metadata) is technically link-local and caught by
+            // NO_RES_RANGE, but be explicit so a future PHP change can't quietly drop it.
+            if ($ip === '169.254.169.254') {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Tell whether an IPv4 address falls inside a CIDR block.
+     *
+     * @param string $ip       Dotted-quad IPv4.
+     * @param string $network  Network address.
+     * @param int    $maskBits 0..32.
+     * @return bool
+     */
+    private static function ipv4InCidr($ip, $network, $maskBits) {
+        $ipLong  = ip2long($ip);
+        $netLong = ip2long($network);
+        if ($ipLong === false || $netLong === false) {
+            return false;
+        }
+        $mask = $maskBits === 0 ? 0 : (~0 << (32 - $maskBits)) & 0xFFFFFFFF;
+        return ($ipLong & $mask) === ($netLong & $mask);
     }
 
     private static function fetchUrl($url) {

@@ -1317,6 +1317,38 @@ if (!isset($_SESSION['user_id'])) {
          CLIENT SCRIPT LOGIC
          ------------------------------------------------------------- -->
     <script>
+        // -------------------------------------------------------------
+        // CSRF protection — every non-GET request to api.php carries the
+        // per-session token from $_SESSION['csrf_token']. Bootstrapped from
+        // the `status` action on page load; rotated on successful login.
+        // The fetch wrapper makes this transparent to call sites: existing
+        // fetch('api.php?...', {method:'POST', body:fd}) calls don't need to
+        // be touched.
+        // -------------------------------------------------------------
+        let CSRF_TOKEN = '';
+        (function installCsrfFetchGuard() {
+            const _origFetch = window.fetch.bind(window);
+            window.fetch = function(input, init) {
+                try {
+                    const url = typeof input === 'string' ? input
+                        : (input && input.url) ? input.url : '';
+                    const isApi = typeof url === 'string' && url.indexOf('api.php') !== -1;
+                    const method = ((init && init.method) || (input && input.method) || 'GET').toUpperCase();
+                    if (isApi && CSRF_TOKEN && method !== 'GET' && method !== 'HEAD') {
+                        init = init || {};
+                        if (init.headers instanceof Headers) {
+                            init.headers.set('X-CSRF-Token', CSRF_TOKEN);
+                        } else if (Array.isArray(init.headers)) {
+                            init.headers.push(['X-CSRF-Token', CSRF_TOKEN]);
+                        } else {
+                            init.headers = Object.assign({}, init.headers || {}, { 'X-CSRF-Token': CSRF_TOKEN });
+                        }
+                    }
+                } catch (e) { /* fall through to the real fetch */ }
+                return _origFetch(input, init);
+            };
+        })();
+
         // Global State variables
         let activeClientId = null;
         let activeAuditId = null;
@@ -1515,6 +1547,17 @@ if (!isset($_SESSION['user_id'])) {
                     toggleBtn.innerHTML = `<i data-lucide="panel-left-open" style="width: 18px; height: 18px;"></i>`;
                 }
             }
+
+            // Bootstrap the CSRF token BEFORE anything that POSTs to api.php.
+            // `status` is GET and exempt, so the wrapper doesn't need a token to fetch it.
+            fetch('api.php?action=status')
+                .then(r => r.json())
+                .then(d => {
+                    if (d && typeof d.csrf_token === 'string') {
+                        CSRF_TOKEN = d.csrf_token;
+                    }
+                })
+                .catch(() => { /* offline / not logged in — caller will see 401 */ });
 
             loadClients();
             loadWelcomeStats();
@@ -1727,6 +1770,9 @@ if (!isset($_SESSION['user_id'])) {
                             ? `<img src="${favicon}" alt="" width="16" height="16" style="flex-shrink: 0; border-radius: 3px;" onerror="this.style.display='none';">`
                             : '';
 
+                        // No inline onclick handlers — a client name containing an
+                        // apostrophe would otherwise break out of the JS string after
+                        // the HTML parser decoded &#039; back to '.
                         item.innerHTML = `
                             <div style="display: flex; align-items: center; justify-content: space-between; flex-grow: 1; min-width: 0; padding-right: 4px; overflow: hidden;">
                                 <span class="client-name" style="font-weight: 600; font-size: 0.95rem; color: var(--text-primary); display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0;">
@@ -1740,16 +1786,20 @@ if (!isset($_SESSION['user_id'])) {
                                 ` : ''}
                             </div>
                             <div class="client-actions-wrapper">
-                                <button class="btn btn-secondary btn-icon" style="padding: 4px; border-radius: 6px; border: 1px solid var(--border-glass);" onclick="openEditClientModal(event, ${c.id}, '${escapeHtml(c.name.replace(/'/g, "\\'"))}', '${escapeHtml(c.homepage_url.replace(/'/g, "\\'"))}', '${escapeHtml((c.industry || '').replace(/'/g, "\\'"))}')" title="Edit Client">
+                                <button class="btn btn-secondary btn-icon" data-edit-client style="padding: 4px; border-radius: 6px; border: 1px solid var(--border-glass);" title="Edit Client">
                                     <i data-lucide="pencil" style="width:12px; height:12px;"></i>
                                 </button>
-                                <button class="btn btn-danger btn-icon" style="padding: 4px; border-radius: 6px;" onclick="deleteClient(event, ${c.id})" title="Delete Client">
+                                <button class="btn btn-danger btn-icon" data-delete-client style="padding: 4px; border-radius: 6px;" title="Delete Client">
                                     <i data-lucide="trash-2" style="width:12px; height:12px;"></i>
                                 </button>
                             </div>
                         `;
-
-
+                        item.querySelector('[data-edit-client]').addEventListener('click', (e) => {
+                            openEditClientModal(e, c.id, c.name, c.homepage_url, c.industry || '');
+                        });
+                        item.querySelector('[data-delete-client]').addEventListener('click', (e) => {
+                            deleteClient(e, c.id);
+                        });
 
                         listContainer.appendChild(item);
                     });
@@ -2842,7 +2892,7 @@ if (!isset($_SESSION['user_id'])) {
                 seoRow.innerHTML = `
                     <td style="vertical-align: middle;">
                         <div class="url-cell-container">
-                            <button class="btn btn-secondary btn-icon action-trigger-btn" style="padding: 2px; width: 20px; height: 20px; min-width: 20px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;" onclick="showUrlActionsDropdown(event, this, ${p.id}, 'page', '${escapeHtml(p.url)}')">
+                            <button class="btn btn-secondary btn-icon action-trigger-btn" data-url-actions style="padding: 2px; width: 20px; height: 20px; min-width: 20px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;">
                                 <i data-lucide="more-vertical" style="width: 12px; height: 12px;"></i>
                             </button>
                             <a href="${escapeHtml(p.url)}" target="_blank" class="url-link" title="${escapeHtml(p.url)}" style="min-width: 0; flex: 1;">${escapeHtml(getUrlDisplayName(p.url))}</a>
@@ -2898,6 +2948,9 @@ if (!isset($_SESSION['user_id'])) {
                         ${getSavedIndicatorHTML(p.id, 'notes', 'page')}
                     </td>
                 `;
+                seoRow.querySelectorAll('[data-url-actions]').forEach(btn => {
+                    btn.addEventListener('click', (e) => showUrlActionsDropdown(e, btn, p.id, 'page', p.url));
+                });
                 seoTable.appendChild(seoRow);
 
                 // Render Technical list
@@ -2929,7 +2982,7 @@ if (!isset($_SESSION['user_id'])) {
                 techRow.innerHTML = `
                     <td style="vertical-align: middle;">
                         <div class="url-cell-container">
-                            <button class="btn btn-secondary btn-icon action-trigger-btn" style="padding: 2px; width: 20px; height: 20px; min-width: 20px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;" onclick="showUrlActionsDropdown(event, this, ${p.id}, 'page', '${escapeHtml(p.url)}')">
+                            <button class="btn btn-secondary btn-icon action-trigger-btn" data-url-actions style="padding: 2px; width: 20px; height: 20px; min-width: 20px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;">
                                 <i data-lucide="more-vertical" style="width: 12px; height: 12px;"></i>
                             </button>
                             <a href="${escapeHtml(p.url)}" target="_blank" class="url-link" title="${escapeHtml(p.url)}" style="min-width: 0; flex: 1;">${escapeHtml(getUrlDisplayName(p.url))}</a>
@@ -2952,6 +3005,9 @@ if (!isset($_SESSION['user_id'])) {
                         </div>
                     </td>
                 `;
+                techRow.querySelectorAll('[data-url-actions]').forEach(btn => {
+                    btn.addEventListener('click', (e) => showUrlActionsDropdown(e, btn, p.id, 'page', p.url));
+                });
                 techTable.appendChild(techRow);
             });
             lucide.createIcons();
@@ -3260,9 +3316,11 @@ if (!isset($_SESSION['user_id'])) {
         let editingHeaderScreenshot = null;
         let currentHeaderMode = 'text';
 
+        // Only accept paths that look exactly like one produced by store_uploaded_image():
+        // begins with uploads/, no traversal, ends with an allowed image extension.
+        // (Matches the tightened predicate in share.php.)
         function isScreenshotPath(str) {
-            if (!str) return false;
-            return str.startsWith('uploads/') || /\.(png|jpe?g|gif|webp|svg)$/i.test(str);
+            return typeof str === 'string' && /^uploads\/[A-Za-z0-9_\-]+\.(?:png|jpe?g|webp|gif)$/.test(str);
         }
 
         function setHeaderMode(mode) {
@@ -4503,7 +4561,7 @@ if (!isset($_SESSION['user_id'])) {
                     row.innerHTML = `
                         <td style="vertical-align: middle;">
                             <div class="url-cell-container">
-                                <button class="btn btn-secondary btn-icon action-trigger-btn" style="padding: 2px; width: 20px; height: 20px; min-width: 20px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;" onclick="showUrlActionsDropdown(event, this, ${c.id}, 'competitor', '${escapeHtml(c.url)}')">
+                                <button class="btn btn-secondary btn-icon action-trigger-btn" data-url-actions style="padding: 2px; width: 20px; height: 20px; min-width: 20px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;">
                                     <i data-lucide="more-vertical" style="width: 12px; height: 12px;"></i>
                                 </button>
                                 <a href="${escapeHtml(c.url)}" target="_blank" class="url-link" title="${escapeHtml(c.url)}" style="min-width: 0; flex: 1;">${escapeHtml(getDomainFromUrl(c.url))}</a>
@@ -4559,6 +4617,9 @@ if (!isset($_SESSION['user_id'])) {
                             ${getSavedIndicatorHTML(c.id, 'notes', 'competitor_analysis')}
                         </td>
                     `;
+                    row.querySelectorAll('[data-url-actions]').forEach(btn => {
+                        btn.addEventListener('click', (e) => showUrlActionsDropdown(e, btn, c.id, 'competitor', c.url));
+                    });
                     list.appendChild(row);
                 });
             }
@@ -5366,11 +5427,15 @@ if (!isset($_SESSION['user_id'])) {
                 iconHtml = `<i data-lucide="info" style="width: 18px; height: 18px; color: var(--primary);"></i>`;
             }
             
+            // iconHtml is a controlled constant per type; message can come from a
+            // server error string (e.g. data.error), so it's set via textContent so
+            // any HTML-looking payload renders inert.
             toast.innerHTML = `
                 <div class="toast-icon">${iconHtml}</div>
-                <div class="toast-text">${message}</div>
+                <div class="toast-text"></div>
             `;
-            
+            toast.querySelector('.toast-text').textContent = message;
+
             container.appendChild(toast);
             
             if (typeof lucide !== 'undefined') {

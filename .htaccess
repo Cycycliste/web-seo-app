@@ -1,0 +1,36 @@
+# --------------------------------------------------------------------
+# Web-root hardening for the SEO Audit Suite.
+# Targets Laragon's Apache (mod_headers + mod_authz_core enabled by default).
+# --------------------------------------------------------------------
+
+Options -Indexes
+
+# Deny direct access to anything containing source secrets, schema, notes,
+# editor backups, dotfiles, and the .git directory. Apache serves these as
+# plain text by default; this rule pre-empts any "oh I forgot to gitignore"
+# style accident.
+<FilesMatch "(?i)\.(sql|md|markdown|bak|swp|swo|log|env|ini|sample|example|gitignore|gitattributes|gitkeep|orig|dist|lock|sh)$|^\.(git|ht|env)">
+    Require all denied
+</FilesMatch>
+
+# Block the .git directory entirely (DirectoryMatch falls through to
+# everything inside it).
+RedirectMatch 404 ^/\.git(/|$)
+
+# Default security response headers.
+<IfModule mod_headers.c>
+    # Clickjacking: only same-origin pages may iframe this site. Share-page
+    # specifically is the threat — attackers could otherwise overlay a leaked
+    # share link to phish or trick clicks.
+    Header always set X-Frame-Options "SAMEORIGIN"
+
+    # Stop browsers from sniffing a response into a different content type.
+    Header always set X-Content-Type-Options "nosniff"
+
+    # Don't leak full URLs (including query string with share tokens) to
+    # third-party origins via Referer.
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
+    # Belt-and-braces against XSS-via-iframe-ancestor on legacy browsers.
+    Header always set X-Permitted-Cross-Domain-Policies "none"
+</IfModule>

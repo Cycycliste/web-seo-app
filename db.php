@@ -21,7 +21,20 @@ try {
 
 // Simple helper to start session safely
 function safe_session_start() {
-    if (session_status() == PHP_SESSION_NONE) {
+    if (session_status() === PHP_SESSION_NONE) {
+        // Lock the session cookie down before it's issued: HttpOnly defeats JS
+        // exfiltration, SameSite=Lax kills cross-site CSRF over the cookie, and
+        // Secure is enabled when the request itself arrived over HTTPS.
+        $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+            || (($_SERVER['SERVER_PORT'] ?? '') === '443');
+        session_set_cookie_params([
+            'lifetime' => 0,
+            'path'     => '/',
+            'domain'   => '',
+            'secure'   => $isHttps,
+            'httponly' => true,
+            'samesite' => 'Lax',
+        ]);
         session_start();
     }
 }

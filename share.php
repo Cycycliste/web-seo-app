@@ -635,8 +635,17 @@
                         favEl.style.display = 'inline-block';
                     }
 
-                    document.getElementById('client-homepage').href = data.audit.client_homepage_url;
-                    document.getElementById('client-homepage-text').textContent = data.audit.client_homepage_url.replace(/^https?:\/\//, '');
+                    // Reject any href that isn't http(s):// — a stored "javascript:..."
+                    // URL would otherwise execute when the visitor clicks "Visit Website".
+                    const homepage = data.audit.client_homepage_url || '';
+                    const homepageEl = document.getElementById('client-homepage');
+                    if (/^https?:\/\//i.test(homepage)) {
+                        homepageEl.href = homepage;
+                        document.getElementById('client-homepage-text').textContent = homepage.replace(/^https?:\/\//, '');
+                    } else {
+                        homepageEl.removeAttribute('href');
+                        document.getElementById('client-homepage-text').textContent = homepage;
+                    }
 
                     // Metric values
                     document.getElementById('stat-monthly-visits').textContent = data.audit.avg_monthly_visits ? data.audit.avg_monthly_visits.toLocaleString() : '-';
@@ -1467,14 +1476,19 @@
             if (!structureStr && !screenshotStr) {
                 treeContainer.innerHTML = '<div style="color:var(--text-muted); text-align:center;">No heading elements (H1-H6) found in HTML document.</div>';
             } else {
-                if (screenshotStr) {
+                if (screenshotStr && isScreenshotPath(screenshotStr)) {
                     const div = document.createElement('div');
                     div.style.textAlign = 'center';
                     div.style.marginBottom = '20px';
-                    div.innerHTML = `
-                        <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 8px; font-weight: 600; text-align: left;">Page Screenshot Structure</div>
-                        <img src="${escapeHtml(screenshotStr)}" style="max-width: 100%; border-radius: var(--radius-sm); border: 1px solid var(--border-glass);" />
-                    `;
+                    const label = document.createElement('div');
+                    label.style.cssText = 'font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 8px; font-weight: 600; text-align: left;';
+                    label.textContent = 'Page Screenshot Structure';
+                    const img = document.createElement('img');
+                    img.src = screenshotStr;
+                    img.alt = 'Page header screenshot';
+                    img.style.cssText = 'max-width: 100%; border-radius: var(--radius-sm); border: 1px solid var(--border-glass);';
+                    div.appendChild(label);
+                    div.appendChild(img);
                     treeContainer.appendChild(div);
                 }
 

@@ -9,7 +9,14 @@ ini_set('log_errors', '1');
 error_reporting(E_ALL);
 
 header('Content-Type: application/json');
+header('X-Content-Type-Options: nosniff');
 safe_session_start();
+
+// Issue a per-session CSRF token on the very first request that touches the
+// session; the SPA picks it up via `status` and echoes it back as X-CSRF-Token.
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
 
 $action = $_GET['action'] ?? '';
 
@@ -19,6 +26,20 @@ $isAuthenticated = isset($_SESSION['user_id']);
 if (!$isAuthenticated && $action !== 'login' && $action !== 'get_share_audit') {
     echo json_encode(['error' => 'Unauthorized. Please log in.', 'code' => 401]);
     exit;
+}
+
+// CSRF guard: every state-changing or session-touching action must present the
+// session's CSRF token in the X-CSRF-Token header. Exempt: token-bootstrap
+// (status), credential-bootstrap (login), and the public token-gated read view
+// (get_share_audit). `logout` is NOT exempt — we don't want CSRF logouts.
+$csrf_exempt = ['login', 'status', 'get_share_audit'];
+if (!in_array($action, $csrf_exempt, true)) {
+    $supplied = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
+    if (!is_string($supplied) || !hash_equals($_SESSION['csrf_token'] ?? '', $supplied)) {
+        http_response_code(403);
+        echo json_encode(['error' => 'Invalid CSRF token. Reload the page and try again.']);
+        exit;
+    }
 }
 
 /**
@@ -138,22 +159,56 @@ switch ($action) {
         $stmt->execute([$username]);
         $user = $stmt->fetch();
 
-        if ($user && password_verify($password, $user['password_hash'])) {
-            $_SESSION['user_id'] = $user['id'];
-            $_SESSION['username'] = $user['username'];
-            echo json_encode(['success' => true, 'message' => 'Logged in successfully.']);
+        // Always run password_verify against a real bcrypt hash so the response
+        // time doesn't reveal whether the username exists (timing-oracle defense).
+        // The dummy hash never verifies against any password.
+        $dummyHash = '$2y$10$abcdefghijklmnopqrstuuO0Mn1mFqsCFkS0Mz5x.aBdCEfGhIjKlM';
+        $hashToCheck = $user ? $user['password_hash'] : $dummyHash;
+        $verified = password_verify($password, $hashToCheck);
+
+        if ($user && $verified) {
+            // Regenerate the session ID on successful auth to defeat session fixation:
+            // a pre-login session id can't survive into the authenticated state.
+            session_regenerate_id(true);
+            $_SESSION['user_id']    = $user['id'];
+            $_SESSION['username']   = $user['username'];
+            // Rotate the CSRF token too so a pre-auth token can't be re-used.
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+            echo json_encode([
+                'success'    => true,
+                'message'    => 'Logged in successfully.',
+                'csrf_token' => $_SESSION['csrf_token'],
+            ]);
         } else {
             echo json_encode(['error' => 'Invalid username or password.']);
         }
         break;
 
     case 'logout':
+        // Tear down session state in-process AND delete the cookie so the same
+        // PHPSESSID can't be reused by setting it back from the browser.
+        $_SESSION = [];
+        if (ini_get('session.use_cookies')) {
+            $params = session_get_cookie_params();
+            setcookie(session_name(), '', [
+                'expires'  => time() - 42000,
+                'path'     => $params['path'],
+                'domain'   => $params['domain'],
+                'secure'   => $params['secure'],
+                'httponly' => $params['httponly'],
+                'samesite' => $params['samesite'] ?? 'Lax',
+            ]);
+        }
         session_destroy();
         echo json_encode(['success' => true]);
         break;
 
     case 'status':
-        echo json_encode(['logged_in' => $isAuthenticated, 'username' => $_SESSION['username'] ?? null]);
+        echo json_encode([
+            'logged_in'  => $isAuthenticated,
+            'username'   => $_SESSION['username'] ?? null,
+            'csrf_token' => $_SESSION['csrf_token'],
+        ]);
         break;
 
     // -------------------------------------------------------------
@@ -853,6 +908,16 @@ switch ($action) {
             $value = null;
         }
 
+        // Screenshot-path fields are rendered as <img src> in the share view. The
+        // whitelist above prevents SQL-side abuse, but the value itself must still
+        // look like a stored upload so an attacker can't smuggle e.g.
+        // "javascript:..." or "https://evil/x.png" into the public report.
+        $screenshot_path_fields = ['breakdown_by_country', 'headers_screenshot'];
+        if ($value !== null && in_array($field, $screenshot_path_fields, true) && !is_safe_upload_path($value)) {
+            echo json_encode(['error' => 'Invalid screenshot path.']);
+            exit;
+        }
+
         $table = '';
         if ($type === 'page') {
             $table = 'audit_pages';
@@ -914,7 +979,10 @@ switch ($action) {
                     CURLOPT_RETURNTRANSFER => true,
                     CURLOPT_TIMEOUT => 35,
                     CURLOPT_CONNECTTIMEOUT => 15,
-                    CURLOPT_SSL_VERIFYPEER => false,
+                    // Keep TLS verification on — this request carries PAGESPEED_API_KEY
+                    // in the URL, so a MITM with verification off would harvest the key.
+                    CURLOPT_SSL_VERIFYPEER => true,
+                    CURLOPT_SSL_VERIFYHOST => 2,
                     CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
                 ]);
                 $response = curl_exec($ch);
@@ -1403,6 +1471,13 @@ switch ($action) {
             $terms = isset($item['terms']) ? implode(', ', $item['terms']) : '';
 
             if (empty($url)) continue;
+            // Skip anything that isn't a syntactically valid http(s) URL — the value
+            // is later passed to the crawler AND stored as a clickable link in the
+            // public share view, so reject javascript:, data:, file:, garbage, etc.
+            if (!filter_var($url, FILTER_VALIDATE_URL) || !preg_match('#^https?://#i', $url)) {
+                $errors[] = "Invalid URL skipped: {$url}";
+                continue;
+            }
 
             // Check if competitor already exists in competitor_analyses
             $stmt = $pdo->prepare("SELECT id FROM competitor_analyses WHERE audit_id = ? AND url = ?");
@@ -1531,18 +1606,24 @@ switch ($action) {
 
         $target_country = isset($_POST['target_country']) ? ($_POST['target_country'] === '' ? null : $_POST['target_country']) : $oldTargetCountry;
 
+        // Same hardening as audit_save_metrics: client-supplied paths must look like a
+        // stored upload, and old paths must be path-validated before unlink().
         $breakdown_by_country = $_POST['breakdown_by_country'] ?? null;
+        if ($breakdown_by_country !== null && $breakdown_by_country !== '' && !is_safe_upload_path($breakdown_by_country)) {
+            $breakdown_by_country = '';
+        }
 
         if (isset($_FILES['breakdown_by_country_file']) && $_FILES['breakdown_by_country_file']['error'] === UPLOAD_ERR_OK) {
-            $ext = pathinfo($_FILES['breakdown_by_country_file']['name'], PATHINFO_EXTENSION);
-            $filename = 'uploads/comp_breakdown_' . $id . '_' . time() . '.' . $ext;
-            if (move_uploaded_file($_FILES['breakdown_by_country_file']['tmp_name'], $filename)) {
-                $breakdown_by_country = $filename;
-                if (!empty($oldBreakdown) && file_exists($oldBreakdown) && is_file($oldBreakdown) && $oldBreakdown !== $filename) {
-                    @unlink($oldBreakdown);
-                }
+            $stored = store_uploaded_image($_FILES['breakdown_by_country_file'], 'uploads', 'comp_breakdown', $id);
+            if ($stored === false) {
+                echo json_encode(['error' => 'Breakdown file rejected. Only PNG, JPG, WEBP, or GIF images are allowed.']);
+                exit;
             }
-        } else if (($breakdown_by_country === '' || $breakdown_by_country === null) && !empty($oldBreakdown) && file_exists($oldBreakdown) && is_file($oldBreakdown)) {
+            $breakdown_by_country = $stored;
+            if (!empty($oldBreakdown) && is_safe_upload_path($oldBreakdown) && file_exists($oldBreakdown) && is_file($oldBreakdown) && $oldBreakdown !== $stored) {
+                @unlink($oldBreakdown);
+            }
+        } else if (($breakdown_by_country === '' || $breakdown_by_country === null) && !empty($oldBreakdown) && is_safe_upload_path($oldBreakdown) && file_exists($oldBreakdown) && is_file($oldBreakdown)) {
             @unlink($oldBreakdown);
         }
 
