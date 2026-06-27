@@ -122,10 +122,10 @@ if (!isset($_SESSION['user_id'])) {
                         </div>
 
                         <div class="glass-card" style="padding: 10px 14px; margin-bottom: 16px; background: rgba(139, 92, 246, 0.03); border-color: rgba(139, 92, 246, 0.15); display: flex; align-items: center; justify-content: space-between; gap: 8px; overflow: hidden;">
-                            <a id="active-client-url" href="#" target="_blank" class="url-link" style="font-size: 0.95rem; font-weight: 700; color: var(--text-primary); text-decoration: none; display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0;">
+                            <span style="font-size: 0.95rem; font-weight: 700; color: var(--text-primary); display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0;">
+                                <img id="active-client-favicon" alt="" width="16" height="16" style="border-radius: 3px; display: none;" onerror="this.style.display='none';">
                                 <span id="active-client-name"></span>
-                                <i data-lucide="external-link" style="width: 12px; height: 12px; color: var(--text-muted); flex-shrink: 0;"></i>
-                            </a>
+                            </span>
                             <span id="active-client-industry" style="font-size: 0.75rem; color: var(--text-secondary); font-style: italic; margin-left: auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 150px; display: none; text-align: right;"></span>
                         </div>
 
@@ -1770,7 +1770,14 @@ if (!isset($_SESSION['user_id'])) {
                     }
 
                     document.getElementById('active-client-name').textContent = client.name;
-                    document.getElementById('active-client-url').href = client.homepage_url;
+                    const activeFavEl = document.getElementById('active-client-favicon');
+                    const activeFavUrl = faviconUrl(client.homepage_url);
+                    if (activeFavUrl) {
+                        activeFavEl.src = activeFavUrl;
+                        activeFavEl.style.display = 'inline-block';
+                    } else {
+                        activeFavEl.style.display = 'none';
+                    }
 
                     if (resetAudit) {
                         closeAuditWorkspace();
